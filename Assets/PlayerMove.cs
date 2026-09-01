@@ -7,17 +7,39 @@ public class PlayerMove : MonoBehaviour
     [SerializeField] private Animator animator;
     [SerializeField] private SpriteRenderer spriteRenderer;
 
-    private Vector2 lastDirection = Vector2.down; // 기본 방향
+    [Header("Attack")]
+    [SerializeField] private float attackCooldown = 0.35f;
+    [SerializeField] private float attackRangeSide = 0.75f;
+    [SerializeField] private Vector2 attackSizeSide = new Vector2(0.8f, 0.8f);
+    [SerializeField] private LayerMask enemyLayer;
+
+    private Vector2 lastDirection = Vector2.right;
+    private int currentDirection = -1;
+    private bool currentMovingState = false;
+    private float nextAttackTime;
+    private bool isAttacking;
+    private float attackTimer;
 
     private void Start()
     {
         if (animator == null)
         {
-            Debug.LogError("Animator가 할당되지 않았습니다!");
+            animator = GetComponent<Animator>();
         }
+
         if (spriteRenderer == null)
         {
-            Debug.LogError("SpriteRenderer가 할당되지 않았습니다!");
+            spriteRenderer = GetComponent<SpriteRenderer>();
+        }
+
+        if (animator == null)
+        {
+            Debug.LogError("Animator가 할당되지 않았습니다! Player 오브젝트에 Animator를 추가하거나 인스펙터에서 연결해주세요.");
+        }
+
+        if (spriteRenderer == null)
+        {
+            Debug.LogError("SpriteRenderer가 할당되지 않았습니다! Player 오브젝트에 SpriteRenderer를 추가하거나 인스펙터에서 연결해주세요.");
         }
     }
 
@@ -33,101 +55,167 @@ public class PlayerMove : MonoBehaviour
             return;
         }
 
-        Vector2 moveDirection = Vector2.zero;
+        Vector2 moveDirection = GetMovementInput();
+        bool isMoving = moveDirection != Vector2.zero;
+
+        if (isMoving)
+        {
+            moveDirection = moveDirection.normalized;
+            lastDirection = moveDirection;
+            transform.position += (Vector3)(moveDirection * moveSpeed * Time.deltaTime);
+        }
+
+        UpdateAnimation(isMoving ? moveDirection : lastDirection, isMoving);
+
+        if (Mouse.current != null && Mouse.current.leftButton.wasPressedThisFrame)
+        {
+            TryAttack();
+        }
+
+        if (isAttacking)
+        {
+            attackTimer -= Time.deltaTime;
+            if (attackTimer <= 0f)
+            {
+                isAttacking = false;
+                attackTimer = 0f;
+                animator.SetBool("isMoving", false);
+                animator.Play("Player_Idle", 0, 0f);
+                animator.ResetTrigger("Attack");
+            }
+        }
+    }
+
+    private Vector2 GetMovementInput()
+    {
+        Vector2 input = Vector2.zero;
 
         if (Keyboard.current.wKey.isPressed)
         {
-            moveDirection.y += 1f;
+            input.y += 1f;
         }
 
         if (Keyboard.current.sKey.isPressed)
         {
-            moveDirection.y -= 1f;
+            input.y -= 1f;
         }
 
         if (Keyboard.current.dKey.isPressed)
         {
-            moveDirection.x += 1f;
+            input.x += 1f;
         }
 
         if (Keyboard.current.aKey.isPressed)
         {
-            moveDirection.x -= 1f;
+            input.x -= 1f;
         }
 
-        if (moveDirection != Vector2.zero)
+        return input;
+    }
+
+    private void TryAttack()
+    {
+        if (Time.time < nextAttackTime || isAttacking)
         {
-            moveDirection = moveDirection.normalized;
-            lastDirection = moveDirection;  // 마지막 방향 저장
-            transform.position += (Vector3)(moveDirection * moveSpeed * Time.deltaTime);
+            return;
         }
 
-        // 항상 마지막 방향으로 애니메이션 업데이트 (입력 없어도 유지)
-        UpdateAnimation(lastDirection);
+        nextAttackTime = Time.time + attackCooldown;
+        isAttacking = true;
+        attackTimer = 0.25f;
+
+        Vector2 facing = GetMouseDirection();
+        bool facingLeft = facing.x < 0f;
+
+        animator.SetInteger("direction", 2);
+        animator.SetBool("isMoving", false);
+
+        animator.Play("Attack_Right", 0, 0f);
+        spriteRenderer.flipX = facingLeft;
+
+        AttackHit(facingLeft);
+    }
+
+    public void AttackFinished()
+    {
+        isAttacking = false;
+        attackTimer = 0f;
+        animator.SetBool("isMoving", false);
+        animator.Play("Player_Idle", 0, 0f);
+    }
+
+    private void AttackHit(bool facingLeft)
+    {
+        Vector2 center = transform.position;
+        Vector2 offset = Vector2.right * (facingLeft ? -1f : 1f) * attackRangeSide;
+
+        Collider2D[] hits = Physics2D.OverlapBoxAll(center + offset, attackSizeSide, 0f, enemyLayer);
+
+        foreach (Collider2D hit in hits)
+        {
+            if (hit.gameObject == gameObject)
+            {
+                continue;
+            }
+
+            Debug.Log("근접 공격 히트: " + hit.name);
+            // hit.GetComponent<Enemy>().TakeDamage(1);
+        }
+    }
+
+    private void OnDrawGizmosSelected()
+    {
+        if (spriteRenderer == null)
+        {
+            return;
+        }
+
+        Vector2 center = transform.position;
+
+        Gizmos.color = new Color(1f, 0.5f, 0f, 0.5f);
+        Gizmos.DrawWireCube(center + Vector2.right * attackRangeSide, attackSizeSide);
+        Gizmos.DrawWireCube(center + Vector2.left * attackRangeSide, attackSizeSide);
     }
 
     private Vector2 GetMouseDirection()
     {
         // 마우스 스크린 좌표를 월드 좌표로 변환
-        Vector3 mouseWorldPos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-        
+        Vector3 mouseWorldPos = Camera.main.ScreenToWorldPoint(Mouse.current.position.ReadValue());
+
         // 플레이어에서 마우스로의 벡터
         Vector2 directionToMouse = (mouseWorldPos - transform.position).normalized;
-        
+
         return directionToMouse;
     }
 
-    private void UpdateAnimation(Vector2 direction)
+    private void UpdateAnimation(Vector2 direction, bool isMoving)
     {
-        // WASD 입력 확인
-        bool isMovingInput = Keyboard.current.wKey.isPressed || 
-                             Keyboard.current.sKey.isPressed ||
-                             Keyboard.current.dKey.isPressed ||
-                             Keyboard.current.aKey.isPressed;
-
-        if (!isMovingInput)
+        if (animator == null || spriteRenderer == null)
         {
-            animator.SetBool("isMoving", false);
             return;
         }
 
-        animator.SetBool("isMoving", true);
-
-        // 대각선 이동 확인 (X와 Y 모두 입력)
-        bool isDiagonal = Keyboard.current.wKey.isPressed && 
-                         (Keyboard.current.dKey.isPressed || Keyboard.current.aKey.isPressed) ||
-                         Keyboard.current.sKey.isPressed && 
-                         (Keyboard.current.dKey.isPressed || Keyboard.current.aKey.isPressed);
-
-        if (isDiagonal)
+        if (!isMoving)
         {
-            // 대각선은 무조건 좌/우 애니메이션
-            animator.SetInteger("direction", 2); // Right
-            spriteRenderer.flipX = direction.x < 0; // 좌측이면 반전
+            if (currentMovingState)
+            {
+                animator.SetBool("isMoving", false);
+                animator.Play("Player_Idle", 0, 0f);
+                currentMovingState = false;
+                currentDirection = -1;
+            }
+            return;
         }
-        else
+
+        if (!currentMovingState)
         {
-            // 수직/수평 방향만 처리
-            if (Mathf.Abs(direction.y) > Mathf.Abs(direction.x))
-            {
-                // 위/아래 이동
-                if (direction.y > 0)
-                {
-                    animator.SetInteger("direction", 0); // Up
-                    spriteRenderer.flipX = false;
-                }
-                else
-                {
-                    animator.SetInteger("direction", 1); // Down
-                    spriteRenderer.flipX = false;
-                }
-            }
-            else
-            {
-                // 좌/우 이동
-                animator.SetInteger("direction", 2); // Right
-                spriteRenderer.flipX = direction.x < 0; // 좌측이면 반전
-            }
+            animator.SetBool("isMoving", true);
+            animator.Play("Move_Right", 0, 0f);
+            animator.SetInteger("direction", 2);
+            currentMovingState = true;
+            currentDirection = 2;
         }
+
+        spriteRenderer.flipX = direction.x < 0f;
     }
 }
