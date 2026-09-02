@@ -372,7 +372,26 @@ public class PlayerMove : MonoBehaviour
             }
         }
 
-        GameObject targetObject = targetCollider.gameObject;
+        PasteTarget pasteTarget = targetCollider.GetComponentInParent<PasteTarget>();
+        if (pasteTarget == null)
+        {
+            Debug.Log("PasteTarget이 없는 대상에는 거대화 오류를 붙여넣을 수 없습니다.");
+            return;
+        }
+
+        if (!GiantErrorEffect.CanPasteTo(pasteTarget.TargetType))
+        {
+            Debug.Log($"거대화 오류는 {pasteTarget.TargetType} 대상에 붙여넣을 수 없습니다.");
+            return;
+        }
+
+        if (pasteTarget.TargetType == PasteTargetType.CombatSkill)
+        {
+            Debug.Log("전투 기술 Paste는 일반 모드에서 Q를 사용해야 합니다.");
+            return;
+        }
+
+        GameObject targetObject = pasteTarget.gameObject;
         GiantErrorEffect effect = targetObject.GetComponent<GiantErrorEffect>();
 
         if (effect == null)

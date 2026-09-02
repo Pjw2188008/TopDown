@@ -14,6 +14,13 @@ public class GiantErrorEffect : MonoBehaviour
 
     public float CurrentMultiplier => targetMultiplier;
 
+    public static bool CanPasteTo(PasteTargetType targetType)
+    {
+        return targetType == PasteTargetType.Living
+            || targetType == PasteTargetType.Object
+            || targetType == PasteTargetType.CombatSkill;
+    }
+
     private void Awake()
     {
         baseScale = transform.localScale;
