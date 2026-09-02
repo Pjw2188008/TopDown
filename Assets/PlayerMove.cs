@@ -4,6 +4,8 @@ using UnityEngine.UI;
 
 public class PlayerMove : MonoBehaviour
 {
+    private static readonly int AttackRightStateHash = Animator.StringToHash("Attack_Right");
+
     [Tooltip("플레이어 이동 속도입니다. 기본 이동 속도를 조절합니다.")]
     [SerializeField] private float moveSpeed = 5f;
 
@@ -52,12 +54,29 @@ public class PlayerMove : MonoBehaviour
     [Tooltip("공격이 감지될 적 레이어입니다. 적 오브젝트가 이 레이어에 있어야 공격 판정에 걸립니다.")]
     [SerializeField] private LayerMask enemyLayer;
 
+    [Header("Attack Effect")]
+    [Tooltip("공격 마지막 프레임에 공격 범위 위로 표시할 스프라이트입니다.")]
+    [SerializeField] private Sprite attackEffectSprite;
+
+    [Tooltip("공격 애니메이션에서 이펙트와 공격 판정이 발생하는 시점입니다. 0.85는 마지막 프레임 시작 지점에 해당합니다.")]
+    [SerializeField, Range(0f, 1f)] private float attackImpactNormalizedTime = 0.85f;
+
+    [Tooltip("공격 이펙트가 화면에 유지되는 시간입니다.")]
+    [SerializeField, Min(0.01f)] private float attackEffectDuration = 0.18f;
+
+    [Tooltip("공격 판정 크기를 기준으로 이펙트 크기를 추가 조절합니다.")]
+    [SerializeField] private Vector2 attackEffectSizeMultiplier = Vector2.one;
+
+    [Tooltip("플레이어보다 이펙트를 몇 단계 앞에 표시할지 설정합니다.")]
+    [SerializeField] private int attackEffectSortingOrderOffset = 1;
+
     private Vector2 lastDirection = Vector2.right;
     private int currentDirection = -1;
     private bool currentMovingState = false;
     private float nextAttackTime;
     private bool isAttacking;
-    private float attackTimer;
+    private bool attackImpactTriggered;
+    private bool attackFacingLeft;
     private bool isEditMode;
     private Image editModeOverlay;
 
@@ -137,8 +156,6 @@ public class PlayerMove : MonoBehaviour
             transform.position += (Vector3)(moveDirection * moveSpeed * Time.deltaTime);
         }
 
-        UpdateAnimation(isMoving ? moveDirection : lastDirection, isMoving);
-
         if (Mouse.current != null && Mouse.current.leftButton.wasPressedThisFrame)
         {
             TryAttack();
@@ -146,15 +163,12 @@ public class PlayerMove : MonoBehaviour
 
         if (isAttacking)
         {
-            attackTimer -= Time.deltaTime;
-            if (attackTimer <= 0f)
-            {
-                isAttacking = false;
-                attackTimer = 0f;
-                animator.SetBool("isMoving", false);
-                animator.Play("Player_Idle", 0, 0f);
-                animator.ResetTrigger("Attack");
-            }
+            UpdateAttackAnimation();
+        }
+
+        if (!isAttacking)
+        {
+            UpdateAnimation(isMoving ? moveDirection : lastDirection, isMoving);
         }
 
         if (playerErrorTimer > 0f)
@@ -265,26 +279,102 @@ public class PlayerMove : MonoBehaviour
 
         nextAttackTime = Time.time + attackCooldown;
         isAttacking = true;
-        attackTimer = 0.25f;
+        currentMovingState = false;
 
         Vector2 facing = GetMouseDirection();
         bool facingLeft = facing.x < 0f;
+        attackFacingLeft = facingLeft;
+        attackImpactTriggered = false;
 
         animator.SetInteger("direction", 2);
         animator.SetBool("isMoving", false);
 
         animator.Play("Attack_Right", 0, 0f);
         spriteRenderer.flipX = facingLeft;
+    }
 
-        AttackHit(facingLeft);
+    private void UpdateAttackAnimation()
+    {
+        AnimatorStateInfo stateInfo = animator.GetCurrentAnimatorStateInfo(0);
+        if (stateInfo.shortNameHash != AttackRightStateHash)
+        {
+            return;
+        }
+
+        if (!attackImpactTriggered && stateInfo.normalizedTime >= attackImpactNormalizedTime)
+        {
+            TriggerAttackImpact();
+        }
+
+        if (!animator.IsInTransition(0) && stateInfo.normalizedTime >= 1f)
+        {
+            AttackFinished();
+        }
     }
 
     public void AttackFinished()
     {
+        if (!isAttacking)
+        {
+            return;
+        }
+
         isAttacking = false;
-        attackTimer = 0f;
+        currentMovingState = false;
         animator.SetBool("isMoving", false);
+        animator.ResetTrigger("Attack");
         animator.Play("Player_Idle", 0, 0f);
+    }
+
+    private void TriggerAttackImpact()
+    {
+        if (attackImpactTriggered)
+        {
+            return;
+        }
+
+        attackImpactTriggered = true;
+        AttackHit(attackFacingLeft);
+        SpawnAttackEffect(attackFacingLeft);
+    }
+
+    private void SpawnAttackEffect(bool facingLeft)
+    {
+        if (attackEffectSprite == null)
+        {
+            return;
+        }
+
+        float attackScale = GetCurrentAttackScale();
+        Vector2 effectCenter = (Vector2)transform.position
+            + Vector2.right * (facingLeft ? -1f : 1f) * GetCurrentAttackRange();
+        Vector2 targetSize = Vector2.Scale(attackSizeSide * attackScale, attackEffectSizeMultiplier);
+        Vector2 spriteSize = attackEffectSprite.bounds.size;
+
+        if (spriteSize.x <= 0f || spriteSize.y <= 0f)
+        {
+            return;
+        }
+
+        GameObject effectObject = new GameObject("PlayerAttackEffect");
+        SpriteRenderer effectRenderer = effectObject.AddComponent<SpriteRenderer>();
+        effectRenderer.sprite = attackEffectSprite;
+        effectRenderer.flipX = facingLeft;
+        effectRenderer.sortingLayerID = spriteRenderer.sortingLayerID;
+        effectRenderer.sortingOrder = spriteRenderer.sortingOrder + attackEffectSortingOrderOffset;
+
+        Vector3 effectScale = new Vector3(
+            targetSize.x / spriteSize.x,
+            targetSize.y / spriteSize.y,
+            1f);
+        effectObject.transform.localScale = effectScale;
+
+        Vector3 spriteCenter = attackEffectSprite.bounds.center;
+        float centerOffsetX = spriteCenter.x * effectScale.x * (facingLeft ? -1f : 1f);
+        float centerOffsetY = spriteCenter.y * effectScale.y;
+        effectObject.transform.position = (Vector3)effectCenter - new Vector3(centerOffsetX, centerOffsetY, 0f);
+
+        Destroy(effectObject, Mathf.Max(0.01f, attackEffectDuration));
     }
 
     private void AttackHit(bool facingLeft)
@@ -487,16 +577,27 @@ public class PlayerMove : MonoBehaviour
         Vector2 center = transform.position;
         float currentAttackRange = GetCurrentAttackRange();
         Vector2 currentAttackSize = attackSizeSide * GetCurrentAttackScale();
+        Vector2 currentEffectSize = Vector2.Scale(currentAttackSize, attackEffectSizeMultiplier);
+        Vector2 rightAttackCenter = center + Vector2.right * currentAttackRange;
+        Vector2 leftAttackCenter = center + Vector2.left * currentAttackRange;
 
         Gizmos.color = new Color(1f, 0.5f, 0f, 0.5f);
-        Gizmos.DrawWireCube(center + Vector2.right * currentAttackRange, currentAttackSize);
-        Gizmos.DrawWireCube(center + Vector2.left * currentAttackRange, currentAttackSize);
+        Gizmos.DrawWireCube(rightAttackCenter, currentAttackSize);
+        Gizmos.DrawWireCube(leftAttackCenter, currentAttackSize);
+
+        Gizmos.color = new Color(0.2f, 0.7f, 1f, 0.15f);
+        Gizmos.DrawCube(rightAttackCenter, currentEffectSize);
+        Gizmos.DrawCube(leftAttackCenter, currentEffectSize);
+
+        Gizmos.color = new Color(0.2f, 0.7f, 1f, 0.9f);
+        Gizmos.DrawWireCube(rightAttackCenter, currentEffectSize);
+        Gizmos.DrawWireCube(leftAttackCenter, currentEffectSize);
 
         if (playerErrorTimer > 0f)
         {
             Gizmos.color = new Color(0.2f, 1f, 0.8f, 0.7f);
-            Gizmos.DrawWireCube(center + Vector2.right * currentAttackRange, currentAttackSize);
-            Gizmos.DrawWireCube(center + Vector2.left * currentAttackRange, currentAttackSize);
+            Gizmos.DrawWireCube(rightAttackCenter, currentAttackSize);
+            Gizmos.DrawWireCube(leftAttackCenter, currentAttackSize);
         }
     }
 

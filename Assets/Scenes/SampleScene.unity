@@ -579,7 +579,7 @@ MonoBehaviour:
   animator: {fileID: 670364625}
   spriteRenderer: {fileID: 670364623}
   editModeKey: 19
-  editTimeScale: 0.5
+  editTimeScale: 0.8
   editModeDarkness: 0.45
   editModeFadeSpeed: 5
   maxEnvironmentErrorUses: 3
@@ -587,11 +587,16 @@ MonoBehaviour:
   playerErrorDuration: 6
   maxPlayerErrorUses: 1
   attackCooldown: 0.35
-  attackRangeSide: 1
-  attackSizeSide: {x: 0.8, y: 2.3}
+  attackRangeSide: 1.54
+  attackSizeSide: {x: 2, y: 3.25}
   enemyLayer:
     serializedVersion: 2
     m_Bits: 64
+  attackEffectSprite: {fileID: 9188709469293079776, guid: 070efad017b34674cb6c515211ecf525, type: 3}
+  attackImpactNormalizedTime: 0.85
+  attackEffectDuration: 0.18
+  attackEffectSizeMultiplier: {x: 1, y: 1}
+  attackEffectSortingOrderOffset: 1
 --- !u!212 &670364623
 SpriteRenderer:
   m_ObjectHideFlags: 0
