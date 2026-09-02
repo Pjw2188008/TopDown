@@ -4,8 +4,17 @@ using UnityEngine.UI;
 
 public class PlayerMove : MonoBehaviour
 {
+    private enum StoredErrorType
+    {
+        None,
+        Giant,
+        Acceleration
+    }
+
+    private const int MaxStoredErrors = 2;
     private static readonly int AttackRightStateHash = Animator.StringToHash("Attack_Right");
 
+    [Header("플레이어 기본 설정")]
     [Tooltip("플레이어 이동 속도입니다. 기본 이동 속도를 조절합니다.")]
     [SerializeField] private float moveSpeed = 5f;
 
@@ -15,7 +24,7 @@ public class PlayerMove : MonoBehaviour
     [Tooltip("플레이어의 SpriteRenderer입니다. 방향 전환과 시각 효과에 사용됩니다.")]
     [SerializeField] private SpriteRenderer spriteRenderer;
 
-    [Header("Edit Mode")]
+    [Header("편집 모드")]
     [Tooltip("E 키로 편집 모드를 켜고 끕니다. 편집 모드에서는 환경 오류를 저장할 수 있습니다.")]
     [SerializeField] private Key editModeKey = Key.E;
 
@@ -28,10 +37,10 @@ public class PlayerMove : MonoBehaviour
     [Tooltip("어두워지는 효과가 얼마나 부드럽게 전환되는지 설정합니다.")]
     [SerializeField] private float editModeFadeSpeed = 5f;
 
-    [Tooltip("환경용 거대화 오류를 저장한 뒤, 최대 몇 번 붙여넣기할 수 있는지 설정합니다.")]
+    [Tooltip("거대화 오류를 Cut한 뒤 전투 기술에 사용할 수 있는 횟수입니다. 환경 Paste는 1회 사용 즉시 오류가 보관함에서 제거됩니다.")]
     [SerializeField] private int maxEnvironmentErrorUses = 3;
 
-    [Header("Player Giant Error")]
+    [Header("전투 기술 - 거대화 오류")]
     [Tooltip("일반 상태에서 Q 키를 눌렀을 때, 공격 범위가 몇 배로 늘어나는지 설정합니다.")]
     [SerializeField] private float playerErrorEffectMultiplier = 2.5f;
 
@@ -41,7 +50,11 @@ public class PlayerMove : MonoBehaviour
     [Tooltip("플레이어용 거대화 오류를 몇 번 사용할 수 있는지 설정합니다. 보통 1회로 충분합니다.")]
     [SerializeField] private int maxPlayerErrorUses = 1;
 
-    [Header("Attack")]
+    [Header("전투 기술 - 가속 오류")]
+    [Tooltip("가속 오류를 전투 기술에 Paste했을 때 효과가 유지되는 시간입니다.")]
+    [SerializeField, Min(0.1f)] private float accelerationAttackDuration = 5f;
+
+    [Header("기본 공격")]
     [Tooltip("공격 후 다음 공격까지의 쿨타임입니다.")]
     [SerializeField] private float attackCooldown = 0.35f;
 
@@ -54,7 +67,7 @@ public class PlayerMove : MonoBehaviour
     [Tooltip("공격이 감지될 적 레이어입니다. 적 오브젝트가 이 레이어에 있어야 공격 판정에 걸립니다.")]
     [SerializeField] private LayerMask enemyLayer;
 
-    [Header("Attack Effect")]
+    [Header("공격 이펙트")]
     [Tooltip("공격 마지막 프레임에 공격 범위 위로 표시할 스프라이트입니다.")]
     [SerializeField] private Sprite attackEffectSprite;
 
@@ -82,6 +95,7 @@ public class PlayerMove : MonoBehaviour
 
     private float storedEnvironmentErrorMultiplier = 0f;
     private bool hasStoredEnvironmentError = false;
+    private bool hasAcquiredGiantError;
     private int environmentErrorUsesLeft = 0;
 
     private float storedPlayerErrorMultiplier = 0f;
@@ -89,6 +103,14 @@ public class PlayerMove : MonoBehaviour
     private int playerErrorUsesLeft = 0;
 
     private float playerErrorTimer = 0f;
+    private float storedAccelerationErrorMultiplier;
+    private bool hasStoredAccelerationError;
+    private bool hasAcquiredAccelerationError;
+    private float accelerationAttackTimer;
+    private float activeAttackSpeedMultiplier = 1f;
+    private float baseAnimatorSpeed = 1f;
+    private int selectedStoredErrorIndex;
+    private bool isSelectingStoredError;
 
     private void Start()
     {
@@ -105,6 +127,10 @@ public class PlayerMove : MonoBehaviour
         if (animator == null)
         {
             Debug.LogError("Animator가 할당되지 않았습니다! Player 오브젝트에 Animator를 추가하거나 인스펙터에서 연결해주세요.");
+        }
+        else
+        {
+            baseAnimatorSpeed = animator.speed;
         }
 
         if (spriteRenderer == null)
@@ -128,17 +154,7 @@ public class PlayerMove : MonoBehaviour
             ToggleEditMode();
         }
 
-        if (Keyboard.current.qKey.wasPressedThisFrame)
-        {
-            if (isEditMode)
-            {
-                TryPasteError();
-                return;
-            }
-
-            TryActivatePlayerErrorBuff();
-            return;
-        }
+        HandleStoredErrorSelectionInput();
 
         if (animator == null || spriteRenderer == null)
         {
@@ -156,7 +172,9 @@ public class PlayerMove : MonoBehaviour
             transform.position += (Vector3)(moveDirection * moveSpeed * Time.deltaTime);
         }
 
-        if (Mouse.current != null && Mouse.current.leftButton.wasPressedThisFrame)
+        if (!isSelectingStoredError
+            && Mouse.current != null
+            && Mouse.current.leftButton.wasPressedThisFrame)
         {
             TryAttack();
         }
@@ -181,7 +199,120 @@ public class PlayerMove : MonoBehaviour
             }
         }
 
+        if (accelerationAttackTimer > 0f)
+        {
+            accelerationAttackTimer -= Time.deltaTime;
+            if (accelerationAttackTimer <= 0f)
+            {
+                accelerationAttackTimer = 0f;
+                activeAttackSpeedMultiplier = 1f;
+                Debug.Log("가속 오류 전투 Paste 종료");
+            }
+        }
+
         UpdateEditModeVisual();
+    }
+
+    private void HandleStoredErrorSelectionInput()
+    {
+        int storedErrorCount = GetStoredErrorCount();
+
+        if (Keyboard.current.qKey.wasPressedThisFrame)
+        {
+            if (IsAnyCombatErrorActive())
+            {
+                isSelectingStoredError = false;
+                Debug.Log($"{GetActiveCombatErrorDisplayName()} 효과가 유지되는 동안에는 다른 오류를 사용할 수 없습니다.");
+                return;
+            }
+
+            if (storedErrorCount == 0)
+            {
+                Debug.Log("보관함에 사용할 오류가 없습니다.");
+                return;
+            }
+
+            ClampSelectedStoredErrorIndex();
+
+            if (storedErrorCount == 1)
+            {
+                ConfirmSelectedStoredError();
+                return;
+            }
+
+            isSelectingStoredError = true;
+            Debug.Log($"오류 선택 시작: {GetStoredErrorDisplayName(GetSelectedStoredErrorType())}");
+        }
+
+        if (!isSelectingStoredError)
+        {
+            return;
+        }
+
+        if (Mouse.current != null)
+        {
+            float scrollY = Mouse.current.scroll.ReadValue().y;
+            if (scrollY < 0f)
+            {
+                selectedStoredErrorIndex = (selectedStoredErrorIndex + 1) % storedErrorCount;
+                Debug.Log($"오류 선택: {GetStoredErrorDisplayName(GetSelectedStoredErrorType())}");
+            }
+            else if (scrollY > 0f)
+            {
+                selectedStoredErrorIndex = (selectedStoredErrorIndex - 1 + storedErrorCount) % storedErrorCount;
+                Debug.Log($"오류 선택: {GetStoredErrorDisplayName(GetSelectedStoredErrorType())}");
+            }
+        }
+
+        if (Keyboard.current.qKey.wasReleasedThisFrame)
+        {
+            isSelectingStoredError = false;
+            ConfirmSelectedStoredError();
+        }
+    }
+
+    private void ConfirmSelectedStoredError()
+    {
+        if (IsAnyCombatErrorActive())
+        {
+            Debug.Log($"{GetActiveCombatErrorDisplayName()} 효과가 유지되는 동안에는 다른 오류를 사용할 수 없습니다.");
+            return;
+        }
+
+        if (GetSelectedStoredErrorType() == StoredErrorType.None)
+        {
+            Debug.Log("선택할 수 있는 오류가 없습니다.");
+            return;
+        }
+
+        if (isEditMode)
+        {
+            TryPasteError();
+        }
+        else
+        {
+            TryActivateStoredCombatError();
+        }
+    }
+
+    private void OnGUI()
+    {
+        if (!isSelectingStoredError || GetStoredErrorCount() < 2)
+        {
+            return;
+        }
+
+        string selectionText = "오류 선택  |  Q를 놓으면 확정\n";
+        int storedErrorCount = GetStoredErrorCount();
+
+        for (int index = 0; index < storedErrorCount; index++)
+        {
+            string marker = index == selectedStoredErrorIndex ? "▶ " : "   ";
+            selectionText += marker + GetStoredErrorDisplayName(GetStoredErrorTypeAtIndex(index)) + "\n";
+        }
+
+        selectionText += "마우스 휠로 변경";
+        GUI.Box(new Rect(20f, 20f, 260f, 92f), selectionText);
     }
 
     private void OnDestroy()
@@ -192,6 +323,7 @@ public class PlayerMove : MonoBehaviour
 
     private void ToggleEditMode()
     {
+        isSelectingStoredError = false;
         isEditMode = !isEditMode;
         Time.timeScale = isEditMode ? editTimeScale : 1f;
         Time.fixedDeltaTime = 0.02f * Time.timeScale;
@@ -277,7 +409,8 @@ public class PlayerMove : MonoBehaviour
             return;
         }
 
-        nextAttackTime = Time.time + attackCooldown;
+        float attackSpeedMultiplier = GetCurrentAttackSpeedMultiplier();
+        nextAttackTime = Time.time + attackCooldown / attackSpeedMultiplier;
         isAttacking = true;
         currentMovingState = false;
 
@@ -288,6 +421,7 @@ public class PlayerMove : MonoBehaviour
 
         animator.SetInteger("direction", 2);
         animator.SetBool("isMoving", false);
+        animator.speed = baseAnimatorSpeed * attackSpeedMultiplier;
 
         animator.Play("Attack_Right", 0, 0f);
         spriteRenderer.flipX = facingLeft;
@@ -321,6 +455,7 @@ public class PlayerMove : MonoBehaviour
 
         isAttacking = false;
         currentMovingState = false;
+        animator.speed = baseAnimatorSpeed;
         animator.SetBool("isMoving", false);
         animator.ResetTrigger("Attack");
         animator.Play("Player_Idle", 0, 0f);
@@ -391,7 +526,38 @@ public class PlayerMove : MonoBehaviour
                 continue;
             }
 
-            if (hit.TryGetComponent<GiantErrorEffect>(out var giantError))
+            if (hit.TryGetComponent<AccelerationErrorEffect>(out var accelerationError)
+                && accelerationError.IsActive)
+            {
+                if (!isEditMode)
+                {
+                    Debug.Log("일반 상태에서는 가속 오류를 Cut할 수 없습니다.");
+                    continue;
+                }
+
+                if (hasAcquiredAccelerationError)
+                {
+                    Debug.Log("가속 오류는 이미 한 번 획득했기 때문에 다시 Cut할 수 없습니다.");
+                    continue;
+                }
+
+                if (hasStoredAccelerationError || GetStoredErrorCount() >= MaxStoredErrors)
+                {
+                    Debug.Log("가속 오류가 이미 보관되어 있거나 보관함 2칸이 가득 찼습니다.");
+                    continue;
+                }
+
+                storedAccelerationErrorMultiplier = accelerationError.CurrentMultiplier;
+                hasStoredAccelerationError = true;
+                hasAcquiredAccelerationError = true;
+                selectedStoredErrorIndex = GetStoredErrorIndex(StoredErrorType.Acceleration);
+                accelerationError.ResetAcceleration();
+                Debug.Log($"가속 오류를 Cut했습니다. 이동 속도가 정상화되었습니다. ({storedAccelerationErrorMultiplier}배 보관)");
+                continue;
+            }
+
+            if (hit.TryGetComponent<GiantErrorEffect>(out var giantError)
+                && giantError.IsActive)
             {
                 if (!isEditMode)
                 {
@@ -399,15 +565,23 @@ public class PlayerMove : MonoBehaviour
                     continue;
                 }
 
-                if (hasStoredEnvironmentError)
+                if (hasAcquiredGiantError)
                 {
-                    Debug.Log("이미 저장된 환경용 거대화 오류가 있어 추가로 얻을 수 없습니다.");
+                    Debug.Log("거대화 오류는 이미 한 번 획득했기 때문에 다시 Cut할 수 없습니다.");
+                    continue;
+                }
+
+                if (hasStoredEnvironmentError || GetStoredErrorCount() >= MaxStoredErrors)
+                {
+                    Debug.Log("거대화 오류가 이미 보관되어 있거나 보관함 2칸이 가득 찼습니다.");
                     continue;
                 }
 
                 storedEnvironmentErrorMultiplier = giantError.CurrentMultiplier;
                 environmentErrorUsesLeft = Mathf.Max(1, maxEnvironmentErrorUses);
                 hasStoredEnvironmentError = true;
+                hasAcquiredGiantError = true;
+                selectedStoredErrorIndex = GetStoredErrorIndex(StoredErrorType.Giant);
                 giantError.ResetScale();
                 Debug.Log("환경용 거대화 오류가 저장되었습니다. 남은 사용 횟수: " + environmentErrorUsesLeft);
                 continue;
@@ -420,6 +594,20 @@ public class PlayerMove : MonoBehaviour
 
     private void TryPasteError()
     {
+        StoredErrorType selectedError = GetSelectedStoredErrorType();
+
+        if (selectedError == StoredErrorType.Acceleration)
+        {
+            TryPasteAccelerationError();
+            return;
+        }
+
+        if (selectedError != StoredErrorType.Giant)
+        {
+            Debug.Log("붙여넣을 오류가 없습니다.");
+            return;
+        }
+
         if (!isEditMode || !hasStoredEnvironmentError || environmentErrorUsesLeft <= 0)
         {
             if (hasStoredEnvironmentError || environmentErrorUsesLeft <= 0)
@@ -489,15 +677,109 @@ public class PlayerMove : MonoBehaviour
             effect = targetObject.AddComponent<GiantErrorEffect>();
         }
 
-        effect.Trigger(storedEnvironmentErrorMultiplier);
-        environmentErrorUsesLeft--;
-        Debug.Log("환경용 거대화 오류가 붙여넣기 되었습니다. 배수: " + storedEnvironmentErrorMultiplier + "x | 남은 사용: " + environmentErrorUsesLeft);
+        float pastedMultiplier = storedEnvironmentErrorMultiplier;
+        effect.Trigger(pastedMultiplier);
+        ClearEnvironmentError();
+        Debug.Log("환경용 거대화 오류가 붙여넣기 되었습니다. 배수: " + pastedMultiplier + "x");
+    }
 
-        if (environmentErrorUsesLeft <= 0)
+    private void TryPasteAccelerationError()
+    {
+        if (!isEditMode || !hasStoredAccelerationError)
         {
-            ClearEnvironmentError();
-            Debug.Log("환경용 거대화 오류가 모두 소모되어 더 이상 다시 얻을 수 없습니다.");
+            Debug.Log("붙여넣을 가속 오류가 없습니다.");
+            return;
         }
+
+        if (Mouse.current == null || Camera.main == null)
+        {
+            return;
+        }
+
+        Vector3 mouseWorldPos = Camera.main.ScreenToWorldPoint(Mouse.current.position.ReadValue());
+        mouseWorldPos.z = 0f;
+
+        Collider2D targetCollider = Physics2D.OverlapPoint(mouseWorldPos);
+        if (targetCollider == null)
+        {
+            GameObject clickedObject = GetSpriteObjectAtMousePosition(mouseWorldPos);
+            if (clickedObject == null)
+            {
+                Debug.Log("커서 위치에 가속 오류를 Paste할 대상이 없습니다.");
+                return;
+            }
+
+            targetCollider = clickedObject.GetComponent<Collider2D>();
+            if (targetCollider == null)
+            {
+                BoxCollider2D collider = clickedObject.AddComponent<BoxCollider2D>();
+                SpriteRenderer clickedRenderer = clickedObject.GetComponent<SpriteRenderer>();
+                if (clickedRenderer != null)
+                {
+                    collider.size = clickedRenderer.bounds.size;
+                }
+
+                targetCollider = collider;
+            }
+        }
+
+        PasteTarget pasteTarget = targetCollider.GetComponentInParent<PasteTarget>();
+        if (pasteTarget == null)
+        {
+            Debug.Log("PasteTarget이 없는 대상에는 가속 오류를 Paste할 수 없습니다.");
+            return;
+        }
+
+        if (!AccelerationErrorEffect.CanPasteTo(pasteTarget.TargetType))
+        {
+            Debug.Log($"가속 오류는 {pasteTarget.TargetType} 대상에 Paste할 수 없습니다.");
+            return;
+        }
+
+        if (pasteTarget.TargetType == PasteTargetType.CombatSkill)
+        {
+            Debug.Log("전투 기술 Paste는 일반 모드에서 Q를 사용해야 합니다.");
+            return;
+        }
+
+        GameObject targetObject = pasteTarget.gameObject;
+        AccelerationErrorEffect accelerationEffect = targetObject.GetComponent<AccelerationErrorEffect>();
+        if (accelerationEffect == null)
+        {
+            accelerationEffect = targetObject.AddComponent<AccelerationErrorEffect>();
+        }
+
+        accelerationEffect.Trigger(storedAccelerationErrorMultiplier);
+        Debug.Log($"가속 오류를 {targetObject.name}에 Paste했습니다. 이동 속도 {storedAccelerationErrorMultiplier}배");
+        ClearStoredAccelerationError();
+    }
+
+    private void TryActivateStoredCombatError()
+    {
+        StoredErrorType selectedError = GetSelectedStoredErrorType();
+
+        if (selectedError == StoredErrorType.Giant)
+        {
+            TryActivatePlayerErrorBuff();
+            return;
+        }
+
+        if (selectedError != StoredErrorType.Acceleration)
+        {
+            Debug.Log("전투 기술에 Paste할 오류가 없습니다.");
+            return;
+        }
+
+        if (accelerationAttackTimer > 0f)
+        {
+            Debug.Log("이미 전투 기술에 가속 오류가 적용되어 있습니다.");
+            return;
+        }
+
+        activeAttackSpeedMultiplier = Mathf.Max(1f, storedAccelerationErrorMultiplier);
+        accelerationAttackTimer = accelerationAttackDuration;
+        ClearStoredAccelerationError();
+        Debug.Log($"가속 오류를 전투 기술에 Paste했습니다. 공격 속도 {activeAttackSpeedMultiplier}배, {accelerationAttackDuration}초 유지");
     }
 
     private void TryActivatePlayerErrorBuff()
@@ -505,6 +787,12 @@ public class PlayerMove : MonoBehaviour
         if (isEditMode)
         {
             Debug.Log("편집 모드에서는 오류를 저장하지 않고, 일반 상태에서만 Q로 버프를 사용할 수 있습니다.");
+            return;
+        }
+
+        if (!hasStoredEnvironmentError || environmentErrorUsesLeft <= 0)
+        {
+            Debug.Log("전투 기술에 Paste할 거대화 오류가 없습니다.");
             return;
         }
 
@@ -517,7 +805,112 @@ public class PlayerMove : MonoBehaviour
         storedPlayerErrorMultiplier = playerErrorEffectMultiplier;
         playerErrorUsesLeft = Mathf.Max(1, maxPlayerErrorUses);
         playerErrorTimer = playerErrorDuration;
+        environmentErrorUsesLeft--;
+
+        if (environmentErrorUsesLeft <= 0)
+        {
+            ClearEnvironmentError();
+        }
+
         Debug.Log("플레이어 거대화 오류 활성화! 공격 범위 " + storedPlayerErrorMultiplier + "배 증가, 지속 시간 " + playerErrorDuration + "초");
+    }
+
+    private int GetStoredErrorCount()
+    {
+        int count = 0;
+
+        if (hasStoredEnvironmentError && environmentErrorUsesLeft > 0)
+        {
+            count++;
+        }
+
+        if (hasStoredAccelerationError)
+        {
+            count++;
+        }
+
+        return count;
+    }
+
+    private StoredErrorType GetStoredErrorTypeAtIndex(int index)
+    {
+        int currentIndex = 0;
+
+        if (hasStoredEnvironmentError && environmentErrorUsesLeft > 0)
+        {
+            if (index == currentIndex)
+            {
+                return StoredErrorType.Giant;
+            }
+
+            currentIndex++;
+        }
+
+        if (hasStoredAccelerationError && index == currentIndex)
+        {
+            return StoredErrorType.Acceleration;
+        }
+
+        return StoredErrorType.None;
+    }
+
+    private int GetStoredErrorIndex(StoredErrorType errorType)
+    {
+        int storedErrorCount = GetStoredErrorCount();
+
+        for (int index = 0; index < storedErrorCount; index++)
+        {
+            if (GetStoredErrorTypeAtIndex(index) == errorType)
+            {
+                return index;
+            }
+        }
+
+        return 0;
+    }
+
+    private StoredErrorType GetSelectedStoredErrorType()
+    {
+        ClampSelectedStoredErrorIndex();
+        return GetStoredErrorTypeAtIndex(selectedStoredErrorIndex);
+    }
+
+    private void ClampSelectedStoredErrorIndex()
+    {
+        int storedErrorCount = GetStoredErrorCount();
+        selectedStoredErrorIndex = storedErrorCount > 0
+            ? Mathf.Clamp(selectedStoredErrorIndex, 0, storedErrorCount - 1)
+            : 0;
+    }
+
+    private static string GetStoredErrorDisplayName(StoredErrorType errorType)
+    {
+        return errorType switch
+        {
+            StoredErrorType.Giant => "[거대화]",
+            StoredErrorType.Acceleration => "[가속]",
+            _ => "[빈 슬롯]"
+        };
+    }
+
+    private bool IsAnyCombatErrorActive()
+    {
+        return playerErrorTimer > 0f || accelerationAttackTimer > 0f;
+    }
+
+    private string GetActiveCombatErrorDisplayName()
+    {
+        if (playerErrorTimer > 0f)
+        {
+            return "[거대화]";
+        }
+
+        if (accelerationAttackTimer > 0f)
+        {
+            return "[가속]";
+        }
+
+        return "[오류]";
     }
 
     private float GetCurrentAttackRange()
@@ -535,11 +928,36 @@ public class PlayerMove : MonoBehaviour
         return 1f;
     }
 
+    private float GetCurrentAttackSpeedMultiplier()
+    {
+        return accelerationAttackTimer > 0f
+            ? Mathf.Max(1f, activeAttackSpeedMultiplier)
+            : 1f;
+    }
+
+    private void ClearStoredAccelerationError()
+    {
+        storedAccelerationErrorMultiplier = 0f;
+        hasStoredAccelerationError = false;
+        RefreshStoredErrorSelection();
+    }
+
     private void ClearEnvironmentError()
     {
         storedEnvironmentErrorMultiplier = 0f;
         environmentErrorUsesLeft = 0;
         hasStoredEnvironmentError = false;
+        RefreshStoredErrorSelection();
+    }
+
+    private void RefreshStoredErrorSelection()
+    {
+        ClampSelectedStoredErrorIndex();
+
+        if (GetStoredErrorCount() < 2)
+        {
+            isSelectingStoredError = false;
+        }
     }
 
     private void ClearPlayerError()
