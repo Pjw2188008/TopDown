@@ -2,13 +2,14 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.UI;
 
-public class PlayerMove : MonoBehaviour
+public class PlayerMove : MonoBehaviour, ICombatDamageable
 {
     private enum StoredErrorType
     {
         None,
         Giant,
-        Acceleration
+        Acceleration,
+        Reflection
     }
 
     private const int MaxStoredErrors = 2;
@@ -37,24 +38,32 @@ public class PlayerMove : MonoBehaviour
     [Tooltip("어두워지는 효과가 얼마나 부드럽게 전환되는지 설정합니다.")]
     [SerializeField] private float editModeFadeSpeed = 5f;
 
-    [Tooltip("거대화 오류를 Cut한 뒤 전투 기술에 사용할 수 있는 횟수입니다. 환경 Paste는 1회 사용 즉시 오류가 보관함에서 제거됩니다.")]
-    [SerializeField] private int maxEnvironmentErrorUses = 3;
-
     [Header("전투 기술 - 거대화 오류")]
-    [Tooltip("일반 상태에서 Q 키를 눌렀을 때, 공격 범위가 몇 배로 늘어나는지 설정합니다.")]
+    [Tooltip("거대화 오류를 전투 기술에 Paste했을 때 공격 범위가 몇 배로 늘어나는지 설정합니다. Paste한 오류는 즉시 보관함에서 사라집니다.")]
     [SerializeField] private float playerErrorEffectMultiplier = 2.5f;
 
-    [Tooltip("플레이어용 거대화 오류 버프가 유지되는 시간입니다.")]
+    [Tooltip("거대화 오류를 전투 기술에 1회 Paste했을 때 효과가 유지되는 시간입니다.")]
     [SerializeField] private float playerErrorDuration = 6f;
 
-    [Tooltip("플레이어용 거대화 오류를 몇 번 사용할 수 있는지 설정합니다. 보통 1회로 충분합니다.")]
-    [SerializeField] private int maxPlayerErrorUses = 1;
-
     [Header("전투 기술 - 가속 오류")]
-    [Tooltip("가속 오류를 전투 기술에 Paste했을 때 효과가 유지되는 시간입니다.")]
+    [Tooltip("가속 오류를 전투 기술에 1회 Paste했을 때 공격 속도 증가가 유지되는 시간입니다. Paste한 오류는 즉시 보관함에서 사라집니다.")]
     [SerializeField, Min(0.1f)] private float accelerationAttackDuration = 5f;
 
+    [Header("전투 기술 - 반사 오류")]
+    [Tooltip("반사 오류를 전투 기술에 1회 Paste했을 때 받은 피해를 공격자에게 되돌리는 시간입니다. Paste한 오류는 즉시 보관함에서 사라집니다.")]
+    [SerializeField, Min(0.1f)] private float reflectionCombatDuration = 5f;
+
+    [Header("플레이어 체력")]
+    [Tooltip("플레이어가 받을 수 있는 최대 피해량입니다. 반사되지 않은 적 투사체가 이 체력을 감소시킵니다.")]
+    [SerializeField, Min(1f)] private float maxHealth = 10f;
+
+    [Tooltip("체력이 0이 됐을 때 테스트를 계속할 수 있도록 최대 체력으로 즉시 복구합니다.")]
+    [SerializeField] private bool restoreHealthOnDefeat = true;
+
     [Header("기본 공격")]
+    [Tooltip("근접 공격이 적에게 주는 피해량입니다.")]
+    [SerializeField, Min(0.1f)] private float attackDamage = 1f;
+
     [Tooltip("공격 후 다음 공격까지의 쿨타임입니다.")]
     [SerializeField] private float attackCooldown = 0.35f;
 
@@ -84,7 +93,6 @@ public class PlayerMove : MonoBehaviour
     [SerializeField] private int attackEffectSortingOrderOffset = 1;
 
     private Vector2 lastDirection = Vector2.right;
-    private int currentDirection = -1;
     private bool currentMovingState = false;
     private float nextAttackTime;
     private bool isAttacking;
@@ -99,9 +107,6 @@ public class PlayerMove : MonoBehaviour
     private int environmentErrorUsesLeft = 0;
 
     private float storedPlayerErrorMultiplier = 0f;
-    private bool hasStoredPlayerError = false;
-    private int playerErrorUsesLeft = 0;
-
     private float playerErrorTimer = 0f;
     private float storedAccelerationErrorMultiplier;
     private bool hasStoredAccelerationError;
@@ -109,11 +114,22 @@ public class PlayerMove : MonoBehaviour
     private float accelerationAttackTimer;
     private float activeAttackSpeedMultiplier = 1f;
     private float baseAnimatorSpeed = 1f;
+    private float currentHealth;
+    private bool hasStoredReflectionError;
+    private bool hasAcquiredReflectionError;
+    private float reflectionCombatTimer;
     private int selectedStoredErrorIndex;
     private bool isSelectingStoredError;
+    private StoredErrorType pendingReplacementErrorType;
+    private MonoBehaviour pendingReplacementSource;
+    private float pendingReplacementMultiplier;
+    private int selectedReplacementIndex;
+    private bool isReplacingStoredError;
 
     private void Start()
     {
+        currentHealth = maxHealth;
+
         if (animator == null)
         {
             animator = GetComponent<Animator>();
@@ -138,6 +154,7 @@ public class PlayerMove : MonoBehaviour
             Debug.LogError("SpriteRenderer가 할당되지 않았습니다! Player 오브젝트에 SpriteRenderer를 추가하거나 인스펙터에서 연결해주세요.");
         }
 
+        EnsureProjectileCollider();
         CreateEditModeOverlay();
         UpdateEditModeVisual();
     }
@@ -149,12 +166,16 @@ public class PlayerMove : MonoBehaviour
             return;
         }
 
-        if (Keyboard.current.eKey.wasPressedThisFrame)
+        if (Keyboard.current[editModeKey].wasPressedThisFrame)
         {
             ToggleEditMode();
         }
 
-        HandleStoredErrorSelectionInput();
+        bool replacementInputConsumed = HandleStoredErrorReplacementInput();
+        if (!replacementInputConsumed)
+        {
+            HandleStoredErrorSelectionInput();
+        }
 
         if (animator == null || spriteRenderer == null)
         {
@@ -173,6 +194,8 @@ public class PlayerMove : MonoBehaviour
         }
 
         if (!isSelectingStoredError
+            && !isReplacingStoredError
+            && !replacementInputConsumed
             && Mouse.current != null
             && Mouse.current.leftButton.wasPressedThisFrame)
         {
@@ -210,11 +233,69 @@ public class PlayerMove : MonoBehaviour
             }
         }
 
+        if (reflectionCombatTimer > 0f)
+        {
+            reflectionCombatTimer -= Time.deltaTime;
+            if (reflectionCombatTimer <= 0f)
+            {
+                reflectionCombatTimer = 0f;
+                Debug.Log("반사 오류 전투 Paste 종료");
+            }
+        }
+
         UpdateEditModeVisual();
+    }
+
+    private bool HandleStoredErrorReplacementInput()
+    {
+        if (!isReplacingStoredError)
+        {
+            return false;
+        }
+
+        if (!isEditMode)
+        {
+            CancelStoredErrorReplacement("편집 모드가 아니므로 오류 교체를 취소했습니다.");
+            return true;
+        }
+
+        int storedErrorCount = GetStoredErrorCount();
+        if (storedErrorCount == 0)
+        {
+            CancelStoredErrorReplacement("교체할 기존 오류가 없어 오류 교체를 취소했습니다.");
+            return true;
+        }
+
+        selectedReplacementIndex = Mathf.Clamp(selectedReplacementIndex, 0, storedErrorCount - 1);
+
+        if (Mouse.current != null)
+        {
+            float scrollY = Mouse.current.scroll.ReadValue().y;
+            if (scrollY < 0f)
+            {
+                selectedReplacementIndex = (selectedReplacementIndex + 1) % storedErrorCount;
+            }
+            else if (scrollY > 0f)
+            {
+                selectedReplacementIndex = (selectedReplacementIndex - 1 + storedErrorCount) % storedErrorCount;
+            }
+
+            if (Mouse.current.leftButton.wasPressedThisFrame)
+            {
+                ConfirmStoredErrorReplacement();
+            }
+        }
+
+        return true;
     }
 
     private void HandleStoredErrorSelectionInput()
     {
+        if (isReplacingStoredError)
+        {
+            return;
+        }
+
         int storedErrorCount = GetStoredErrorCount();
 
         if (Keyboard.current.qKey.wasPressedThisFrame)
@@ -297,6 +378,23 @@ public class PlayerMove : MonoBehaviour
 
     private void OnGUI()
     {
+        if (isReplacingStoredError)
+        {
+            string replacementText = $"새 오류 {GetStoredErrorDisplayName(pendingReplacementErrorType)}\n"
+                + "교체할 오류 선택\n";
+            int replacementCandidateCount = GetStoredErrorCount();
+
+            for (int index = 0; index < replacementCandidateCount; index++)
+            {
+                string marker = index == selectedReplacementIndex ? ">> " : "    ";
+                replacementText += marker + GetStoredErrorDisplayName(GetStoredErrorTypeAtIndex(index)) + "\n";
+            }
+
+            replacementText += "마우스 휠: 변경  |  좌클릭: 교체 확정";
+            GUI.Box(new Rect(20f, 20f, 330f, 132f), replacementText);
+            return;
+        }
+
         if (!isSelectingStoredError || GetStoredErrorCount() < 2)
         {
             return;
@@ -325,6 +423,12 @@ public class PlayerMove : MonoBehaviour
     {
         isSelectingStoredError = false;
         isEditMode = !isEditMode;
+
+        if (!isEditMode && isReplacingStoredError)
+        {
+            CancelStoredErrorReplacement("편집 모드가 종료되어 오류 교체를 취소했습니다.");
+        }
+
         Time.timeScale = isEditMode ? editTimeScale : 1f;
         Time.fixedDeltaTime = 0.02f * Time.timeScale;
 
@@ -526,6 +630,36 @@ public class PlayerMove : MonoBehaviour
                 continue;
             }
 
+            if (hit.TryGetComponent<ReflectionErrorEffect>(out var reflectionError)
+                && reflectionError.IsActive
+                && isEditMode)
+            {
+                if (hasAcquiredReflectionError)
+                {
+                    Debug.Log("반사 오류는 이미 한 번 획득했기 때문에 다시 Cut할 수 없습니다.");
+                    continue;
+                }
+
+                if (hasStoredReflectionError)
+                {
+                    Debug.Log("반사 오류가 이미 보관되어 있습니다.");
+                    continue;
+                }
+
+                if (GetStoredErrorCount() >= MaxStoredErrors)
+                {
+                    BeginStoredErrorReplacement(StoredErrorType.Reflection, reflectionError, 0f);
+                    continue;
+                }
+
+                hasStoredReflectionError = true;
+                hasAcquiredReflectionError = true;
+                selectedStoredErrorIndex = GetStoredErrorIndex(StoredErrorType.Reflection);
+                reflectionError.ResetReflection();
+                Debug.Log("반사 오류를 Cut했습니다. 적의 투사체 반사와 피해 반사가 제거되었습니다.");
+                continue;
+            }
+
             if (hit.TryGetComponent<AccelerationErrorEffect>(out var accelerationError)
                 && accelerationError.IsActive)
             {
@@ -541,9 +675,18 @@ public class PlayerMove : MonoBehaviour
                     continue;
                 }
 
-                if (hasStoredAccelerationError || GetStoredErrorCount() >= MaxStoredErrors)
+                if (hasStoredAccelerationError)
                 {
-                    Debug.Log("가속 오류가 이미 보관되어 있거나 보관함 2칸이 가득 찼습니다.");
+                    Debug.Log("가속 오류가 이미 보관되어 있습니다.");
+                    continue;
+                }
+
+                if (GetStoredErrorCount() >= MaxStoredErrors)
+                {
+                    BeginStoredErrorReplacement(
+                        StoredErrorType.Acceleration,
+                        accelerationError,
+                        accelerationError.CurrentMultiplier);
                     continue;
                 }
 
@@ -571,24 +714,35 @@ public class PlayerMove : MonoBehaviour
                     continue;
                 }
 
-                if (hasStoredEnvironmentError || GetStoredErrorCount() >= MaxStoredErrors)
+                if (hasStoredEnvironmentError)
                 {
-                    Debug.Log("거대화 오류가 이미 보관되어 있거나 보관함 2칸이 가득 찼습니다.");
+                    Debug.Log("거대화 오류가 이미 보관되어 있습니다.");
+                    continue;
+                }
+
+                if (GetStoredErrorCount() >= MaxStoredErrors)
+                {
+                    BeginStoredErrorReplacement(
+                        StoredErrorType.Giant,
+                        giantError,
+                        giantError.CurrentMultiplier);
                     continue;
                 }
 
                 storedEnvironmentErrorMultiplier = giantError.CurrentMultiplier;
-                environmentErrorUsesLeft = Mathf.Max(1, maxEnvironmentErrorUses);
+                environmentErrorUsesLeft = 1;
                 hasStoredEnvironmentError = true;
                 hasAcquiredGiantError = true;
                 selectedStoredErrorIndex = GetStoredErrorIndex(StoredErrorType.Giant);
                 giantError.ResetScale();
-                Debug.Log("환경용 거대화 오류가 저장되었습니다. 남은 사용 횟수: " + environmentErrorUsesLeft);
+                Debug.Log("거대화 오류를 Cut해 보관함에 저장했습니다. 환경 또는 전투 기술에 1회 Paste할 수 있습니다.");
                 continue;
             }
 
-            Debug.Log("근접 공격 히트: " + hit.name);
-            // hit.GetComponent<Enemy>().TakeDamage(1);
+            if (!CombatDamageUtility.TryApplyDamage(hit.gameObject, attackDamage, gameObject))
+            {
+                Debug.Log("근접 공격 히트: " + hit.name);
+            }
         }
     }
 
@@ -599,6 +753,12 @@ public class PlayerMove : MonoBehaviour
         if (selectedError == StoredErrorType.Acceleration)
         {
             TryPasteAccelerationError();
+            return;
+        }
+
+        if (selectedError == StoredErrorType.Reflection)
+        {
+            TryPasteReflectionError();
             return;
         }
 
@@ -754,6 +914,77 @@ public class PlayerMove : MonoBehaviour
         ClearStoredAccelerationError();
     }
 
+    private void TryPasteReflectionError()
+    {
+        if (!isEditMode || !hasStoredReflectionError)
+        {
+            Debug.Log("붙여넣을 반사 오류가 없습니다.");
+            return;
+        }
+
+        if (Mouse.current == null || Camera.main == null)
+        {
+            return;
+        }
+
+        Vector3 mouseWorldPos = Camera.main.ScreenToWorldPoint(Mouse.current.position.ReadValue());
+        mouseWorldPos.z = 0f;
+
+        Collider2D targetCollider = Physics2D.OverlapPoint(mouseWorldPos);
+        if (targetCollider == null)
+        {
+            GameObject clickedObject = GetSpriteObjectAtMousePosition(mouseWorldPos);
+            if (clickedObject == null)
+            {
+                Debug.Log("커서 위치에 반사 오류를 Paste할 대상이 없습니다.");
+                return;
+            }
+
+            targetCollider = clickedObject.GetComponent<Collider2D>();
+            if (targetCollider == null)
+            {
+                BoxCollider2D collider = clickedObject.AddComponent<BoxCollider2D>();
+                SpriteRenderer clickedRenderer = clickedObject.GetComponent<SpriteRenderer>();
+                if (clickedRenderer != null)
+                {
+                    collider.size = clickedRenderer.bounds.size;
+                }
+
+                targetCollider = collider;
+            }
+        }
+
+        PasteTarget pasteTarget = targetCollider.GetComponentInParent<PasteTarget>();
+        if (pasteTarget == null)
+        {
+            Debug.Log("PasteTarget이 없는 대상에는 반사 오류를 Paste할 수 없습니다.");
+            return;
+        }
+
+        if (!ReflectionErrorEffect.CanPasteTo(pasteTarget.TargetType))
+        {
+            Debug.Log($"반사 오류는 {pasteTarget.TargetType} 대상에 Paste할 수 없습니다.");
+            return;
+        }
+
+        if (pasteTarget.TargetType == PasteTargetType.CombatSkill)
+        {
+            Debug.Log("전투 기술 Paste는 일반 모드에서 Q를 사용해야 합니다.");
+            return;
+        }
+
+        GameObject targetObject = pasteTarget.gameObject;
+        ReflectionErrorEffect reflectionEffect = targetObject.GetComponent<ReflectionErrorEffect>();
+        if (reflectionEffect == null)
+        {
+            reflectionEffect = targetObject.AddComponent<ReflectionErrorEffect>();
+        }
+
+        reflectionEffect.Trigger();
+        ClearStoredReflectionError();
+        Debug.Log($"반사 오류를 {targetObject.name}에 Paste했습니다. 이제 이 대상이 투사체를 반사합니다.");
+    }
+
     private void TryActivateStoredCombatError()
     {
         StoredErrorType selectedError = GetSelectedStoredErrorType();
@@ -761,6 +992,14 @@ public class PlayerMove : MonoBehaviour
         if (selectedError == StoredErrorType.Giant)
         {
             TryActivatePlayerErrorBuff();
+            return;
+        }
+
+        if (selectedError == StoredErrorType.Reflection)
+        {
+            reflectionCombatTimer = reflectionCombatDuration;
+            ClearStoredReflectionError();
+            Debug.Log($"반사 오류를 전투 기술에 Paste했습니다. {reflectionCombatDuration}초 동안 받은 피해를 공격자에게 되돌립니다.");
             return;
         }
 
@@ -803,16 +1042,157 @@ public class PlayerMove : MonoBehaviour
         }
 
         storedPlayerErrorMultiplier = playerErrorEffectMultiplier;
-        playerErrorUsesLeft = Mathf.Max(1, maxPlayerErrorUses);
         playerErrorTimer = playerErrorDuration;
-        environmentErrorUsesLeft--;
+        ClearEnvironmentError();
 
-        if (environmentErrorUsesLeft <= 0)
+        Debug.Log("거대화 오류를 전투 기술에 Paste했습니다. 공격 범위 " + storedPlayerErrorMultiplier + "배 증가, 지속 시간 " + playerErrorDuration + "초. 보관함에서 오류가 제거되었습니다.");
+    }
+
+    private void BeginStoredErrorReplacement(
+        StoredErrorType newErrorType,
+        MonoBehaviour source,
+        float storedMultiplier)
+    {
+        if (isReplacingStoredError
+            || !isEditMode
+            || source == null
+            || newErrorType == StoredErrorType.None)
         {
-            ClearEnvironmentError();
+            return;
         }
 
-        Debug.Log("플레이어 거대화 오류 활성화! 공격 범위 " + storedPlayerErrorMultiplier + "배 증가, 지속 시간 " + playerErrorDuration + "초");
+        if (GetStoredErrorCount() < MaxStoredErrors)
+        {
+            Debug.LogWarning("보관함에 빈 슬롯이 있어 교체 UI를 열지 않았습니다.", this);
+            return;
+        }
+
+        pendingReplacementErrorType = newErrorType;
+        pendingReplacementSource = source;
+        pendingReplacementMultiplier = storedMultiplier;
+        selectedReplacementIndex = 0;
+        isReplacingStoredError = true;
+        isSelectingStoredError = false;
+
+        Debug.Log($"보관함이 가득 찼습니다. {GetStoredErrorDisplayName(newErrorType)}와 교체할 오류를 선택하세요.");
+    }
+
+    private void ConfirmStoredErrorReplacement()
+    {
+        if (!isReplacingStoredError || !isEditMode)
+        {
+            return;
+        }
+
+        int storedErrorCount = GetStoredErrorCount();
+        selectedReplacementIndex = Mathf.Clamp(selectedReplacementIndex, 0, storedErrorCount - 1);
+        StoredErrorType discardedError = GetStoredErrorTypeAtIndex(selectedReplacementIndex);
+
+        if (discardedError == StoredErrorType.None || !CanCompletePendingCut())
+        {
+            CancelStoredErrorReplacement("새 오류 원본이 사라졌거나 비활성화되어 교체를 취소했습니다.");
+            return;
+        }
+
+        StoredErrorType newErrorType = pendingReplacementErrorType;
+        MonoBehaviour newErrorSource = pendingReplacementSource;
+        float newErrorMultiplier = pendingReplacementMultiplier;
+
+        isReplacingStoredError = false;
+        pendingReplacementErrorType = StoredErrorType.None;
+        pendingReplacementSource = null;
+        pendingReplacementMultiplier = 0f;
+
+        DiscardStoredError(discardedError);
+        CompletePendingErrorCut(newErrorType, newErrorSource, newErrorMultiplier);
+
+        Debug.Log($"{GetStoredErrorDisplayName(discardedError)}을(를) 폐기하고 {GetStoredErrorDisplayName(newErrorType)}을(를) 저장했습니다.");
+    }
+
+    private bool CanCompletePendingCut()
+    {
+        if (pendingReplacementSource == null)
+        {
+            return false;
+        }
+
+        return pendingReplacementErrorType switch
+        {
+            StoredErrorType.Giant => pendingReplacementSource is GiantErrorEffect giant && giant.IsActive,
+            StoredErrorType.Acceleration => pendingReplacementSource is AccelerationErrorEffect acceleration && acceleration.IsActive,
+            StoredErrorType.Reflection => pendingReplacementSource is ReflectionErrorEffect reflection && reflection.IsActive,
+            _ => false
+        };
+    }
+
+    private void CompletePendingErrorCut(
+        StoredErrorType newErrorType,
+        MonoBehaviour source,
+        float storedMultiplier)
+    {
+        switch (newErrorType)
+        {
+            case StoredErrorType.Giant:
+            {
+                GiantErrorEffect giant = (GiantErrorEffect)source;
+                storedEnvironmentErrorMultiplier = storedMultiplier;
+                environmentErrorUsesLeft = 1;
+                hasStoredEnvironmentError = true;
+                hasAcquiredGiantError = true;
+                giant.ResetScale();
+                break;
+            }
+            case StoredErrorType.Acceleration:
+            {
+                AccelerationErrorEffect acceleration = (AccelerationErrorEffect)source;
+                storedAccelerationErrorMultiplier = storedMultiplier;
+                hasStoredAccelerationError = true;
+                hasAcquiredAccelerationError = true;
+                acceleration.ResetAcceleration();
+                break;
+            }
+            case StoredErrorType.Reflection:
+            {
+                ReflectionErrorEffect reflection = (ReflectionErrorEffect)source;
+                hasStoredReflectionError = true;
+                hasAcquiredReflectionError = true;
+                reflection.ResetReflection();
+                break;
+            }
+        }
+
+        selectedStoredErrorIndex = GetStoredErrorIndex(newErrorType);
+        RefreshStoredErrorSelection();
+    }
+
+    private void DiscardStoredError(StoredErrorType errorType)
+    {
+        switch (errorType)
+        {
+            case StoredErrorType.Giant:
+                ClearEnvironmentError();
+                break;
+            case StoredErrorType.Acceleration:
+                ClearStoredAccelerationError();
+                break;
+            case StoredErrorType.Reflection:
+                ClearStoredReflectionError();
+                break;
+        }
+    }
+
+    private void CancelStoredErrorReplacement(string message)
+    {
+        isReplacingStoredError = false;
+        pendingReplacementErrorType = StoredErrorType.None;
+        pendingReplacementSource = null;
+        pendingReplacementMultiplier = 0f;
+        selectedReplacementIndex = 0;
+
+        if (!string.IsNullOrEmpty(message))
+        {
+            Debug.Log(message);
+        }
     }
 
     private int GetStoredErrorCount()
@@ -825,6 +1205,11 @@ public class PlayerMove : MonoBehaviour
         }
 
         if (hasStoredAccelerationError)
+        {
+            count++;
+        }
+
+        if (hasStoredReflectionError)
         {
             count++;
         }
@@ -849,6 +1234,16 @@ public class PlayerMove : MonoBehaviour
         if (hasStoredAccelerationError && index == currentIndex)
         {
             return StoredErrorType.Acceleration;
+        }
+
+        if (hasStoredAccelerationError)
+        {
+            currentIndex++;
+        }
+
+        if (hasStoredReflectionError && index == currentIndex)
+        {
+            return StoredErrorType.Reflection;
         }
 
         return StoredErrorType.None;
@@ -889,13 +1284,16 @@ public class PlayerMove : MonoBehaviour
         {
             StoredErrorType.Giant => "[거대화]",
             StoredErrorType.Acceleration => "[가속]",
+            StoredErrorType.Reflection => "[반사]",
             _ => "[빈 슬롯]"
         };
     }
 
     private bool IsAnyCombatErrorActive()
     {
-        return playerErrorTimer > 0f || accelerationAttackTimer > 0f;
+        return playerErrorTimer > 0f
+            || accelerationAttackTimer > 0f
+            || reflectionCombatTimer > 0f;
     }
 
     private string GetActiveCombatErrorDisplayName()
@@ -908,6 +1306,11 @@ public class PlayerMove : MonoBehaviour
         if (accelerationAttackTimer > 0f)
         {
             return "[가속]";
+        }
+
+        if (reflectionCombatTimer > 0f)
+        {
+            return "[반사]";
         }
 
         return "[오류]";
@@ -942,6 +1345,12 @@ public class PlayerMove : MonoBehaviour
         RefreshStoredErrorSelection();
     }
 
+    private void ClearStoredReflectionError()
+    {
+        hasStoredReflectionError = false;
+        RefreshStoredErrorSelection();
+    }
+
     private void ClearEnvironmentError()
     {
         storedEnvironmentErrorMultiplier = 0f;
@@ -960,12 +1369,46 @@ public class PlayerMove : MonoBehaviour
         }
     }
 
-    private void ClearPlayerError()
+    public bool ReceiveDamage(float amount, GameObject source, bool canReflect)
     {
-        storedPlayerErrorMultiplier = 0f;
-        playerErrorUsesLeft = 0;
-        hasStoredPlayerError = false;
-        playerErrorTimer = 0f;
+        if (amount <= 0f)
+        {
+            return false;
+        }
+
+        if (canReflect && reflectionCombatTimer > 0f && source != null)
+        {
+            bool reflected = CombatDamageUtility.TryApplyDamage(source, amount, gameObject, false);
+            Debug.Log(reflected
+                ? $"반사 오류로 피해 {amount}을 공격자에게 되돌렸습니다."
+                : "반사할 공격자가 피해를 받을 수 없습니다.", this);
+            return true;
+        }
+
+        currentHealth = Mathf.Max(0f, currentHealth - amount);
+        Debug.Log($"플레이어 피해 {amount} / 남은 체력 {currentHealth}/{maxHealth}", this);
+
+        if (currentHealth <= 0f && restoreHealthOnDefeat)
+        {
+            currentHealth = maxHealth;
+            Debug.Log("플레이어 체력이 0이 되어 테스트용으로 전부 회복했습니다.", this);
+        }
+
+        return true;
+    }
+
+    private void EnsureProjectileCollider()
+    {
+        if (GetComponent<Collider2D>() != null)
+        {
+            return;
+        }
+
+        BoxCollider2D playerCollider = gameObject.AddComponent<BoxCollider2D>();
+        if (spriteRenderer != null && spriteRenderer.sprite != null)
+        {
+            playerCollider.size = spriteRenderer.sprite.bounds.size;
+        }
     }
 
     private GameObject GetSpriteObjectAtMousePosition(Vector3 mouseWorldPos)
@@ -1044,7 +1487,6 @@ public class PlayerMove : MonoBehaviour
                 animator.SetBool("isMoving", false);
                 animator.Play("Player_Idle", 0, 0f);
                 currentMovingState = false;
-                currentDirection = -1;
             }
             return;
         }
@@ -1055,7 +1497,6 @@ public class PlayerMove : MonoBehaviour
             animator.Play("Move_Right", 0, 0f);
             animator.SetInteger("direction", 2);
             currentMovingState = true;
-            currentDirection = 2;
         }
 
         spriteRenderer.flipX = direction.x < 0f;
