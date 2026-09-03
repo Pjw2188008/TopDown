@@ -2,6 +2,10 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.UI;
 
+/// <summary>
+/// 플레이어의 이동, 공격, 애니메이션, 편집 모드와 오류 보관·교체·Paste를 통합 관리합니다.
+/// 플레이어 GameObject에 직접 부착해야 하는 핵심 조작 컴포넌트입니다.
+/// </summary>
 public class PlayerMove : MonoBehaviour, ICombatDamageable
 {
     private enum StoredErrorType

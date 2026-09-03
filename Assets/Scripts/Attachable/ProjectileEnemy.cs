@@ -1,5 +1,9 @@
 using UnityEngine;
 
+/// <summary>
+/// 플레이어를 향해 반사 가능한 투사체를 주기적으로 발사하고 적의 체력과 피해 반사를 처리합니다.
+/// 투사체를 발사하는 반사 적 GameObject에 직접 부착합니다.
+/// </summary>
 [DisallowMultipleComponent]
 [RequireComponent(typeof(SpriteRenderer), typeof(BoxCollider2D), typeof(ReflectionErrorEffect))]
 public sealed class ProjectileEnemy : MonoBehaviour, ICombatDamageable

@@ -1,5 +1,9 @@
 using UnityEngine;
 
+/// <summary>
+/// 거대화 오류의 활성 상태와 대상 크기 변화를 관리합니다.
+/// 처음부터 거대화된 오류 원본에 직접 부착하거나, 환경 Paste 시 PlayerMove가 대상에 자동으로 추가합니다.
+/// </summary>
 public class GiantErrorEffect : MonoBehaviour
 {
     [Header("거대화 오류")]

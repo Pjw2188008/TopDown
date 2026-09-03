@@ -1,10 +1,18 @@
 using UnityEngine;
 
+/// <summary>
+/// 가속 오류로 속도 배율을 적용받을 수 있는 이동 컴포넌트가 구현하는 규약입니다.
+/// 인터페이스이므로 GameObject에 직접 부착하지 않습니다.
+/// </summary>
 public interface IAccelerationTarget
 {
     void SetAccelerationMultiplier(float multiplier);
 }
 
+/// <summary>
+/// 가속 오류의 활성 상태를 관리하고 같은 GameObject의 IAccelerationTarget에 속도 배율을 전달합니다.
+/// 가속 오류 원본에 직접 부착하거나, 환경 Paste 시 PlayerMove가 대상에 자동으로 추가합니다.
+/// </summary>
 [DisallowMultipleComponent]
 public sealed class AccelerationErrorEffect : MonoBehaviour
 {

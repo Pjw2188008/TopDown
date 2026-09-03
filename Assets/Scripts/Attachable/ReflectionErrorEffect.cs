@@ -1,5 +1,9 @@
 using UnityEngine;
 
+/// <summary>
+/// 반사 오류의 활성 상태와 시각 표시를 관리합니다.
+/// 반사 적 또는 반사 오류 원본에 직접 부착하거나, 환경 Paste 시 PlayerMove가 물체·표면에 자동으로 추가합니다.
+/// </summary>
 [DisallowMultipleComponent]
 public sealed class ReflectionErrorEffect : MonoBehaviour
 {

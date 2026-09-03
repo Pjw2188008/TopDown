@@ -1,5 +1,9 @@
 using UnityEngine;
 
+/// <summary>
+/// 시작 위치를 중심으로 지정한 축을 왕복 순찰하고, 가속 오류의 속도 배율을 적용받습니다.
+/// 움직이게 만들 적 또는 테스트 대상 GameObject에 직접 부착합니다.
+/// </summary>
 [DisallowMultipleComponent]
 public sealed class MovingEnemy : MonoBehaviour, IAccelerationTarget
 {

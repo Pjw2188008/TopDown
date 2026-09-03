@@ -1,5 +1,9 @@
 using UnityEngine;
 
+/// <summary>
+/// 발사된 투사체 한 개의 이동, 수명, 충돌, 피해와 반사 방향을 처리하는 런타임 전용 컴포넌트입니다.
+/// ProjectileEnemy가 투사체를 생성할 때 자동으로 추가하므로 다른 GameObject에 직접 부착하지 않습니다.
+/// </summary>
 [DisallowMultipleComponent]
 public sealed class ReflectProjectile : MonoBehaviour
 {
@@ -12,6 +16,9 @@ public sealed class ReflectProjectile : MonoBehaviour
     private int remainingBounces;
     private bool inheritsReflection;
 
+    /// <summary>
+    /// 투사체를 생성한 공격자와 이동·피해·반사 정보를 전달받아 초기화합니다.
+    /// </summary>
     public void Initialize(
         GameObject projectileOwner,
         Vector2 launchDirection,

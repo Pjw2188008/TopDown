@@ -1,5 +1,9 @@
 using UnityEngine;
 
+/// <summary>
+/// 지정한 플레이어를 부드럽게 따라가도록 카메라 위치를 갱신합니다.
+/// 추적에 사용할 카메라 GameObject에 직접 부착합니다.
+/// </summary>
 public class CameraFollow : MonoBehaviour
 {
     [Header("카메라 추적")]

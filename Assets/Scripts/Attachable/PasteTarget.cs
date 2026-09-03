@@ -1,5 +1,8 @@
 using UnityEngine;
 
+/// <summary>
+/// 오류 호환성을 판정할 때 사용하는 Paste 대상 분류입니다.
+/// </summary>
 public enum PasteTargetType
 {
     Living,
@@ -9,6 +12,10 @@ public enum PasteTargetType
     CombatSkill
 }
 
+/// <summary>
+/// GameObject가 생명체·물체·투사체·표면·전투 기술 중 어떤 Paste 대상인지 표시합니다.
+/// 오류를 Paste할 수 있게 만들 대상 GameObject에 직접 부착합니다.
+/// </summary>
 [DisallowMultipleComponent]
 public sealed class PasteTarget : MonoBehaviour
 {
