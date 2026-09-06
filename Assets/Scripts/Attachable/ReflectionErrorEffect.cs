@@ -18,6 +18,9 @@ public sealed class ReflectionErrorEffect : MonoBehaviour
     private Color baseColor = Color.white;
 
     public bool IsActive { get; private set; }
+    /// <summary>환경 Paste로 적용된 오류인지 구분합니다. 다른 원본의 같은 오류에는 영향을 주지 않습니다.</summary>
+    public bool IsPasted { get; private set; }
+    public bool CanCut => IsActive && !IsPasted;
 
     public static bool CanPasteTo(PasteTargetType targetType)
     {
@@ -43,6 +46,7 @@ public sealed class ReflectionErrorEffect : MonoBehaviour
 
     public void Trigger()
     {
+        IsPasted = false;
         IsActive = true;
 
         if (targetRenderer == null)
@@ -58,6 +62,13 @@ public sealed class ReflectionErrorEffect : MonoBehaviour
         {
             targetRenderer.color = reflectedTint;
         }
+    }
+
+    /// <summary>붙여넣기로 적용한 오류는 다시 Cut할 수 없습니다.</summary>
+    public void ApplyPaste()
+    {
+        Trigger();
+        IsPasted = true;
     }
 
     public void ResetReflection()

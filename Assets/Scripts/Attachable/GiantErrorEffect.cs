@@ -25,6 +25,9 @@ public class GiantErrorEffect : MonoBehaviour
 
     public float CurrentMultiplier => targetMultiplier;
     public bool IsActive { get; private set; }
+    /// <summary>환경 Paste로 적용된 오류인지 구분합니다. 다른 원본의 같은 오류에는 영향을 주지 않습니다.</summary>
+    public bool IsPasted { get; private set; }
+    public bool CanCut => IsActive && !IsPasted;
 
     public static bool CanPasteTo(PasteTargetType targetType)
     {
@@ -45,6 +48,7 @@ public class GiantErrorEffect : MonoBehaviour
 
     public void Trigger(float multiplier)
     {
+        IsPasted = false;
         if (multiplier <= 0f)
         {
             multiplier = 1f;
@@ -54,6 +58,13 @@ public class GiantErrorEffect : MonoBehaviour
         IsActive = true;
         isGrowing = true;
         growthProgress = 0f;
+    }
+
+    /// <summary>붙여넣기로 적용한 오류는 다시 Cut할 수 없습니다.</summary>
+    public void ApplyPaste(float multiplier)
+    {
+        Trigger(multiplier);
+        IsPasted = true;
     }
 
     public void ResetScale()

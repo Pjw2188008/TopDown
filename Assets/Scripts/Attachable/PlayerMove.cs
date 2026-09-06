@@ -18,12 +18,16 @@ public class PlayerMove : MonoBehaviour, ICombatDamageable
 
     private const int MaxStoredErrors = 2;
     private static readonly int AttackRightStateHash = Animator.StringToHash("Attack_Right");
+    private static readonly int AttackUpStateHash = Animator.StringToHash("Attack_Up");
+    private static readonly int AttackDownStateHash = Animator.StringToHash("Attack_Down");
+    private static readonly int IsMovingHash = Animator.StringToHash("isMoving");
+    private static readonly int DirectionHash = Animator.StringToHash("direction");
 
     [Header("플레이어 기본 설정")]
     [Tooltip("플레이어 이동 속도입니다. 기본 이동 속도를 조절합니다.")]
     [SerializeField] private float moveSpeed = 5f;
 
-    [Tooltip("플레이어 애니메이터입니다. 이동/공격 애니메이션을 제어합니다.")]
+    [Tooltip("Player.controller를 연결한 Animator입니다. 이동은 isMoving과 direction(0=위, 1=아래, 2=좌우)으로 전환합니다. 스프라이트 프레임은 Ctrl+6 Animation 창에서 각 .anim 클립을 직접 편집하세요.")]
     [SerializeField] private Animator animator;
 
     [Tooltip("플레이어의 SpriteRenderer입니다. 방향 전환과 시각 효과에 사용됩니다.")]
@@ -65,6 +69,9 @@ public class PlayerMove : MonoBehaviour, ICombatDamageable
     [SerializeField] private bool restoreHealthOnDefeat = true;
 
     [Header("기본 공격")]
+    [Tooltip("위/아래 축에서 이 각도 이내의 커서만 세로 공격으로 처리합니다. 기본 22.5도는 8방향 중 위/아래만 세로 공격, 네 대각선은 좌우 공격에 포함합니다. 이펙트와 판정은 상하좌우로만 나갑니다.")]
+    [SerializeField, Range(1f, 45f)] private float verticalAttackHalfAngle = 22.5f;
+
     [Tooltip("근접 공격이 적에게 주는 피해량입니다.")]
     [SerializeField, Min(0.1f)] private float attackDamage = 1f;
 
@@ -81,11 +88,22 @@ public class PlayerMove : MonoBehaviour, ICombatDamageable
     [SerializeField] private LayerMask enemyLayer;
 
     [Header("공격 이펙트")]
-    [Tooltip("공격 마지막 프레임에 공격 범위 위로 표시할 스프라이트입니다.")]
+    [Tooltip("오른쪽을 향하는 공격 이펙트 이미지를 넣으세요. 클릭 순간 결정한 상하좌우 방향으로만 표시됩니다. 대각선 커서는 좌우 공격으로 처리합니다.")]
+    // 설정용 이미지이므로 애니메이션 키 대상에서 제외합니다.
+    // Animation 창에 Sprite를 드롭할 때 PlayerMove가 대상 후보로 표시되지 않게 합니다.
+    [UnityEngine.Animations.NotKeyable]
     [SerializeField] private Sprite attackEffectSprite;
 
-    [Tooltip("공격 애니메이션에서 이펙트와 공격 판정이 발생하는 시점입니다. 0.85는 마지막 프레임 시작 지점에 해당합니다.")]
+    [Tooltip("켜면 각 공격 클립의 끝에서 세 번째 프레임이 시작될 때 이펙트와 타격 판정이 함께 발생합니다. 클립 길이와 Samples를 기준으로 자동 계산합니다. 3프레임 이하인 클립은 첫 프레임에 발생합니다.")]
+    [UnityEngine.Serialization.FormerlySerializedAs("attackEffectAtAnimationEnd")]
+    [UnityEngine.Serialization.FormerlySerializedAs("attackEffectOnLastFrame")]
+    [SerializeField] private bool attackEffectOnThirdLastFrame = true;
+
+    [Tooltip("끝에서 세 번째 프레임 자동 계산 옵션을 껐을 때만 사용합니다. 0은 시작, 0.85는 재생 시간의 85%, 1은 끝입니다.")]
     [SerializeField, Range(0f, 1f)] private float attackImpactNormalizedTime = 0.85f;
+
+    [Tooltip("아직 스프라이트를 넣지 않은 빈 공격 클립의 임시 재생 시간입니다. 프레임을 넣으면 실제 클립 길이를 사용합니다.")]
+    [SerializeField, Min(0.01f)] private float emptyAttackDuration = 0.3f;
 
     [Tooltip("공격 이펙트가 화면에 유지되는 시간입니다.")]
     [SerializeField, Min(0.01f)] private float attackEffectDuration = 0.18f;
@@ -97,30 +115,29 @@ public class PlayerMove : MonoBehaviour, ICombatDamageable
     [SerializeField] private int attackEffectSortingOrderOffset = 1;
 
     private Vector2 lastDirection = Vector2.right;
-    private bool currentMovingState = false;
     private float nextAttackTime;
     private bool isAttacking;
     private bool attackImpactTriggered;
-    private bool attackFacingLeft;
+    private Vector2 attackDirection = Vector2.right;
+    private int currentAttackStateHash;
+    private float attackElapsedTime;
+    private float currentAttackImpactTime = -1f;
     private bool isEditMode;
     private Image editModeOverlay;
 
     private float storedEnvironmentErrorMultiplier = 0f;
     private bool hasStoredEnvironmentError = false;
-    private bool hasAcquiredGiantError;
     private int environmentErrorUsesLeft = 0;
 
     private float storedPlayerErrorMultiplier = 0f;
     private float playerErrorTimer = 0f;
     private float storedAccelerationErrorMultiplier;
     private bool hasStoredAccelerationError;
-    private bool hasAcquiredAccelerationError;
     private float accelerationAttackTimer;
     private float activeAttackSpeedMultiplier = 1f;
     private float baseAnimatorSpeed = 1f;
     private float currentHealth;
     private bool hasStoredReflectionError;
-    private bool hasAcquiredReflectionError;
     private float reflectionCombatTimer;
     private int selectedStoredErrorIndex;
     private bool isSelectingStoredError;
@@ -520,38 +537,66 @@ public class PlayerMove : MonoBehaviour, ICombatDamageable
         float attackSpeedMultiplier = GetCurrentAttackSpeedMultiplier();
         nextAttackTime = Time.time + attackCooldown / attackSpeedMultiplier;
         isAttacking = true;
-        currentMovingState = false;
 
-        Vector2 facing = GetMouseDirection();
-        bool facingLeft = facing.x < 0f;
-        attackFacingLeft = facingLeft;
+        // 대각선 커서는 좌우에 배정하고, 애니메이션/이펙트/판정을 같은 4방향으로 고정합니다.
+        attackDirection = GetCardinalAttackDirection(GetMouseDirection());
+        bool verticalAttack = attackDirection.y != 0f;
+        int attackAnimationDirection = verticalAttack ? (attackDirection.y > 0f ? 0 : 1) : 2;
+        currentAttackStateHash = attackAnimationDirection == 0 ? AttackUpStateHash
+            : attackAnimationDirection == 1 ? AttackDownStateHash : AttackRightStateHash;
+        attackElapsedTime = 0f;
+        currentAttackImpactTime = -1f;
         attackImpactTriggered = false;
 
-        animator.SetInteger("direction", 2);
-        animator.SetBool("isMoving", false);
+        animator.SetInteger(DirectionHash, attackAnimationDirection);
+        animator.SetBool(IsMovingHash, false);
         animator.speed = baseAnimatorSpeed * attackSpeedMultiplier;
 
-        animator.Play("Attack_Right", 0, 0f);
-        spriteRenderer.flipX = facingLeft;
+        animator.Play(currentAttackStateHash, 0, 0f);
+        spriteRenderer.flipX = !verticalAttack && attackDirection.x < 0f;
     }
 
     private void UpdateAttackAnimation()
     {
+        attackElapsedTime += Time.deltaTime * Mathf.Max(0f, animator.speed);
         AnimatorStateInfo stateInfo = animator.GetCurrentAnimatorStateInfo(0);
-        if (stateInfo.shortNameHash != AttackRightStateHash)
+        if (stateInfo.shortNameHash != currentAttackStateHash)
         {
             return;
         }
 
-        if (!attackImpactTriggered && stateInfo.normalizedTime >= attackImpactNormalizedTime)
+        // 빈 클립에서 공격 잠금이 남지 않도록 이미지 설정 전에는 임시 시간을 사용합니다.
+        float progress = stateInfo.length > 0.0001f ? stateInfo.normalizedTime
+            : attackElapsedTime / Mathf.Max(0.01f, emptyAttackDuration);
+        if (currentAttackImpactTime < 0f)
+            currentAttackImpactTime = attackEffectOnThirdLastFrame
+                ? GetThirdLastAttackFrameNormalizedTime() : attackImpactNormalizedTime;
+
+        if (!attackImpactTriggered && progress >= currentAttackImpactTime)
         {
             TriggerAttackImpact();
         }
 
-        if (!animator.IsInTransition(0) && stateInfo.normalizedTime >= 1f)
+        if (!animator.IsInTransition(0) && progress >= 1f)
         {
             AttackFinished();
         }
+    }
+
+    private float GetThirdLastAttackFrameNormalizedTime()
+    {
+        // 공격 상태에 진입한 뒤 한 번만 읽으므로 방향별로 다른 길이/FPS도 반영합니다.
+        AnimatorClipInfo[] clipInfos = animator.GetCurrentAnimatorClipInfo(0);
+        if (clipInfos.Length == 0 || clipInfos[0].clip == null)
+            return 1f;
+
+        AnimationClip clip = clipInfos[0].clip;
+        if (clip.length <= 0f || clip.frameRate <= 0f)
+            return 1f;
+
+        // 예: 7프레임/24 FPS → 끝에서 세 번째인 5번째 프레임은 4/24초에 시작합니다.
+        // 정규화 시점을 사용하므로 가속 오류로 재생 속도가 바뀌어도 프레임에 맞춰집니다.
+        return Mathf.Clamp01((clip.length - 3f / clip.frameRate) / clip.length);
     }
 
     public void AttackFinished()
@@ -562,10 +607,8 @@ public class PlayerMove : MonoBehaviour, ICombatDamageable
         }
 
         isAttacking = false;
-        currentMovingState = false;
         animator.speed = baseAnimatorSpeed;
-        animator.SetBool("isMoving", false);
-        animator.ResetTrigger("Attack");
+        animator.SetBool(IsMovingHash, false);
         animator.Play("Player_Idle", 0, 0f);
     }
 
@@ -577,11 +620,11 @@ public class PlayerMove : MonoBehaviour, ICombatDamageable
         }
 
         attackImpactTriggered = true;
-        AttackHit(attackFacingLeft);
-        SpawnAttackEffect(attackFacingLeft);
+        AttackHit();
+        SpawnAttackEffect();
     }
 
-    private void SpawnAttackEffect(bool facingLeft)
+    private void SpawnAttackEffect()
     {
         if (attackEffectSprite == null)
         {
@@ -590,7 +633,7 @@ public class PlayerMove : MonoBehaviour, ICombatDamageable
 
         float attackScale = GetCurrentAttackScale();
         Vector2 effectCenter = (Vector2)transform.position
-            + Vector2.right * (facingLeft ? -1f : 1f) * GetCurrentAttackRange();
+            + attackDirection * GetCurrentAttackRange();
         Vector2 targetSize = Vector2.Scale(attackSizeSide * attackScale, attackEffectSizeMultiplier);
         Vector2 spriteSize = attackEffectSprite.bounds.size;
 
@@ -602,6 +645,7 @@ public class PlayerMove : MonoBehaviour, ICombatDamageable
         GameObject effectObject = new GameObject("PlayerAttackEffect");
         SpriteRenderer effectRenderer = effectObject.AddComponent<SpriteRenderer>();
         effectRenderer.sprite = attackEffectSprite;
+        bool facingLeft = attackDirection.x < 0f;
         effectRenderer.flipX = facingLeft;
         effectRenderer.sortingLayerID = spriteRenderer.sortingLayerID;
         effectRenderer.sortingOrder = spriteRenderer.sortingOrder + attackEffectSortingOrderOffset;
@@ -611,21 +655,26 @@ public class PlayerMove : MonoBehaviour, ICombatDamageable
             targetSize.y / spriteSize.y,
             1f);
         effectObject.transform.localScale = effectScale;
+        float angle = Mathf.Atan2(attackDirection.y, attackDirection.x) * Mathf.Rad2Deg;
+        Quaternion rotation = Quaternion.Euler(0f, 0f, angle - (facingLeft ? 180f : 0f));
+        effectObject.transform.rotation = rotation;
 
         Vector3 spriteCenter = attackEffectSprite.bounds.center;
         float centerOffsetX = spriteCenter.x * effectScale.x * (facingLeft ? -1f : 1f);
         float centerOffsetY = spriteCenter.y * effectScale.y;
-        effectObject.transform.position = (Vector3)effectCenter - new Vector3(centerOffsetX, centerOffsetY, 0f);
+        effectObject.transform.position = (Vector3)effectCenter
+            - rotation * new Vector3(centerOffsetX, centerOffsetY, 0f);
 
         Destroy(effectObject, Mathf.Max(0.01f, attackEffectDuration));
     }
 
-    private void AttackHit(bool facingLeft)
+    private void AttackHit()
     {
         Vector2 center = transform.position;
-        Vector2 offset = Vector2.right * (facingLeft ? -1f : 1f) * GetCurrentAttackRange();
+        Vector2 offset = attackDirection * GetCurrentAttackRange();
+        float angle = Mathf.Atan2(attackDirection.y, attackDirection.x) * Mathf.Rad2Deg;
 
-        Collider2D[] hits = Physics2D.OverlapBoxAll(center + offset, attackSizeSide * GetCurrentAttackScale(), 0f, enemyLayer);
+        Collider2D[] hits = Physics2D.OverlapBoxAll(center + offset, attackSizeSide * GetCurrentAttackScale(), angle, enemyLayer);
 
         foreach (Collider2D hit in hits)
         {
@@ -638,9 +687,9 @@ public class PlayerMove : MonoBehaviour, ICombatDamageable
                 && reflectionError.IsActive
                 && isEditMode)
             {
-                if (hasAcquiredReflectionError)
+                if (!reflectionError.CanCut)
                 {
-                    Debug.Log("반사 오류는 이미 한 번 획득했기 때문에 다시 Cut할 수 없습니다.");
+                    Debug.Log("다른 대상에 Paste한 반사 오류는 다시 Cut할 수 없습니다.");
                     continue;
                 }
 
@@ -657,7 +706,6 @@ public class PlayerMove : MonoBehaviour, ICombatDamageable
                 }
 
                 hasStoredReflectionError = true;
-                hasAcquiredReflectionError = true;
                 selectedStoredErrorIndex = GetStoredErrorIndex(StoredErrorType.Reflection);
                 reflectionError.ResetReflection();
                 Debug.Log("반사 오류를 Cut했습니다. 적의 투사체 반사와 피해 반사가 제거되었습니다.");
@@ -673,9 +721,9 @@ public class PlayerMove : MonoBehaviour, ICombatDamageable
                     continue;
                 }
 
-                if (hasAcquiredAccelerationError)
+                if (!accelerationError.CanCut)
                 {
-                    Debug.Log("가속 오류는 이미 한 번 획득했기 때문에 다시 Cut할 수 없습니다.");
+                    Debug.Log("다른 대상에 Paste한 가속 오류는 다시 Cut할 수 없습니다.");
                     continue;
                 }
 
@@ -696,7 +744,6 @@ public class PlayerMove : MonoBehaviour, ICombatDamageable
 
                 storedAccelerationErrorMultiplier = accelerationError.CurrentMultiplier;
                 hasStoredAccelerationError = true;
-                hasAcquiredAccelerationError = true;
                 selectedStoredErrorIndex = GetStoredErrorIndex(StoredErrorType.Acceleration);
                 accelerationError.ResetAcceleration();
                 Debug.Log($"가속 오류를 Cut했습니다. 이동 속도가 정상화되었습니다. ({storedAccelerationErrorMultiplier}배 보관)");
@@ -712,9 +759,9 @@ public class PlayerMove : MonoBehaviour, ICombatDamageable
                     continue;
                 }
 
-                if (hasAcquiredGiantError)
+                if (!giantError.CanCut)
                 {
-                    Debug.Log("거대화 오류는 이미 한 번 획득했기 때문에 다시 Cut할 수 없습니다.");
+                    Debug.Log("다른 대상에 Paste한 거대화 오류는 다시 Cut할 수 없습니다.");
                     continue;
                 }
 
@@ -736,7 +783,6 @@ public class PlayerMove : MonoBehaviour, ICombatDamageable
                 storedEnvironmentErrorMultiplier = giantError.CurrentMultiplier;
                 environmentErrorUsesLeft = 1;
                 hasStoredEnvironmentError = true;
-                hasAcquiredGiantError = true;
                 selectedStoredErrorIndex = GetStoredErrorIndex(StoredErrorType.Giant);
                 giantError.ResetScale();
                 Debug.Log("거대화 오류를 Cut해 보관함에 저장했습니다. 환경 또는 전투 기술에 1회 Paste할 수 있습니다.");
@@ -842,7 +888,7 @@ public class PlayerMove : MonoBehaviour, ICombatDamageable
         }
 
         float pastedMultiplier = storedEnvironmentErrorMultiplier;
-        effect.Trigger(pastedMultiplier);
+        effect.ApplyPaste(pastedMultiplier);
         ClearEnvironmentError();
         Debug.Log("환경용 거대화 오류가 붙여넣기 되었습니다. 배수: " + pastedMultiplier + "x");
     }
@@ -913,7 +959,7 @@ public class PlayerMove : MonoBehaviour, ICombatDamageable
             accelerationEffect = targetObject.AddComponent<AccelerationErrorEffect>();
         }
 
-        accelerationEffect.Trigger(storedAccelerationErrorMultiplier);
+        accelerationEffect.ApplyPaste(storedAccelerationErrorMultiplier);
         Debug.Log($"가속 오류를 {targetObject.name}에 Paste했습니다. 이동 속도 {storedAccelerationErrorMultiplier}배");
         ClearStoredAccelerationError();
     }
@@ -984,7 +1030,7 @@ public class PlayerMove : MonoBehaviour, ICombatDamageable
             reflectionEffect = targetObject.AddComponent<ReflectionErrorEffect>();
         }
 
-        reflectionEffect.Trigger();
+        reflectionEffect.ApplyPaste();
         ClearStoredReflectionError();
         Debug.Log($"반사 오류를 {targetObject.name}에 Paste했습니다. 이제 이 대상이 투사체를 반사합니다.");
     }
@@ -1094,7 +1140,7 @@ public class PlayerMove : MonoBehaviour, ICombatDamageable
 
         if (discardedError == StoredErrorType.None || !CanCompletePendingCut())
         {
-            CancelStoredErrorReplacement("새 오류 원본이 사라졌거나 비활성화되어 교체를 취소했습니다.");
+            CancelStoredErrorReplacement("새 오류 원본이 사라졌거나 더 이상 Cut할 수 없어 교체를 취소했습니다.");
             return;
         }
 
@@ -1122,9 +1168,9 @@ public class PlayerMove : MonoBehaviour, ICombatDamageable
 
         return pendingReplacementErrorType switch
         {
-            StoredErrorType.Giant => pendingReplacementSource is GiantErrorEffect giant && giant.IsActive,
-            StoredErrorType.Acceleration => pendingReplacementSource is AccelerationErrorEffect acceleration && acceleration.IsActive,
-            StoredErrorType.Reflection => pendingReplacementSource is ReflectionErrorEffect reflection && reflection.IsActive,
+            StoredErrorType.Giant => pendingReplacementSource is GiantErrorEffect giant && giant.CanCut,
+            StoredErrorType.Acceleration => pendingReplacementSource is AccelerationErrorEffect acceleration && acceleration.CanCut,
+            StoredErrorType.Reflection => pendingReplacementSource is ReflectionErrorEffect reflection && reflection.CanCut,
             _ => false
         };
     }
@@ -1142,7 +1188,6 @@ public class PlayerMove : MonoBehaviour, ICombatDamageable
                 storedEnvironmentErrorMultiplier = storedMultiplier;
                 environmentErrorUsesLeft = 1;
                 hasStoredEnvironmentError = true;
-                hasAcquiredGiantError = true;
                 giant.ResetScale();
                 break;
             }
@@ -1151,7 +1196,6 @@ public class PlayerMove : MonoBehaviour, ICombatDamageable
                 AccelerationErrorEffect acceleration = (AccelerationErrorEffect)source;
                 storedAccelerationErrorMultiplier = storedMultiplier;
                 hasStoredAccelerationError = true;
-                hasAcquiredAccelerationError = true;
                 acceleration.ResetAcceleration();
                 break;
             }
@@ -1159,7 +1203,6 @@ public class PlayerMove : MonoBehaviour, ICombatDamageable
             {
                 ReflectionErrorEffect reflection = (ReflectionErrorEffect)source;
                 hasStoredReflectionError = true;
-                hasAcquiredReflectionError = true;
                 reflection.ResetReflection();
                 break;
             }
@@ -1439,42 +1482,64 @@ public class PlayerMove : MonoBehaviour, ICombatDamageable
             return;
         }
 
-        Vector2 center = transform.position;
-        float currentAttackRange = GetCurrentAttackRange();
-        Vector2 currentAttackSize = attackSizeSide * GetCurrentAttackScale();
-        Vector2 currentEffectSize = Vector2.Scale(currentAttackSize, attackEffectSizeMultiplier);
-        Vector2 rightAttackCenter = center + Vector2.right * currentAttackRange;
-        Vector2 leftAttackCenter = center + Vector2.left * currentAttackRange;
-
-        Gizmos.color = new Color(1f, 0.5f, 0f, 0.5f);
-        Gizmos.DrawWireCube(rightAttackCenter, currentAttackSize);
-        Gizmos.DrawWireCube(leftAttackCenter, currentAttackSize);
-
-        Gizmos.color = new Color(0.2f, 0.7f, 1f, 0.15f);
-        Gizmos.DrawCube(rightAttackCenter, currentEffectSize);
-        Gizmos.DrawCube(leftAttackCenter, currentEffectSize);
-
-        Gizmos.color = new Color(0.2f, 0.7f, 1f, 0.9f);
-        Gizmos.DrawWireCube(rightAttackCenter, currentEffectSize);
-        Gizmos.DrawWireCube(leftAttackCenter, currentEffectSize);
-
-        if (playerErrorTimer > 0f)
+        if (Application.isPlaying)
         {
-            Gizmos.color = new Color(0.2f, 1f, 0.8f, 0.7f);
-            Gizmos.DrawWireCube(rightAttackCenter, currentAttackSize);
-            Gizmos.DrawWireCube(leftAttackCenter, currentAttackSize);
+            DrawAttackGizmo(isAttacking ? attackDirection : GetCardinalAttackDirection(GetMouseDirection()));
         }
+        else
+        {
+            DrawAttackGizmo(Vector2.right);
+            DrawAttackGizmo(Vector2.left);
+            DrawAttackGizmo(Vector2.up);
+            DrawAttackGizmo(Vector2.down);
+        }
+    }
+
+    private void DrawAttackGizmo(Vector2 direction)
+    {
+        Vector2 center = (Vector2)transform.position + direction * GetCurrentAttackRange();
+        Vector2 size = attackSizeSide * GetCurrentAttackScale();
+        Vector2 effectSize = Vector2.Scale(size, attackEffectSizeMultiplier);
+        float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
+        Matrix4x4 previousMatrix = Gizmos.matrix;
+        Color previousColor = Gizmos.color;
+        Gizmos.matrix = Matrix4x4.TRS(center, Quaternion.Euler(0f, 0f, angle), Vector3.one);
+        Gizmos.color = new Color(1f, 0.5f, 0f, 0.7f);
+        Gizmos.DrawWireCube(Vector3.zero, size);
+        Gizmos.color = new Color(0.2f, 0.7f, 1f, 0.15f);
+        Gizmos.DrawCube(Vector3.zero, effectSize);
+        Gizmos.color = new Color(0.2f, 0.7f, 1f, 0.9f);
+        Gizmos.DrawWireCube(Vector3.zero, effectSize);
+        Gizmos.matrix = previousMatrix;
+        Gizmos.color = previousColor;
+    }
+
+    private Vector2 GetCardinalAttackDirection(Vector2 direction)
+    {
+        if (direction.sqrMagnitude < 0.0001f)
+            return Vector2.right;
+
+        // 세로 축 기준 각도: 위/아래는 각각 45도 영역, 나머지 대각선 영역은 좌우가 담당합니다.
+        float angleFromVertical = Mathf.Atan2(Mathf.Abs(direction.x), Mathf.Abs(direction.y)) * Mathf.Rad2Deg;
+        if (angleFromVertical < Mathf.Clamp(verticalAttackHalfAngle, 1f, 45f))
+            return direction.y > 0f ? Vector2.up : Vector2.down;
+
+        return direction.x < 0f ? Vector2.left : Vector2.right;
     }
 
     private Vector2 GetMouseDirection()
     {
+        if (Mouse.current == null || Camera.main == null)
+            return lastDirection.sqrMagnitude > 0f ? lastDirection.normalized : Vector2.right;
+
         // 마우스 스크린 좌표를 월드 좌표로 변환
         Vector3 mouseWorldPos = Camera.main.ScreenToWorldPoint(Mouse.current.position.ReadValue());
 
         // 플레이어에서 마우스로의 벡터
-        Vector2 directionToMouse = (mouseWorldPos - transform.position).normalized;
+        Vector2 directionToMouse = (Vector2)(mouseWorldPos - transform.position);
 
-        return directionToMouse;
+        return directionToMouse.sqrMagnitude > 0.0001f ? directionToMouse.normalized
+            : (lastDirection.sqrMagnitude > 0f ? lastDirection.normalized : Vector2.right);
     }
 
     private void UpdateAnimation(Vector2 direction, bool isMoving)
@@ -1484,25 +1549,17 @@ public class PlayerMove : MonoBehaviour, ICombatDamageable
             return;
         }
 
+        // 클립/프레임은 Animator와 Animation 창에서 관리합니다.
+        // 스크립트는 이동 상태만 전달하고, 실제 클립 전환은 Controller가 담당합니다.
+        animator.SetBool(IsMovingHash, isMoving);
         if (!isMoving)
-        {
-            if (currentMovingState)
-            {
-                animator.SetBool("isMoving", false);
-                animator.Play("Player_Idle", 0, 0f);
-                currentMovingState = false;
-            }
             return;
-        }
 
-        if (!currentMovingState)
-        {
-            animator.SetBool("isMoving", true);
-            animator.Play("Move_Right", 0, 0f);
-            animator.SetInteger("direction", 2);
-            currentMovingState = true;
-        }
+        // 대각선은 수평 방향을 우선하여 좌우 이동 클립을 사용합니다.
+        int movementDirection = direction.x != 0f ? 2 : (direction.y > 0f ? 0 : 1);
+        animator.SetInteger(DirectionHash, movementDirection);
 
-        spriteRenderer.flipX = direction.x < 0f;
+        // 왼쪽과 왼쪽 대각선만 오른쪽 클립을 뒤집습니다. 위/아래는 뒤집지 않습니다.
+        spriteRenderer.flipX = movementDirection == 2 && direction.x < 0f;
     }
 }
