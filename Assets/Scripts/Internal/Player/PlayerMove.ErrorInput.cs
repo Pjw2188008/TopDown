@@ -66,14 +66,17 @@ public partial class PlayerMove
 
             if (storedErrorCount == 0)
             {
+                isSelectingStoredError = false;
                 Debug.Log("보관함에 사용할 오류가 없습니다.");
                 return;
             }
 
             ClampSelectedStoredErrorIndex();
 
-            if (storedErrorCount == 1)
+            // 하나는 즉시 적용, 둘은 선택 중 다시 Q를 눌렀을 때만 적용합니다.
+            if (storedErrorCount == 1 || isSelectingStoredError)
             {
+                isSelectingStoredError = false;
                 ConfirmSelectedStoredError();
                 return;
             }
@@ -96,11 +99,7 @@ public partial class PlayerMove
                 Debug.Log($"오류 선택: {GetStoredErrorDisplayName(GetSelectedStoredErrorType())}");
         }
 
-        if (Keyboard.current.qKey.wasReleasedThisFrame)
-        {
-            isSelectingStoredError = false;
-            ConfirmSelectedStoredError();
-        }
+        // Q를 놓아도 선택 상태를 유지합니다. 다음 Q 누름이 전투 Paste를 확정합니다.
     }
 
     private void ConfirmSelectedStoredError()

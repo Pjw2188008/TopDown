@@ -113,7 +113,7 @@ public partial class PlayerMove
             return;
         }
 
-        string selectionText = "오류 선택  |  Q를 놓으면 확정\n";
+        string selectionText = "전투 오류 선택  |  Q를 다시 누르면 적용\n";
         int storedErrorCount = GetStoredErrorCount();
 
         for (int index = 0; index < storedErrorCount; index++)
