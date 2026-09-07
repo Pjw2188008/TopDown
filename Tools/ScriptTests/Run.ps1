@@ -18,7 +18,7 @@ $compilerArguments = @('/nologo', '/target:exe', '/nostdlib', ('/r:' + $coreLibr
 foreach ($relativePath in @(
     'Attachable\GiantErrorEffect.cs', 'Attachable\AccelerationErrorEffect.cs', 'Attachable\ReflectionErrorEffect.cs',
     'Internal\ErrorDefinitions.cs', 'Internal\ErrorInventory.cs', 'Internal\ErrorEffectState.cs',
-    'Internal\IErrorSource.cs', 'Internal\AttackMath.cs'
+    'Internal\IErrorSource.cs', 'Internal\AttackMath.cs', 'Internal\EnvironmentPasteSession.cs'
 )) {
     $compilerArguments += Join-Path $scriptDirectory $relativePath
 }

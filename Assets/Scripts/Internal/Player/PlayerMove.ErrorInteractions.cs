@@ -17,6 +17,8 @@ public partial class PlayerMove
         { source = giant; component = giant; }
 
         if (source == null) return false;
+        // Paste 준비 전에 시작했던 공격의 지연 타격으로 오류가 추가 Cut되는 것을 방지합니다.
+        if (suppressErrorCutForCurrentAttack) return true;
         string errorName = ErrorRules.DisplayName(source.ErrorType);
         if (!isEditMode) { Debug.Log("일반 상태에서는 " + errorName + " 오류를 Cut할 수 없습니다."); return true; }
         if (!source.CanCut) { Debug.Log("다른 대상에 Paste한 " + errorName + " 오류는 다시 Cut할 수 없습니다."); return true; }
@@ -29,17 +31,16 @@ public partial class PlayerMove
         return true;
     }
 
-    private void TryPasteError()
+    private bool TryPasteError(StoredErrorType selected)
     {
-        StoredErrorType selected = GetSelectedStoredErrorType();
         if (!isEditMode || !storedErrors.Contains(selected))
-        { Debug.Log("붙여넣을 오류가 없습니다."); return; }
+        { Debug.Log("붙여넣을 오류가 없습니다."); return false; }
 
-        if (!TryFindPasteTarget(out PasteTarget target)) return;
+        if (!TryFindPasteTarget(out PasteTarget target)) return false;
         if (!ErrorRules.CanPasteTo(selected, target.TargetType))
-        { Debug.Log(ErrorRules.DisplayName(selected) + " 오류는 " + target.TargetType + " 대상에 Paste할 수 없습니다."); return; }
+        { Debug.Log(ErrorRules.DisplayName(selected) + " 오류는 " + target.TargetType + " 대상에 Paste할 수 없습니다."); return false; }
         if (target.TargetType == PasteTargetType.CombatSkill)
-        { Debug.Log("전투 기술 Paste는 일반 모드에서 Q를 사용해야 합니다."); return; }
+        { Debug.Log("전투 기술 Paste는 일반 모드에서 Q를 사용해야 합니다."); return false; }
 
         float multiplier = storedErrors.GetMultiplier(selected);
         switch (selected)
@@ -53,10 +54,11 @@ public partial class PlayerMove
             case StoredErrorType.Reflection:
                 GetOrAddEffect<ReflectionErrorEffect>(target.gameObject).ApplyPaste();
                 break;
-            default: return;
+            default: return false;
         }
         DiscardStoredError(selected);
         Debug.Log(ErrorRules.DisplayName(selected) + " 오류를 " + target.name + "에 Paste했습니다.");
+        return true;
     }
 
     private bool TryFindPasteTarget(out PasteTarget target)

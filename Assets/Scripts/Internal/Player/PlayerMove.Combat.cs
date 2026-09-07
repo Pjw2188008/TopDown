@@ -13,6 +13,7 @@ public partial class PlayerMove
         float attackSpeedMultiplier = GetCurrentAttackSpeedMultiplier();
         nextAttackTime = Time.time + attackCooldown / attackSpeedMultiplier;
         isAttacking = true;
+        suppressErrorCutForCurrentAttack = false;
 
         // 대각선 커서는 좌우에 배정하고, 애니메이션/이펙트/판정을 같은 4방향으로 고정합니다.
         attackDirection = GetCardinalAttackDirection(GetMouseDirection());

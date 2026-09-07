@@ -10,6 +10,7 @@ public partial class PlayerMove : MonoBehaviour, ICombatDamageable
 {
     private const int MaxStoredErrors = 2;
     private readonly ErrorInventory storedErrors = new ErrorInventory(MaxStoredErrors);
+    private readonly EnvironmentPasteSession environmentPaste = new EnvironmentPasteSession();
     private static readonly int AttackRightStateHash = Animator.StringToHash("Attack_Right");
     private static readonly int AttackUpStateHash = Animator.StringToHash("Attack_Up");
     private static readonly int AttackDownStateHash = Animator.StringToHash("Attack_Down");
@@ -111,6 +112,7 @@ public partial class PlayerMove : MonoBehaviour, ICombatDamageable
     private float nextAttackTime;
     private bool isAttacking;
     private bool attackImpactTriggered;
+    private bool suppressErrorCutForCurrentAttack;
     private Vector2 attackDirection = Vector2.right;
     private int currentAttackStateHash;
     private float attackElapsedTime;
@@ -174,6 +176,8 @@ public partial class PlayerMove : MonoBehaviour, ICombatDamageable
             return;
         }
 
+        // 취소/성공한 프레임에도 같은 좌클릭이 Cut 공격으로 이어지지 않도록 입력을 소비합니다.
+        bool pasteInputConsumed = environmentPaste.IsBusy;
         if (Keyboard.current[editModeKey].wasPressedThisFrame)
         {
             ToggleEditMode();
@@ -184,6 +188,12 @@ public partial class PlayerMove : MonoBehaviour, ICombatDamageable
         {
             HandleStoredErrorSelectionInput();
         }
+
+        pasteInputConsumed |= environmentPaste.IsBusy;
+        if (environmentPaste.IsBusy && isAttacking)
+            suppressErrorCutForCurrentAttack = true;
+        if (!replacementInputConsumed)
+            pasteInputConsumed |= HandleEnvironmentPasteClick();
 
         if (animator == null || spriteRenderer == null)
         {
@@ -204,6 +214,7 @@ public partial class PlayerMove : MonoBehaviour, ICombatDamageable
         if (!isSelectingStoredError
             && !isReplacingStoredError
             && !replacementInputConsumed
+            && !pasteInputConsumed
             && Mouse.current != null
             && Mouse.current.leftButton.wasPressedThisFrame)
         {

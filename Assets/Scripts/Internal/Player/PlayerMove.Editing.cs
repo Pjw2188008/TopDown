@@ -6,6 +6,7 @@ public partial class PlayerMove
 {
     private void ToggleEditMode()
     {
+        environmentPaste.Cancel();
         isSelectingStoredError = false;
         isEditMode = !isEditMode;
 
@@ -80,6 +81,30 @@ public partial class PlayerMove
 
             replacementText += "마우스 휠: 변경  |  좌클릭: 교체 확정";
             GUI.Box(new Rect(20f, 20f, 330f, 132f), replacementText);
+            return;
+        }
+
+        if (isEditMode && environmentPaste.IsBusy)
+        {
+            if (environmentPaste.IsArmed)
+            {
+                GUI.Box(new Rect(20f, 20f, 350f, 80f),
+                    "Paste 준비: " + GetStoredErrorDisplayName(environmentPaste.SelectedError)
+                    + "\n좌클릭: Paste  |  Q: 취소  |  E: 편집 모드 종료"
+                    + "\n적용 성공 전까지 보관함에서 소비되지 않습니다.");
+            }
+            else
+            {
+                string text = "환경 Paste 오류 선택\n";
+                for (int index = 0; index < storedErrors.Count; index++)
+                {
+                    StoredErrorType type = storedErrors.GetTypeAt(index);
+                    text += (type == environmentPaste.SelectedError ? "▶ " : "   ")
+                        + GetStoredErrorDisplayName(type) + "\n";
+                }
+                text += "휠: 변경  |  Q 다시 누르기: 준비  |  E: 취소";
+                GUI.Box(new Rect(20f, 20f, 350f, 105f), text);
+            }
             return;
         }
 

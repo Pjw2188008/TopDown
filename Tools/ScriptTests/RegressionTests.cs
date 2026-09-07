@@ -63,6 +63,7 @@ public static class ProvenanceTests
     public static void Main()
     {
         ModelTests.Run();
+        EnvironmentPasteTests.Run();
         foreach (Type type in new[] { typeof(GiantErrorEffect), typeof(AccelerationErrorEffect), typeof(ReflectionErrorEffect) })
         {
             object sourceA = Activator.CreateInstance(type);
@@ -90,6 +91,75 @@ public static class ProvenanceTests
             Assert(!canCut(targetB), "Repeated Paste must remain blocked");
             Console.WriteLine(type.Name + ": 8 assertions PASS");
         }
+    }
+}
+
+public static class EnvironmentPasteTests
+{
+    private static int checks;
+    private static void Check(bool condition, string message)
+    {
+        checks++;
+        if (!condition) throw new Exception(message);
+    }
+
+    public static void Run()
+    {
+        var inventory = new ErrorInventory();
+        var session = new EnvironmentPasteSession();
+        session.PressQ(inventory, 0);
+        Check(!session.IsBusy && inventory.Count == 0, "empty Q");
+
+        inventory.TryStore(StoredErrorType.Giant, 3f);
+        session.PressQ(inventory, 0);
+        Check(session.IsArmed && session.SelectedError == StoredErrorType.Giant, "single Q prepares");
+        Check(inventory.Count == 1 && inventory.GetMultiplier(StoredErrorType.Giant) == 3f, "prepare does not consume");
+        session.PressQ(inventory, 0);
+        Check(!session.IsBusy && inventory.Count == 1, "second Q cancels without consumption");
+        session.PressQ(inventory, 0);
+        session.CompletePaste(false);
+        Check(session.IsArmed && inventory.Count == 1, "invalid target keeps armed/error");
+        inventory.Remove(session.SelectedError); // Actual successful Paste consumes in PlayerMove.
+        session.CompletePaste(true);
+        Check(!session.IsBusy && inventory.Count == 0, "success exits ready");
+
+        inventory.TryStore(StoredErrorType.Giant, 3f);
+        inventory.TryStore(StoredErrorType.Reflection, 0f);
+        session.PressQ(inventory, 0);
+        Check(session.State == EnvironmentPasteSession.PasteState.Selecting && !session.IsArmed, "two Q starts selection only");
+        session.Scroll(inventory, -1);
+        Check(session.SelectedError == StoredErrorType.Reflection && inventory.Count == 2, "wheel down selects");
+        session.Scroll(inventory, -1);
+        Check(session.SelectedError == StoredErrorType.Giant, "wheel wraps");
+        session.Scroll(inventory, 1);
+        Check(session.SelectedError == StoredErrorType.Reflection, "wheel up wraps");
+        // Releasing Q has no session action, so selection remains active until the next press.
+        Check(session.State == EnvironmentPasteSession.PasteState.Selecting, "selection survives release");
+        session.PressQ(inventory, 0);
+        Check(session.IsArmed && session.SelectedError == StoredErrorType.Reflection && inventory.Count == 2, "next Q prepares selected");
+        session.Scroll(inventory, -1);
+        Check(session.SelectedError == StoredErrorType.Reflection, "wheel cannot alter armed error");
+        session.CompletePaste(false);
+        Check(session.IsArmed && inventory.Count == 2, "two errors invalid target");
+        session.PressQ(inventory, 0);
+        Check(!session.IsBusy && inventory.Count == 2, "armed Q cancels two errors");
+
+        session.PressQ(inventory, 0);
+        session.Cancel(); // E / leaving edit mode.
+        Check(!session.IsBusy && inventory.Count == 2, "E cancels selection");
+        session.PressQ(inventory, 0);
+        session.PressQ(inventory, 0);
+        session.Cancel();
+        Check(!session.IsBusy && inventory.Count == 2, "E cancels armed");
+        session.PressQ(inventory, 0);
+        inventory.Remove(session.SelectedError);
+        Check(!session.Validate(inventory) && !session.IsBusy, "missing selected error cancels safely");
+        session.PressQ(inventory, 99);
+        Check(session.IsArmed && session.SelectedError == StoredErrorType.Reflection, "stale preferred index safely uses existing");
+        inventory.Remove(session.SelectedError);
+        session.CompletePaste(true);
+        Check(inventory.Count == 0 && !session.IsBusy, "no duplicate after success");
+        Console.WriteLine("Environment Paste: " + checks + " checks PASS");
     }
 }
 

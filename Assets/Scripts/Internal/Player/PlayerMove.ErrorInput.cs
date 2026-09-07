@@ -47,6 +47,12 @@ public partial class PlayerMove
             return;
         }
 
+        if (isEditMode)
+        {
+            HandleEnvironmentPasteSelectionInput();
+            return;
+        }
+
         int storedErrorCount = GetStoredErrorCount();
 
         if (Keyboard.current.qKey.wasPressedThisFrame)
@@ -111,13 +117,54 @@ public partial class PlayerMove
             return;
         }
 
-        if (isEditMode)
-        {
-            TryPasteError();
-        }
-        else
-        {
+        if (!isEditMode)
             TryActivateStoredCombatError();
+    }
+
+    private void HandleEnvironmentPasteSelectionInput()
+    {
+        isSelectingStoredError = false;
+        environmentPaste.Validate(storedErrors);
+        if (Keyboard.current.qKey.wasPressedThisFrame)
+        {
+            // 준비 취소는 전투 오류의 활성 상태와 관계없이 허용합니다.
+            if (!environmentPaste.IsArmed && IsAnyCombatErrorActive())
+            {
+                Debug.Log(GetActiveCombatErrorDisplayName() + " 효과가 유지되는 동안에는 다른 오류를 사용할 수 없습니다.");
+                return;
+            }
+            if (storedErrors.Count == 0)
+            {
+                Debug.Log("보관함에 사용할 오류가 없습니다.");
+                return;
+            }
+            environmentPaste.PressQ(storedErrors, selectedStoredErrorIndex);
+            if (!environmentPaste.IsBusy) Debug.Log("Paste 준비를 취소했습니다. 오류는 보관함에 유지됩니다.");
         }
+
+        // Q를 놓아도 소비/확정하지 않습니다. 다음 Q 누름이 준비를 확정합니다.
+        if (Mouse.current != null)
+            environmentPaste.Scroll(storedErrors, Mouse.current.scroll.ReadValue().y);
+
+        if (environmentPaste.IsBusy)
+            selectedStoredErrorIndex = GetStoredErrorIndex(environmentPaste.SelectedError);
+    }
+
+    private bool HandleEnvironmentPasteClick()
+    {
+        if (!isEditMode || isReplacingStoredError || !environmentPaste.IsArmed
+            || Mouse.current == null || !Mouse.current.leftButton.wasPressedThisFrame)
+            return false;
+
+        if (!environmentPaste.Validate(storedErrors)) return true;
+        if (IsAnyCombatErrorActive())
+        {
+            Debug.Log(GetActiveCombatErrorDisplayName() + " 효과가 유지되는 동안에는 다른 오류를 사용할 수 없습니다.");
+            return true;
+        }
+
+        // 실패하면 준비 상태와 보관함을 유지해 다른 대상에 다시 클릭할 수 있습니다.
+        environmentPaste.CompletePaste(TryPasteError(environmentPaste.SelectedError));
+        return true;
     }
 }
