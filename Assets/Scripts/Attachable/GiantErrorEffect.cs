@@ -4,7 +4,7 @@ using UnityEngine;
 /// 거대화 오류의 활성 상태와 대상 크기 변화를 관리합니다.
 /// 처음부터 거대화된 오류 원본에 직접 부착하거나, 환경 Paste 시 PlayerMove가 대상에 자동으로 추가합니다.
 /// </summary>
-public class GiantErrorEffect : MonoBehaviour
+public class GiantErrorEffect : MonoBehaviour, IErrorSource
 {
     [Header("거대화 오류")]
     [Tooltip("거대화가 적용된 대상의 최종 크기 배율입니다. Cut하면 이 배율이 오류 정보로 보관됩니다.")]
@@ -24,17 +24,15 @@ public class GiantErrorEffect : MonoBehaviour
     private float growthProgress;
 
     public float CurrentMultiplier => targetMultiplier;
-    public bool IsActive { get; private set; }
-    /// <summary>환경 Paste로 적용된 오류인지 구분합니다. 다른 원본의 같은 오류에는 영향을 주지 않습니다.</summary>
-    public bool IsPasted { get; private set; }
-    public bool CanCut => IsActive && !IsPasted;
+    private ErrorEffectState state;
+    public bool IsActive => state.IsActive;
+    public bool IsPasted => state.IsPasted;
+    public bool CanCut => state.CanCut;
+    public StoredErrorType ErrorType => StoredErrorType.Giant;
+    public float StoredMultiplier => CurrentMultiplier;
+    public void RemoveError() => ResetScale();
 
-    public static bool CanPasteTo(PasteTargetType targetType)
-    {
-        return targetType == PasteTargetType.Living
-            || targetType == PasteTargetType.Object
-            || targetType == PasteTargetType.CombatSkill;
-    }
+    public static bool CanPasteTo(PasteTargetType targetType) => ErrorRules.CanPasteTo(StoredErrorType.Giant, targetType);
 
     private void Awake()
     {
@@ -48,14 +46,13 @@ public class GiantErrorEffect : MonoBehaviour
 
     public void Trigger(float multiplier)
     {
-        IsPasted = false;
         if (multiplier <= 0f)
         {
             multiplier = 1f;
         }
 
         targetMultiplier = multiplier;
-        IsActive = true;
+        state.ActivateOriginal();
         isGrowing = true;
         growthProgress = 0f;
     }
@@ -64,13 +61,13 @@ public class GiantErrorEffect : MonoBehaviour
     public void ApplyPaste(float multiplier)
     {
         Trigger(multiplier);
-        IsPasted = true;
+        state.MarkPasted();
     }
 
     public void ResetScale()
     {
         transform.localScale = baseScale;
-        IsActive = false;
+        state.Deactivate();
         isGrowing = false;
         growthProgress = 0f;
     }

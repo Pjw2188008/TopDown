@@ -25,13 +25,23 @@ public static class CombatDamageUtility
             return false;
         }
 
+        return TryFindReceiver(target, out ICombatDamageable receiver)
+            && receiver.ReceiveDamage(amount, source, canReflect);
+    }
+
+    /// <summary>자식 Collider에서 부모의 피해 수신자를 찾는 규칙을 공유합니다.</summary>
+    public static bool TryFindReceiver(GameObject target, out ICombatDamageable receiver)
+    {
+        receiver = null;
+        if (target == null) return false;
         MonoBehaviour[] behaviours = target.GetComponentsInParent<MonoBehaviour>(true);
 
         foreach (MonoBehaviour behaviour in behaviours)
         {
             if (behaviour is ICombatDamageable damageable)
             {
-                return damageable.ReceiveDamage(amount, source, canReflect);
+                receiver = damageable;
+                return true;
             }
         }
 

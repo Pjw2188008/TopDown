@@ -27,9 +27,7 @@ public sealed class MovingEnemy : MonoBehaviour, IAccelerationTarget
     private void Awake()
     {
         startPosition = transform.position;
-        patrolDirection = patrolAxis.sqrMagnitude > 0f
-            ? ((Vector3)patrolAxis).normalized
-            : Vector3.right;
+        patrolDirection = GetPatrolDirection();
     }
 
     private void Update()
@@ -51,12 +49,15 @@ public sealed class MovingEnemy : MonoBehaviour, IAccelerationTarget
         accelerationMultiplier = Mathf.Max(1f, multiplier);
     }
 
+    private Vector3 GetPatrolDirection()
+    {
+        return patrolAxis.sqrMagnitude > 0f ? ((Vector3)patrolAxis).normalized : Vector3.right;
+    }
+
     private void OnDrawGizmosSelected()
     {
         Vector3 origin = Application.isPlaying ? startPosition : transform.position;
-        Vector3 direction = patrolAxis.sqrMagnitude > 0f
-            ? ((Vector3)patrolAxis).normalized
-            : Vector3.right;
+        Vector3 direction = GetPatrolDirection();
 
         Gizmos.color = new Color(1f, 0.3f, 0.1f, 0.9f);
         Gizmos.DrawLine(origin - direction * patrolDistance, origin + direction * patrolDistance);

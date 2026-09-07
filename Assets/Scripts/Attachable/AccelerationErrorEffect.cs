@@ -1,20 +1,11 @@
 using UnityEngine;
 
 /// <summary>
-/// 가속 오류로 속도 배율을 적용받을 수 있는 이동 컴포넌트가 구현하는 규약입니다.
-/// 인터페이스이므로 GameObject에 직접 부착하지 않습니다.
-/// </summary>
-public interface IAccelerationTarget
-{
-    void SetAccelerationMultiplier(float multiplier);
-}
-
-/// <summary>
 /// 가속 오류의 활성 상태를 관리하고 같은 GameObject의 IAccelerationTarget에 속도 배율을 전달합니다.
 /// 가속 오류 원본에 직접 부착하거나, 환경 Paste 시 PlayerMove가 대상에 자동으로 추가합니다.
 /// </summary>
 [DisallowMultipleComponent]
-public sealed class AccelerationErrorEffect : MonoBehaviour
+public sealed class AccelerationErrorEffect : MonoBehaviour, IErrorSource
 {
     [Header("가속 오류")]
     [Tooltip("가속 오류가 적용됐을 때 IAccelerationTarget의 움직임이 빨라지는 배율입니다. Cut하면 이 배율이 오류 정보로 보관됩니다.")]
@@ -31,18 +22,15 @@ public sealed class AccelerationErrorEffect : MonoBehaviour
     private Color baseColor = Color.white;
 
     public float CurrentMultiplier => targetMultiplier;
-    public bool IsActive { get; private set; }
-    /// <summary>환경 Paste로 적용된 오류인지 구분합니다. 다른 원본의 같은 오류에는 영향을 주지 않습니다.</summary>
-    public bool IsPasted { get; private set; }
-    public bool CanCut => IsActive && !IsPasted;
+    private ErrorEffectState state;
+    public bool IsActive => state.IsActive;
+    public bool IsPasted => state.IsPasted;
+    public bool CanCut => state.CanCut;
+    public StoredErrorType ErrorType => StoredErrorType.Acceleration;
+    public float StoredMultiplier => CurrentMultiplier;
+    public void RemoveError() => ResetAcceleration();
 
-    public static bool CanPasteTo(PasteTargetType targetType)
-    {
-        return targetType == PasteTargetType.Living
-            || targetType == PasteTargetType.Object
-            || targetType == PasteTargetType.Projectile
-            || targetType == PasteTargetType.CombatSkill;
-    }
+    public static bool CanPasteTo(PasteTargetType targetType) => ErrorRules.CanPasteTo(StoredErrorType.Acceleration, targetType);
 
     private void Awake()
     {
@@ -62,10 +50,9 @@ public sealed class AccelerationErrorEffect : MonoBehaviour
 
     public void Trigger(float multiplier)
     {
-        IsPasted = false;
         targetMultiplier = Mathf.Max(1f, multiplier);
         FindAccelerationTarget();
-        IsActive = true;
+        state.ActivateOriginal();
 
         if (accelerationTarget != null)
         {
@@ -86,12 +73,12 @@ public sealed class AccelerationErrorEffect : MonoBehaviour
     public void ApplyPaste(float multiplier)
     {
         Trigger(multiplier);
-        IsPasted = true;
+        state.MarkPasted();
     }
 
     public void ResetAcceleration()
     {
-        IsActive = false;
+        state.Deactivate();
 
         if (accelerationTarget != null)
         {

@@ -14,7 +14,7 @@ public class CameraFollow : MonoBehaviour
     [SerializeField] private float smoothSpeed = 5f;
 
     [Tooltip("플레이어를 기준으로 유지할 카메라 위치 차이입니다. 2D에서는 보통 Z 값을 -10으로 유지합니다.")]
-    [SerializeField] private Vector3 offset = new Vector3(0, 0, -10f); // Z축 거리
+    [SerializeField] private Vector3 offset = new Vector3(0, 0, -10f);
 
     private void LateUpdate()
     {
@@ -23,10 +23,9 @@ public class CameraFollow : MonoBehaviour
             return;
         }
 
-        // 목표 위치 설정
+        // LateUpdate에서 플레이어 이동 후 보간합니다. 기존 Lerp 방식/속도는 유지합니다.
         Vector3 targetPosition = player.position + offset;
 
-        // Smooth 이동
         transform.position = Vector3.Lerp(transform.position, targetPosition, smoothSpeed * Time.deltaTime);
     }
 }

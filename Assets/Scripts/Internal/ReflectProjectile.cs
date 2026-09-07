@@ -54,27 +54,7 @@ public sealed class ReflectProjectile : MonoBehaviour
     private void MoveAndCheckCollision(float moveDistance)
     {
         Vector2 start = transform.position;
-        RaycastHit2D[] hits = Physics2D.CircleCastAll(start, radius, direction, moveDistance);
-        RaycastHit2D closestHit = default;
-        bool foundHit = false;
-
-        foreach (RaycastHit2D hit in hits)
-        {
-            if (hit.collider == null
-                || hit.collider.gameObject == gameObject
-                || IsOwnerCollider(hit.collider))
-            {
-                continue;
-            }
-
-            if (!foundHit || hit.distance < closestHit.distance)
-            {
-                closestHit = hit;
-                foundHit = true;
-            }
-        }
-
-        if (!foundHit)
+        if (!TryFindClosestHit(start, moveDistance, out RaycastHit2D closestHit))
         {
             transform.position = start + direction * moveDistance;
             return;
@@ -100,6 +80,30 @@ public sealed class ReflectProjectile : MonoBehaviour
         direction = Vector2.Reflect(direction, normal).normalized;
         remainingBounces--;
         transform.position = closestHit.centroid + normal * 0.02f;
+    }
+
+    private bool TryFindClosestHit(Vector2 start, float moveDistance, out RaycastHit2D closestHit)
+    {
+        RaycastHit2D[] hits = Physics2D.CircleCastAll(start, radius, direction, moveDistance);
+        closestHit = default;
+        bool foundHit = false;
+
+        foreach (RaycastHit2D hit in hits)
+        {
+            if (hit.collider == null
+                || hit.collider.gameObject == gameObject
+                || IsOwnerCollider(hit.collider))
+            {
+                continue;
+            }
+
+            if (!foundHit || hit.distance < closestHit.distance)
+            {
+                closestHit = hit;
+                foundHit = true;
+            }
+        }
+        return foundHit;
     }
 
     private bool CanReflectFrom(Collider2D hitCollider)

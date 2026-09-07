@@ -110,6 +110,22 @@ public sealed class ProjectileEnemy : MonoBehaviour, ICombatDamageable
     private void FireAtTarget()
     {
         Vector2 launchDirection = (target.position - transform.position).normalized;
+        GameObject projectileObject = CreateProjectileObject(launchDirection);
+
+        ReflectProjectile projectile = projectileObject.AddComponent<ReflectProjectile>();
+        projectile.Initialize(
+            gameObject,
+            launchDirection,
+            projectileSpeed,
+            projectileDamage,
+            projectileRadius,
+            projectileLifetime,
+            maxProjectileBounces,
+            reflectionError != null && reflectionError.IsActive);
+    }
+
+    private GameObject CreateProjectileObject(Vector2 launchDirection)
+    {
         GameObject projectileObject = new GameObject("Reflection Projectile");
         projectileObject.transform.position = transform.position + (Vector3)(launchDirection * 0.7f);
 
@@ -122,17 +138,7 @@ public sealed class ProjectileEnemy : MonoBehaviour, ICombatDamageable
         CircleCollider2D projectileCollider = projectileObject.AddComponent<CircleCollider2D>();
         projectileCollider.radius = 0.5f;
         projectileCollider.isTrigger = true;
-
-        ReflectProjectile projectile = projectileObject.AddComponent<ReflectProjectile>();
-        projectile.Initialize(
-            gameObject,
-            launchDirection,
-            projectileSpeed,
-            projectileDamage,
-            projectileRadius,
-            projectileLifetime,
-            maxProjectileBounces,
-            reflectionError != null && reflectionError.IsActive);
+        return projectileObject;
     }
 
     private static Sprite GetProjectileSprite()
