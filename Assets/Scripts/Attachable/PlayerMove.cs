@@ -62,6 +62,19 @@ public partial class PlayerMove : MonoBehaviour, ICombatDamageable
     [Tooltip("체력이 0이 됐을 때 테스트를 계속할 수 있도록 최대 체력으로 즉시 복구합니다.")]
     [SerializeField] private bool restoreHealthOnDefeat = true;
 
+    [Header("가드 (우클릭 유지)")]
+    [Tooltip("일반 모드에서 우클릭을 누르는 동안 받는 피해를 이 비율(%)만큼 줄입니다. 0=감소 없음, 100=피해 없음. 현재는 피격 방향과 무관하게 적용하며, 반사 오류가 활성화되면 기존 반사 처리가 우선합니다.")]
+    [SerializeField, Range(0f, 100f)] private float guardDamageReductionPercent = 50f;
+
+    [Tooltip("가드 게이지 최대치입니다. 가드로 공격을 받을 때마다 10씩 소모하며, 0이 되면 가드가 풀립니다.")]
+    [SerializeField, Min(1f)] private float maxGuardGauge = 100f;
+
+    [Tooltip("가드하지 않을 때 초당 자동 회복되는 가드 게이지입니다. 가드 중에는 회복하지 않습니다. 게임 시간 기준입니다.")]
+    [SerializeField, Min(0f)] private float guardGaugeRecoveryPerSecond = 20f;
+
+    [Tooltip("화면 왼쪽 아래에 가드 게이지와 현재 상태를 표시합니다.")]
+    [SerializeField] private bool showGuardGauge = true;
+
     [Header("기본 공격")]
     [Tooltip("위/아래 축에서 이 각도 이내의 커서만 세로 공격으로 처리합니다. 기본 22.5도는 8방향 중 위/아래만 세로 공격, 네 대각선은 좌우 공격에 포함합니다. 이펙트와 판정은 상하좌우로만 나갑니다.")]
     [SerializeField, Range(1f, 45f)] private float verticalAttackHalfAngle = 22.5f;
@@ -139,6 +152,7 @@ public partial class PlayerMove : MonoBehaviour, ICombatDamageable
     private void Start()
     {
         currentHealth = maxHealth;
+        currentGuardGauge = Mathf.Max(1f, maxGuardGauge);
 
         if (animator == null)
         {
@@ -202,7 +216,8 @@ public partial class PlayerMove : MonoBehaviour, ICombatDamageable
         }
 
         Vector2 moveDirection = GetMovementInput();
-        bool isMoving = moveDirection != Vector2.zero;
+        UpdateGuardState();
+        bool isMoving = moveDirection != Vector2.zero && !isGuarding;
 
         if (isMoving)
         {
@@ -226,12 +241,15 @@ public partial class PlayerMove : MonoBehaviour, ICombatDamageable
             UpdateAttackAnimation();
         }
 
-        if (!isAttacking)
+        // 공격을 끝낸 프레임에도 우클릭을 유지 중이면 즉시 가드로 이어집니다.
+        UpdateGuardState();
+        if (!isAttacking && !isGuarding)
         {
             UpdateAnimation(isMoving ? moveDirection : lastDirection, isMoving);
         }
 
         UpdateCombatErrorTimers();
+        UpdateGuardGauge(Time.deltaTime);
 
         UpdateEditModeVisual();
     }

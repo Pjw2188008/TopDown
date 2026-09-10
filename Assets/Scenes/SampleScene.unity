@@ -776,6 +776,10 @@ MonoBehaviour:
   reflectionCombatDuration: 5
   maxHealth: 10
   restoreHealthOnDefeat: 1
+  guardDamageReductionPercent: 50
+  maxGuardGauge: 100
+  guardGaugeRecoveryPerSecond: 20
+  showGuardGauge: 1
   verticalAttackHalfAngle: 22.5
   attackDamage: 1
   attackCooldown: 0.35

@@ -5,7 +5,7 @@ public partial class PlayerMove
 {
     private void TryAttack()
     {
-        if (Time.time < nextAttackTime || isAttacking)
+        if (Time.time < nextAttackTime || isAttacking || isGuarding || IsGuardRequested())
         {
             return;
         }
@@ -229,6 +229,15 @@ public partial class PlayerMove
                 ? $"반사 오류로 피해 {amount}을 공격자에게 되돌렸습니다."
                 : "반사할 공격자가 피해를 받을 수 없습니다.", this);
             return true;
+        }
+
+        // 입력을 직접 확인하여 우클릭 해제/편집 모드 전환 직후 남은 상태로 방어하지 않습니다.
+        // 반사 오류는 위에서 먼저 처리하므로 가드로 반사 피해량까지 줄이지 않습니다.
+        if (IsGuardRequested())
+        {
+            amount *= 1f - Mathf.Clamp(guardDamageReductionPercent, 0f, 100f) / 100f;
+            // 게이지를 소진시킨 타격까지는 가드 감소율을 적용하고, 그다음 타격부터 일반 피해입니다.
+            ConsumeGuardGaugeOnHit();
         }
 
         currentHealth = Mathf.Max(0f, currentHealth - amount);
