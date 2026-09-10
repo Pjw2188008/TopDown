@@ -780,6 +780,13 @@ MonoBehaviour:
   maxGuardGauge: 100
   guardGaugeRecoveryPerSecond: 20
   showGuardGauge: 1
+  parryWindow: 0.2
+  parryStunDuration: 1
+  emptyParryDuration: 0.25
+  parryFeedbackSprite: {fileID: -3972993596038742393, guid: 9dd51d7965722f641bca673f6a682140, type: 3}
+  parryFeedbackImageSize: {x: 100, y: 50}
+  parryFeedbackImageOffset: 4.82
+  showParryFeedbackGizmo: 1
   verticalAttackHalfAngle: 22.5
   attackDamage: 1
   attackCooldown: 0.35

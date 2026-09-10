@@ -56,6 +56,7 @@ public sealed class ProjectileEnemy : MonoBehaviour, ICombatDamageable
 
     private void Update()
     {
+        if (TryGetComponent<EnemyStagger>(out var stagger) && stagger.IsStunned) return;
         FindTargetIfNeeded();
         if (target == null || Time.time < nextFireTime)
         {

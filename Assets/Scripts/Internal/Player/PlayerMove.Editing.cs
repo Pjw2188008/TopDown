@@ -68,6 +68,7 @@ public partial class PlayerMove
     private void OnGUI()
     {
         DrawGuardGauge();
+        DrawParryFeedback();
         if (isReplacingStoredError)
         {
             string replacementText = $"새 오류 {GetStoredErrorDisplayName(pendingReplacementErrorType)}\n"

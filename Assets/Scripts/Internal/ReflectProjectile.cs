@@ -61,6 +61,20 @@ public sealed class ReflectProjectile : MonoBehaviour
         }
 
         GameObject hitObject = closestHit.collider.gameObject;
+        PlayerMove player = hitObject.GetComponentInParent<PlayerMove>();
+        if (damage > 0f && player != null && player.TryParryProjectile())
+        {
+            // 실제 투사체를 돌려보냅니다. 발사자를 새 목표로, 패링한 플레이어를 새 소유자로 설정합니다.
+            Vector2 returnDirection = owner != null
+                ? (Vector2)owner.transform.position - closestHit.centroid : -direction;
+            direction = returnDirection.sqrMagnitude > 0.0001f ? returnDirection.normalized : -direction;
+            owner = player.gameObject;
+            transform.position = closestHit.centroid + direction * (radius + 0.02f);
+            return;
+        }
+
+        // 패링한 탄환도 오류 규칙의 예외가 아닙니다. 반사 오류가 있는 적은 새 소유자인
+        // 플레이어에게 피해를 되돌립니다. 이후 반사 피해의 재반사 방지는 적의 피해 처리에서 담당합니다.
         if (CombatDamageUtility.TryApplyDamage(hitObject, damage, owner))
         {
             Destroy(gameObject);

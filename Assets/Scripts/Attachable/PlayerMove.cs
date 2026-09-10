@@ -75,6 +75,30 @@ public partial class PlayerMove : MonoBehaviour, ICombatDamageable
     [Tooltip("화면 왼쪽 아래에 가드 게이지와 현재 상태를 표시합니다.")]
     [SerializeField] private bool showGuardGauge = true;
 
+    [Header("패링 / 첨삭")]
+    [Tooltip("우클릭을 새로 누른 순간부터 패링할 수 있는 시간입니다. 한 번 누를 때 한 공격만 패링하며, 계속 누르면 일반 가드가 됩니다. 게임 시간 기준입니다.")]
+    [SerializeField, Min(0.01f)] private float parryWindow = 0.2f;
+
+    [Tooltip("근접 공격을 패링했을 때 공격자가 이동/공격을 멈추는 시간입니다.")]
+    [SerializeField, Min(0f)] private float parryStunDuration = 1f;
+
+    [Tooltip("스프라이트를 넣기 전 빈 패링 클립의 임시 재생 시간입니다. 프레임을 넣으면 해당 클립을 끝까지 재생합니다.")]
+    [SerializeField, Min(0.01f)] private float emptyParryDuration = 0.25f;
+
+    [Header("패링 성공 이미지")]
+    [Tooltip("직접 만든 패링 글씨 이미지를 Sprite로 넣으세요. 성공 시 플레이어 발밑에 표시합니다. 비워두면 기존 '첨삭 성공!' 문구를 사용합니다.")]
+    [UnityEngine.Animations.NotKeyable]
+    [SerializeField] private Sprite parryFeedbackSprite;
+
+    [Tooltip("패링 성공 이미지 표시 영역의 가로/세로 크기입니다(화면 픽셀). 이미지의 원래 비율은 유지합니다.")]
+    [SerializeField] private Vector2 parryFeedbackImageSize = new Vector2(180f, 60f);
+
+    [Tooltip("플레이어 스프라이트 발끝에서 성공 이미지 위쪽까지의 간격입니다(화면 픽셀).")]
+    [SerializeField, Min(0f)] private float parryFeedbackImageOffset = 8f;
+
+    [Tooltip("Player 선택 시 패링 이미지 영역을 표시합니다. 하늘색=설정 영역, 노란색=이미지 비율 유지 영역. MainCamera와 Game 뷰 해상도를 기준으로 계산합니다.")]
+    [SerializeField] private bool showParryFeedbackGizmo = true;
+
     [Header("기본 공격")]
     [Tooltip("위/아래 축에서 이 각도 이내의 커서만 세로 공격으로 처리합니다. 기본 22.5도는 8방향 중 위/아래만 세로 공격, 네 대각선은 좌우 공격에 포함합니다. 이펙트와 판정은 상하좌우로만 나갑니다.")]
     [SerializeField, Range(1f, 45f)] private float verticalAttackHalfAngle = 22.5f;
@@ -185,6 +209,7 @@ public partial class PlayerMove : MonoBehaviour, ICombatDamageable
 
     private void Update()
     {
+        RefreshParryInput();
         if (Keyboard.current == null)
         {
             return;
@@ -217,7 +242,7 @@ public partial class PlayerMove : MonoBehaviour, ICombatDamageable
 
         Vector2 moveDirection = GetMovementInput();
         UpdateGuardState();
-        bool isMoving = moveDirection != Vector2.zero && !isGuarding;
+        bool isMoving = moveDirection != Vector2.zero && !isGuarding && !isPlayingParry;
 
         if (isMoving)
         {
@@ -243,7 +268,7 @@ public partial class PlayerMove : MonoBehaviour, ICombatDamageable
 
         // 공격을 끝낸 프레임에도 우클릭을 유지 중이면 즉시 가드로 이어집니다.
         UpdateGuardState();
-        if (!isAttacking && !isGuarding)
+        if (!isAttacking && !isGuarding && !isPlayingParry)
         {
             UpdateAnimation(isMoving ? moveDirection : lastDirection, isMoving);
         }
@@ -256,6 +281,7 @@ public partial class PlayerMove : MonoBehaviour, ICombatDamageable
 
     private void OnDestroy()
     {
+        if (parryFeedbackCanvas != null) Destroy(parryFeedbackCanvas.gameObject);
         Time.timeScale = 1f;
         Time.fixedDeltaTime = 0.02f;
     }

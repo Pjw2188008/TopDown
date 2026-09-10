@@ -5,7 +5,7 @@ public partial class PlayerMove
 {
     private void TryAttack()
     {
-        if (Time.time < nextAttackTime || isAttacking || isGuarding || IsGuardRequested())
+        if (Time.time < nextAttackTime || isAttacking || isGuarding || isPlayingParry || IsGuardRequested())
         {
             return;
         }
@@ -178,6 +178,7 @@ public partial class PlayerMove
 
     private void OnDrawGizmosSelected()
     {
+        DrawParryFeedbackGizmo();
         if (spriteRenderer == null)
         {
             return;

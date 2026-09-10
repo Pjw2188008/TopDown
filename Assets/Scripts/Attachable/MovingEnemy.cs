@@ -32,6 +32,7 @@ public sealed class MovingEnemy : MonoBehaviour, IAccelerationTarget
 
     private void Update()
     {
+        if (TryGetComponent<EnemyStagger>(out var stagger) && stagger.IsStunned) return;
         Vector3 targetPosition = startPosition + patrolDirection * patrolDistance * directionSign;
         transform.position = Vector3.MoveTowards(
             transform.position,

@@ -69,6 +69,18 @@ public partial class PlayerMove
         if (Mouse.current != null && !Mouse.current.rightButton.isPressed)
             guardRequiresRelease = false;
 
+        if (isPlayingParry)
+        {
+            if (isEditMode || !guardHasFocus || guardRequiresRelease || currentGuardGauge <= 0f)
+                EndGuard();
+            else
+            {
+                // 방어 여부는 현재 입력을 따르지만, 성공 연출은 우클릭 해제로 끊지 않습니다.
+                isGuarding = IsGuardRequested();
+                return;
+            }
+        }
+
         if (!IsGuardRequested())
         {
             EndGuard();
@@ -101,6 +113,12 @@ public partial class PlayerMove
 
     private void LateUpdate()
     {
+        UpdateParryFeedbackImage();
+        if (isPlayingParry)
+        {
+            UpdateParryAnimation();
+            return;
+        }
         if (!isGuarding || isGuardFrameHeld || animator == null || !IsGuardRequested()) return;
 
         // Animator 평가 후, 화면에 그리기 전에 목표 프레임으로 보정합니다.
@@ -127,6 +145,8 @@ public partial class PlayerMove
 
     private void EndGuard()
     {
+        parryAvailable = false;
+        CancelParryAnimation();
         if (!isGuarding) return;
         isGuarding = false;
         currentGuardStateHash = 0;
@@ -148,6 +168,8 @@ public partial class PlayerMove
 
     private void OnDisable()
     {
+        parryFeedbackUntil = 0f;
+        if (parryFeedbackCanvas != null) parryFeedbackCanvas.gameObject.SetActive(false);
         EndGuard();
     }
 }
