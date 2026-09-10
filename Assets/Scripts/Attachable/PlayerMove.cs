@@ -40,6 +40,19 @@ public partial class PlayerMove : MonoBehaviour, ICombatDamageable
     [Tooltip("어두워지는 효과가 얼마나 부드럽게 전환되는지 설정합니다.")]
     [SerializeField] private float editModeFadeSpeed = 5f;
 
+    [Header("오류 발견 / 도감")]
+    [Tooltip("플레이어 중심과 활성 오류 대상 중심의 XY 거리가 이 값 이내이면 도감에 자동 등록합니다(월드 단위). 벽에 가려져 있어도 발견합니다. Cut/노출 조건과는 별개입니다.")]
+    [SerializeField, Min(0f)] private float errorDiscoveryRadius = 3f;
+
+    [Tooltip("오류 도감을 열고 닫는 키입니다. 도감을 읽는 동안 게임을 일시 정지하며, 오류 항목을 클릭하면 설명과 호환 대상을 보여줍니다.")]
+    [SerializeField] private Key errorCodexKey = Key.B;
+
+    [Tooltip("발견 기록을 이 기기의 PlayerPrefs에 저장하여 게임을 다시 실행해도 유지합니다. 보관함의 오류는 저장하지 않습니다.")]
+    [SerializeField] private bool persistErrorDiscoveries = true;
+
+    [Tooltip("Player 선택 시 Scene 창에 오류 발견 범위를 초록색 원으로 표시합니다.")]
+    [SerializeField] private bool showErrorDiscoveryGizmo = true;
+
     [Header("전투 기술 - 거대화 오류")]
     [Tooltip("거대화 오류를 전투 기술에 Paste했을 때 공격 범위가 몇 배로 늘어나는지 설정합니다. Paste한 오류는 즉시 보관함에서 사라집니다.")]
     [SerializeField] private float playerErrorEffectMultiplier = 2.5f;
@@ -175,6 +188,7 @@ public partial class PlayerMove : MonoBehaviour, ICombatDamageable
 
     private void Start()
     {
+        LoadErrorDiscoveries();
         currentHealth = maxHealth;
         currentGuardGauge = Mathf.Max(1f, maxGuardGauge);
 
@@ -209,6 +223,9 @@ public partial class PlayerMove : MonoBehaviour, ICombatDamageable
 
     private void Update()
     {
+        // 도감 클릭이 공격/Cut/Paste 입력으로 전달되지 않도록 가장 먼저 처리합니다.
+        if (HandleErrorCodexInput()) return;
+        UpdateErrorDiscovery();
         RefreshParryInput();
         if (Keyboard.current == null)
         {
@@ -281,6 +298,7 @@ public partial class PlayerMove : MonoBehaviour, ICombatDamageable
 
     private void OnDestroy()
     {
+        CloseErrorCodex();
         if (parryFeedbackCanvas != null) Destroy(parryFeedbackCanvas.gameObject);
         Time.timeScale = 1f;
         Time.fixedDeltaTime = 0.02f;

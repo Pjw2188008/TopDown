@@ -59,7 +59,7 @@ public partial class PlayerMove
     // 편집 모드의 입력에는 간섭하지 않습니다. 공격 도중 가드로 공격을 끊을 수 없습니다.
     private bool IsGuardRequested()
     {
-        return isActiveAndEnabled && guardHasFocus && !isEditMode && !isAttacking
+        return isActiveAndEnabled && guardHasFocus && !isErrorCodexOpen && !isEditMode && !isAttacking
             && currentGuardGauge > 0f && !guardRequiresRelease
             && Mouse.current != null && Mouse.current.rightButton.isPressed;
     }
@@ -113,6 +113,7 @@ public partial class PlayerMove
 
     private void LateUpdate()
     {
+        if (isErrorCodexOpen) return;
         UpdateParryFeedbackImage();
         if (isPlayingParry)
         {
@@ -168,6 +169,7 @@ public partial class PlayerMove
 
     private void OnDisable()
     {
+        CloseErrorCodex();
         parryFeedbackUntil = 0f;
         if (parryFeedbackCanvas != null) parryFeedbackCanvas.gameObject.SetActive(false);
         EndGuard();

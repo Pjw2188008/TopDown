@@ -178,6 +178,7 @@ public partial class PlayerMove
 
     private void OnDrawGizmosSelected()
     {
+        DrawErrorDiscoveryGizmo();
         DrawParryFeedbackGizmo();
         if (spriteRenderer == null)
         {
