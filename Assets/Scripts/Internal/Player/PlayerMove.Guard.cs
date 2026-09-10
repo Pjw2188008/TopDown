@@ -113,6 +113,7 @@ public partial class PlayerMove
 
     private void LateUpdate()
     {
+        UpdateRunAfterimages(Time.deltaTime);
         if (isErrorCodexOpen) return;
         UpdateParryFeedbackImage();
         if (isPlayingParry)
@@ -169,6 +170,7 @@ public partial class PlayerMove
 
     private void OnDisable()
     {
+        ClearRunAfterimages();
         CloseErrorCodex();
         parryFeedbackUntil = 0f;
         if (parryFeedbackCanvas != null) parryFeedbackCanvas.gameObject.SetActive(false);

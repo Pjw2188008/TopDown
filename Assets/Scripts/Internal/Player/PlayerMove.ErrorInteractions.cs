@@ -98,6 +98,8 @@ public partial class PlayerMove
 
         foreach (SpriteRenderer renderer in renderers)
         {
+            // 시각 효과인 잔상을 Collider 없는 환경 Paste 대상으로 취급하지 않습니다.
+            if (IsRunAfterimage(renderer)) continue;
             if (renderer == null || renderer.bounds.Contains(mouseWorldPos) == false)
             {
                 continue;

@@ -20,10 +20,20 @@ public partial class PlayerMove
     private Vector2 codexDetailScroll;
     private GUIStyle codexBodyStyle;
     private GUIStyle codexTitleStyle;
+    // 시작 시 결정해 테스트 도중 Inspector 값을 바꾸어도 임시 기록이 기존 저장에 섞이지 않게 합니다.
+    private bool usePersistentErrorDiscoveries;
 
     private void LoadErrorDiscoveries()
     {
-        if (!persistErrorDiscoveries) return;
+        errorCodex.Clear();
+        selectedCodexError = StoredErrorType.None;
+        codexDetailScroll = Vector2.zero;
+        discoveryNotice = "";
+        discoveryNoticeUntil = 0f;
+        nextErrorDiscoveryScan = 0f;
+        usePersistentErrorDiscoveries = persistErrorDiscoveries
+            && !(Application.isEditor && startWithEmptyErrorCodexInEditor);
+        if (!usePersistentErrorDiscoveries) return;
         foreach (StoredErrorType type in ErrorCodex.Entries)
             if (PlayerPrefs.GetInt(ErrorCodexSavePrefix + (int)type, 0) == 1)
                 errorCodex.TryDiscover(type);
@@ -42,7 +52,7 @@ public partial class PlayerMove
         ScanErrorSources<ReflectionErrorEffect>(ref newlyDiscovered);
         ScanErrorSources<AccelerationErrorEffect>(ref newlyDiscovered);
         if (newlyDiscovered.Length == 0) return;
-        if (persistErrorDiscoveries) PlayerPrefs.Save();
+        if (usePersistentErrorDiscoveries) PlayerPrefs.Save();
         discoveryNotice = "이상현상 발견: " + newlyDiscovered + "\n도감에 등록했습니다. [" + errorCodexKey + "] 도감 열기";
         discoveryNoticeUntil = Time.unscaledTime + 4f;
         Debug.Log(discoveryNotice, this);
@@ -56,7 +66,7 @@ public partial class PlayerMove
             Vector3 difference = source.transform.position - transform.position;
             if (!ErrorCodex.IsWithinRange(difference.x, difference.y, errorDiscoveryRadius)) continue;
             if (!errorCodex.TryDiscover(source.ErrorType)) continue;
-            if (persistErrorDiscoveries) PlayerPrefs.SetInt(ErrorCodexSavePrefix + (int)source.ErrorType, 1);
+            if (usePersistentErrorDiscoveries) PlayerPrefs.SetInt(ErrorCodexSavePrefix + (int)source.ErrorType, 1);
             if (newlyDiscovered.Length > 0) newlyDiscovered += " / ";
             newlyDiscovered += ErrorRules.DisplayName(source.ErrorType);
             if (selectedCodexError == StoredErrorType.None) selectedCodexError = source.ErrorType;

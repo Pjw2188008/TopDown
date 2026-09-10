@@ -4,6 +4,13 @@ using UnityEngine.InputSystem;
 /// <summary>PlayerMove의 이동·커서·이동 애니메이션 구현 부분입니다. 별도 컴포넌트가 아니므로 직접 부착하지 않습니다.</summary>
 public partial class PlayerMove
 {
+    /// <summary>Space 유지 시 이동 속도만 높입니다. 걷기 클립과 Animator 속도는 그대로 둡니다.</summary>
+    private float GetCurrentMoveSpeed()
+    {
+        bool isRunning = Keyboard.current != null && Keyboard.current.spaceKey.isPressed;
+        return moveSpeed * (isRunning ? Mathf.Max(1f, runSpeedMultiplier) : 1f);
+    }
+
     private Vector2 GetMovementInput()
     {
         Vector2 input = Vector2.zero;

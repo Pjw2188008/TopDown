@@ -21,6 +21,25 @@ public partial class PlayerMove : MonoBehaviour, ICombatDamageable
     [Tooltip("플레이어 이동 속도입니다. 기본 이동 속도를 조절합니다.")]
     [SerializeField] private float moveSpeed = 5f;
 
+    [Tooltip("Space를 누르고 이동할 때 걷기 속도에 곱할 배율입니다. 키를 놓으면 걷기 속도로 돌아옵니다. 애니메이션과 재생 속도는 바꾸지 않으며 가드/패링 중에는 이동할 수 없습니다.")]
+    [SerializeField, Min(1f)] private float runSpeedMultiplier = 1.5f;
+
+    [Header("달리기 잔상")]
+    [Tooltip("Space를 누르고 실제로 이동할 때 현재 플레이어 스프라이트로 옅은 잔상을 남깁니다. 별도 이미지나 프리팹은 필요하지 않습니다.")]
+    [SerializeField] private bool showRunAfterimages = true;
+
+    [Tooltip("달리기 잔상 생성 간격입니다(게임 시간, 초). 작을수록 촘촘합니다. 잔상은 최대 12개를 재사용합니다.")]
+    [SerializeField, Min(0.02f)] private float runAfterimageInterval = 0.07f;
+
+    [Tooltip("잔상이 완전히 사라질 때까지의 시간입니다(게임 시간, 초). 편집 모드의 슬로모션과 도감 일시 정지를 따릅니다.")]
+    [SerializeField, Min(0.01f)] private float runAfterimageLifetime = 0.2f;
+
+    [Tooltip("잔상의 시작 불투명도입니다. 0이면 보이지 않습니다. 플레이어의 현재 색을 유지하며 점점 투명해집니다.")]
+    [SerializeField, Range(0f, 1f)] private float runAfterimageOpacity = 0.22f;
+
+    [Tooltip("이동 반대 방향으로 잔상을 살짝 밀어 표시하는 거리입니다(월드 단위).")]
+    [SerializeField, Min(0f)] private float runAfterimageOffset = 0.1f;
+
     [Tooltip("Player.controller를 연결한 Animator입니다. 이동은 isMoving과 direction(0=위, 1=아래, 2=좌우)으로 전환합니다. 스프라이트 프레임은 Ctrl+6 Animation 창에서 각 .anim 클립을 직접 편집하세요.")]
     [SerializeField] private Animator animator;
 
@@ -49,6 +68,9 @@ public partial class PlayerMove : MonoBehaviour, ICombatDamageable
 
     [Tooltip("발견 기록을 이 기기의 PlayerPrefs에 저장하여 게임을 다시 실행해도 유지합니다. 보관함의 오류는 저장하지 않습니다.")]
     [SerializeField] private bool persistErrorDiscoveries = true;
+
+    [Tooltip("테스트용: Unity Editor에서 Play를 시작하면 도감을 빈 상태로 시작합니다. 이 실행에서는 기존 발견 기록을 읽거나 덮어쓰지 않습니다. 빌드에는 적용하지 않습니다. 저장 유지 테스트 시 Play를 끄고 이 옵션을 해제하세요.")]
+    [SerializeField] private bool startWithEmptyErrorCodexInEditor = true;
 
     [Tooltip("Player 선택 시 Scene 창에 오류 발견 범위를 초록색 원으로 표시합니다.")]
     [SerializeField] private bool showErrorDiscoveryGizmo = true;
@@ -223,6 +245,7 @@ public partial class PlayerMove : MonoBehaviour, ICombatDamageable
 
     private void Update()
     {
+        didRunThisFrame = false;
         // 도감 클릭이 공격/Cut/Paste 입력으로 전달되지 않도록 가장 먼저 처리합니다.
         if (HandleErrorCodexInput()) return;
         UpdateErrorDiscovery();
@@ -265,7 +288,10 @@ public partial class PlayerMove : MonoBehaviour, ICombatDamageable
         {
             moveDirection = moveDirection.normalized;
             lastDirection = moveDirection;
-            transform.position += (Vector3)(moveDirection * moveSpeed * Time.deltaTime);
+            transform.position += (Vector3)(moveDirection * GetCurrentMoveSpeed() * Time.deltaTime);
+            didRunThisFrame = Keyboard.current.spaceKey.isPressed && runSpeedMultiplier > 1f
+                && moveSpeed > 0f && Time.deltaTime > 0f;
+            runAfterimageDirection = moveDirection;
         }
 
         if (!isSelectingStoredError
@@ -298,6 +324,7 @@ public partial class PlayerMove : MonoBehaviour, ICombatDamageable
 
     private void OnDestroy()
     {
+        DestroyRunAfterimages();
         CloseErrorCodex();
         if (parryFeedbackCanvas != null) Destroy(parryFeedbackCanvas.gameObject);
         Time.timeScale = 1f;
