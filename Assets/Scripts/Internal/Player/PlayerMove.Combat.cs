@@ -5,7 +5,7 @@ public partial class PlayerMove
 {
     private void TryAttack()
     {
-        if (Time.time < nextAttackTime || isAttacking || isGuarding || isPlayingParry || IsGuardRequested())
+        if (Time.time < nextAttackTime || isAttacking || isGuarding || isPlayingParry || isDashing || didDashThisFrame || IsGuardRequested())
         {
             return;
         }

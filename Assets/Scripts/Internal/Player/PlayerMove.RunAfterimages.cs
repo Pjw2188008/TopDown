@@ -56,7 +56,7 @@ public partial class PlayerMove
         if (runAfterimageCooldown > 0f) return;
         EmitRunAfterimage();
         // 저프레임에서 같은 위치에 여러 잔상이 한꺼번에 생기지 않도록 프레임당 최대 1개 생성합니다.
-        runAfterimageCooldown = Mathf.Max(0.02f, runAfterimageInterval);
+        runAfterimageCooldown = Mathf.Max(0.02f, didDashThisFrame ? dashAfterimageInterval : runAfterimageInterval);
     }
 
     private void EmitRunAfterimage()

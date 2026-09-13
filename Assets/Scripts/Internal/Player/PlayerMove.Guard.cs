@@ -60,6 +60,7 @@ public partial class PlayerMove
     private bool IsGuardRequested()
     {
         return isActiveAndEnabled && guardHasFocus && !isErrorCodexOpen && !isEditMode && !isAttacking
+            && !isDashing && !didDashThisFrame
             && currentGuardGauge > 0f && !guardRequiresRelease
             && Mouse.current != null && Mouse.current.rightButton.isPressed;
     }
@@ -165,11 +166,13 @@ public partial class PlayerMove
     private void OnApplicationFocus(bool hasFocus)
     {
         guardHasFocus = hasFocus;
+        if (!hasFocus) CancelDash();
         if (!hasFocus) EndGuard();
     }
 
     private void OnDisable()
     {
+        CancelDash();
         ClearRunAfterimages();
         CloseErrorCodex();
         parryFeedbackUntil = 0f;

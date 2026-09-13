@@ -68,6 +68,7 @@ public partial class PlayerMove
     private void OnGUI()
     {
         if (DrawErrorCodex()) return;
+        DrawDashStamina();
         DrawGuardGauge();
         DrawParryFeedback();
         if (isReplacingStoredError)

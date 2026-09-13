@@ -24,8 +24,30 @@ public partial class PlayerMove : MonoBehaviour, ICombatDamageable
     [Tooltip("Space를 누르고 이동할 때 걷기 속도에 곱할 배율입니다. 키를 놓으면 걷기 속도로 돌아옵니다. 애니메이션과 재생 속도는 바꾸지 않으며 가드/패링 중에는 이동할 수 없습니다.")]
     [SerializeField, Min(1f)] private float runSpeedMultiplier = 1.5f;
 
+    [Header("대쉬 / 스태미나")]
+    [Tooltip("Space를 새로 누르면 대쉬합니다. 누른 채 유지하면 대쉬 종료 후 기존 달리기로 이어집니다. 이동 입력이 없으면 마지막 이동 방향으로 대쉬합니다. 별도 무적 효과는 없습니다.")]
+    [SerializeField, Min(0.1f)] private float dashSpeed = 18f;
+    [Tooltip("대쉬 유지 시간입니다(게임 시간, 초). 기본 거리 = 속도 × 시간이며 진행 방향은 시작 순간 고정됩니다.")]
+    [SerializeField, Min(0.01f)] private float dashDuration = 0.16f;
+    [Tooltip("대쉬 종료 후 다음 대쉬까지의 최소 대기 시간입니다(초). 누르고 있는 것만으로 연속 대쉬하지 않습니다.")]
+    [SerializeField, Min(0f)] private float dashCooldown = 0.25f;
+    [Tooltip("최대 스태미나입니다. Play 시작 시 가득 찬 상태로 시작합니다. 달리기는 소모하지 않습니다.")]
+    [SerializeField, Min(1f)] private float maxDashStamina = 100f;
+    [Tooltip("대쉬 1회에 소모할 스태미나입니다. 부족하면 대쉬하지 않고 소비도 하지 않습니다.")]
+    [SerializeField, Min(1f)] private float dashStaminaCost = 30f;
+    [Tooltip("대쉬가 끝난 뒤 스태미나 회복을 시작하기까지의 시간입니다(초). 대쉬 중에는 회복하지 않습니다.")]
+    [SerializeField, Min(0f)] private float dashStaminaRecoveryDelay = 0.8f;
+    [Tooltip("회복 대기 시간이 지나면 초당 회복할 스태미나입니다. 편집 모드 슬로모션과 도감 정지를 따릅니다.")]
+    [SerializeField, Min(0f)] private float dashStaminaRecoveryPerSecond = 25f;
+    [Tooltip("화면 왼쪽 아래 가드 게이지 위에 스태미나를 표시합니다.")]
+    [SerializeField] private bool showDashStamina = true;
+    [Tooltip("대쉬를 막는 Collider2D의 레이어입니다. Trigger는 무시하고 플레이어와 충돌하도록 설정된 레이어만 검사합니다.")]
+    [SerializeField] private LayerMask dashBlockingLayers = Physics2D.DefaultRaycastLayers;
+    [Tooltip("대쉬 중 잔상 생성 간격입니다. 달리기보다 촘촘한 기본 0.035초이며 달리기 잔상 설정의 유지 시간/불투명도를 공유합니다.")]
+    [SerializeField, Min(0.02f)] private float dashAfterimageInterval = 0.035f;
+
     [Header("달리기 잔상")]
-    [Tooltip("Space를 누르고 실제로 이동할 때 현재 플레이어 스프라이트로 옅은 잔상을 남깁니다. 별도 이미지나 프리팹은 필요하지 않습니다.")]
+    [Tooltip("달리기 및 대쉬 중 현재 플레이어 스프라이트로 옅은 잔상을 남깁니다. 별도 이미지나 프리팹은 필요하지 않습니다.")]
     [SerializeField] private bool showRunAfterimages = true;
 
     [Tooltip("달리기 잔상 생성 간격입니다(게임 시간, 초). 작을수록 촘촘합니다. 잔상은 최대 12개를 재사용합니다.")]
@@ -213,6 +235,7 @@ public partial class PlayerMove : MonoBehaviour, ICombatDamageable
         LoadErrorDiscoveries();
         currentHealth = maxHealth;
         currentGuardGauge = Mathf.Max(1f, maxGuardGauge);
+        currentDashStamina = Mathf.Max(1f, maxDashStamina);
 
         if (animator == null)
         {
@@ -246,8 +269,10 @@ public partial class PlayerMove : MonoBehaviour, ICombatDamageable
     private void Update()
     {
         didRunThisFrame = false;
+        didDashThisFrame = false;
         // 도감 클릭이 공격/Cut/Paste 입력으로 전달되지 않도록 가장 먼저 처리합니다.
         if (HandleErrorCodexInput()) return;
+        UpdateDashStamina(Time.deltaTime);
         UpdateErrorDiscovery();
         RefreshParryInput();
         if (Keyboard.current == null)
@@ -257,13 +282,13 @@ public partial class PlayerMove : MonoBehaviour, ICombatDamageable
 
         // 취소/성공한 프레임에도 같은 좌클릭이 Cut 공격으로 이어지지 않도록 입력을 소비합니다.
         bool pasteInputConsumed = environmentPaste.IsBusy;
-        if (Keyboard.current[editModeKey].wasPressedThisFrame)
+        if (!isDashing && Keyboard.current[editModeKey].wasPressedThisFrame)
         {
             ToggleEditMode();
         }
 
-        bool replacementInputConsumed = HandleStoredErrorReplacementInput();
-        if (!replacementInputConsumed)
+        bool replacementInputConsumed = !isDashing && HandleStoredErrorReplacementInput();
+        if (!replacementInputConsumed && !isDashing)
         {
             HandleStoredErrorSelectionInput();
         }
@@ -271,7 +296,7 @@ public partial class PlayerMove : MonoBehaviour, ICombatDamageable
         pasteInputConsumed |= environmentPaste.IsBusy;
         if (environmentPaste.IsBusy && isAttacking)
             suppressErrorCutForCurrentAttack = true;
-        if (!replacementInputConsumed)
+        if (!replacementInputConsumed && !isDashing)
             pasteInputConsumed |= HandleEnvironmentPasteClick();
 
         if (animator == null || spriteRenderer == null)
@@ -282,9 +307,12 @@ public partial class PlayerMove : MonoBehaviour, ICombatDamageable
 
         Vector2 moveDirection = GetMovementInput();
         UpdateGuardState();
-        bool isMoving = moveDirection != Vector2.zero && !isGuarding && !isPlayingParry;
+        if (Keyboard.current.spaceKey.wasPressedThisFrame) TryBeginDash(moveDirection);
+        bool dashHandled = UpdateDashMovement(Time.deltaTime);
+        if (dashHandled) moveDirection = dashDirection;
+        bool isMoving = dashHandled || (moveDirection != Vector2.zero && !isGuarding && !isPlayingParry);
 
-        if (isMoving)
+        if (isMoving && !dashHandled)
         {
             moveDirection = moveDirection.normalized;
             lastDirection = moveDirection;
