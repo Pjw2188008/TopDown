@@ -1,7 +1,7 @@
 using UnityEngine;
 
 /// <summary>
-/// 플레이어를 향해 반사 가능한 투사체를 주기적으로 발사하고 적의 체력과 피해 반사를 처리합니다.
+/// 공격 범위 안의 플레이어를 향해 반사 가능한 투사체를 주기적으로 발사하고 체력/피해 반사를 처리합니다.
 /// 투사체를 발사하는 반사 적 GameObject에 직접 부착합니다.
 /// </summary>
 [DisallowMultipleComponent]
@@ -11,6 +11,12 @@ public sealed class ProjectileEnemy : MonoBehaviour, ICombatDamageable
     [Header("투사체 공격")]
     [Tooltip("투사체가 추적할 플레이어입니다. 비어 있으면 씬에서 PlayerMove를 자동으로 찾습니다.")]
     [SerializeField] private Transform target;
+
+    [Tooltip("몬스터 중심에서 플레이어 중심까지의 공격 가능 거리입니다(월드 단위, XY 평면). 범위 밖에서는 새 투사체를 발사하지 않습니다. 벽/시야는 검사하지 않습니다.")]
+    [SerializeField, Min(0f)] private float attackRange = 6f;
+
+    [Tooltip("몬스터를 선택하면 Scene 창에 빨간색 공격 범위 기즈모를 표시합니다.")]
+    [SerializeField] private bool showAttackRangeGizmo = true;
 
     [Tooltip("투사체를 발사하는 시간 간격입니다.")]
     [SerializeField, Min(0.1f)] private float fireInterval = 1.5f;
@@ -58,13 +64,21 @@ public sealed class ProjectileEnemy : MonoBehaviour, ICombatDamageable
     {
         if (TryGetComponent<EnemyStagger>(out var stagger) && stagger.IsStunned) return;
         FindTargetIfNeeded();
-        if (target == null || Time.time < nextFireTime)
+        if (!IsTargetInAttackRange() || Time.time < nextFireTime)
         {
             return;
         }
 
         FireAtTarget();
         nextFireTime = Time.time + fireInterval;
+    }
+
+    private bool IsTargetInAttackRange()
+    {
+        if (target == null || !target.gameObject.activeInHierarchy) return false;
+        Vector2 difference = target.position - transform.position;
+        float range = Mathf.Max(0f, attackRange);
+        return difference.sqrMagnitude <= range * range;
     }
 
     public bool ReceiveDamage(float amount, GameObject source, bool canReflect)
@@ -165,7 +179,17 @@ public sealed class ProjectileEnemy : MonoBehaviour, ICombatDamageable
 
     private void OnDrawGizmosSelected()
     {
+        Color previousColor = Gizmos.color;
+        Matrix4x4 previousMatrix = Gizmos.matrix;
+        Gizmos.matrix = Matrix4x4.identity;
+        if (showAttackRangeGizmo)
+        {
+            Gizmos.color = new Color(1f, 0.3f, 0.2f, 0.9f);
+            Gizmos.DrawWireSphere(transform.position, Mathf.Max(0f, attackRange));
+        }
         Gizmos.color = projectileColor;
         Gizmos.DrawWireSphere(transform.position, projectileRadius);
+        Gizmos.color = previousColor;
+        Gizmos.matrix = previousMatrix;
     }
 }
