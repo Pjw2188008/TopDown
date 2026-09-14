@@ -68,46 +68,7 @@ public partial class PlayerMove
     private void OnGUI()
     {
         if (DrawErrorCodex()) return;
-        DrawDashStamina();
-        DrawGuardGauge();
+        DrawPlayerHud();
         DrawParryFeedback();
-        if (isReplacingStoredError)
-        {
-            string replacementText = $"새 오류 {GetStoredErrorDisplayName(pendingReplacementErrorType)}\n"
-                + "교체할 오류 선택\n";
-            int replacementCandidateCount = GetStoredErrorCount();
-
-            for (int index = 0; index < replacementCandidateCount; index++)
-            {
-                string marker = index == selectedReplacementIndex ? ">> " : "    ";
-                replacementText += marker + "[" + (storedErrors.SlotIndexOf(GetStoredErrorTypeAtIndex(index)) + 1) + "] "
-                    + GetStoredErrorDisplayName(GetStoredErrorTypeAtIndex(index)) + "\n";
-            }
-
-            replacementText += "마우스 휠: 변경  |  좌클릭: 교체 확정";
-            GUI.Box(new Rect(20f, 20f, 330f, 132f), replacementText);
-            return;
-        }
-
-        DrawStoredErrorSlots();
-    }
-
-    private void DrawStoredErrorSlots()
-    {
-        if (!Application.isPlaying) return;
-        string text = "오류 보관함\n";
-        for (int slot = 0; slot < storedErrors.Capacity; slot++)
-        {
-            StoredErrorType error = storedErrors.GetSlot(slot);
-            string marker = isEditMode && environmentPaste.IsArmed && environmentPaste.SelectedError == error ? " ▶ " : "    ";
-            text += marker + "[" + (slot + 1) + "] " + GetStoredErrorDisplayName(error) + "\n";
-        }
-        text += isEditMode
-            ? environmentPaste.IsArmed ? "좌클릭: Paste  |  같은 번호: 취소  |  다른 번호: 변경"
-                : "1 / 2: Paste 준비 → 대상 좌클릭"
-            : "1 / 2: 해당 슬롯의 오류를 전투 기술에 즉시 적용";
-        if (IsAnyCombatErrorActive())
-            text += "\n" + GetActiveCombatErrorDisplayName() + " 전투 효과 유지 중 · 추가 사용 불가";
-        GUI.Box(new Rect(20f, 20f, 440f, 116f), text);
     }
 }

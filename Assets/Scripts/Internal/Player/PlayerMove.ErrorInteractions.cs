@@ -6,28 +6,28 @@ public partial class PlayerMove
 {
     private bool TryHandleErrorHit(Collider2D hit)
     {
-        // 기존 우선순위/일반모드 동작을 유지합니다: 반사(편집만) → 가속 → 거대화.
-        IErrorSource source = null;
-        MonoBehaviour component = null;
-        if (isEditMode && hit.TryGetComponent<ReflectionErrorEffect>(out var reflection) && reflection.IsActive)
-        { source = reflection; component = reflection; }
-        else if (hit.TryGetComponent<AccelerationErrorEffect>(out var acceleration) && acceleration.IsActive)
-        { source = acceleration; component = acceleration; }
-        else if (hit.TryGetComponent<GiantErrorEffect>(out var giant) && giant.IsActive)
-        { source = giant; component = giant; }
-
-        if (source == null) return false;
-        // Paste 준비 전에 시작했던 공격의 지연 타격으로 오류가 추가 Cut되는 것을 방지합니다.
-        if (suppressErrorCutForCurrentAttack) return true;
-        string errorName = ErrorRules.DisplayName(source.ErrorType);
-        if (!isEditMode) { Debug.Log("일반 상태에서는 " + errorName + " 오류를 Cut할 수 없습니다."); return true; }
-        if (!source.CanCut) { Debug.Log("다른 대상에 Paste한 " + errorName + " 오류는 다시 Cut할 수 없습니다."); return true; }
-        if (storedErrors.Contains(source.ErrorType)) { Debug.Log(errorName + " 오류가 이미 보관되어 있습니다."); return true; }
-
-        if (storedErrors.Count >= storedErrors.Capacity)
-            BeginStoredErrorReplacement(source.ErrorType, component, source.StoredMultiplier);
-        else
-            CompletePendingErrorCut(source.ErrorType, component, source.StoredMultiplier);
+        var candidates = new System.Collections.Generic.List<MonoBehaviour>();
+        bool hasActiveError = false;
+        foreach (MonoBehaviour component in hit.GetComponents<MonoBehaviour>())
+        {
+            if (!(component is IErrorSource source) || !component.isActiveAndEnabled || !source.IsActive) continue;
+            // 일반 모드의 기존 판정 유지: 반사 오류만 있는 적은 일반 피해/반사 처리를 받습니다.
+            if (!isEditMode && source.ErrorType == StoredErrorType.Reflection) continue;
+            hasActiveError = true;
+            if (!source.CanCut || storedErrors.Contains(source.ErrorType)) continue;
+            if (candidates.Exists(item => ((IErrorSource)item).ErrorType == source.ErrorType)) continue;
+            candidates.Add(component);
+        }
+        if (!hasActiveError) return false;
+        if (suppressErrorCutForCurrentAttack || isReplacingStoredError) return true;
+        if (!isEditMode) { Debug.Log("일반 모드에서는 오류를 Cut할 수 없습니다."); return true; }
+        if (candidates.Count == 0)
+        {
+            Debug.Log("가져올 수 있는 새 오류가 없습니다. 이미 보관한 종류와 Paste한 오류는 원본에 남습니다.");
+            return true;
+        }
+        candidates.Sort((a, b) => ((IErrorSource)a).ErrorType.CompareTo(((IErrorSource)b).ErrorType));
+        BeginErrorCutBatch(candidates);
         return true;
     }
 

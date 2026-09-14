@@ -126,7 +126,8 @@ public partial class PlayerMove
             GUI.Box(new Rect(Mathf.Max(0f, Screen.width - 230f), 20f, 210f, 32f),
                 $"[{errorCodexKey}] 오류 도감  {errorCodex.Count}/{ErrorCodex.Entries.Count}");
             if (Time.unscaledTime < discoveryNoticeUntil)
-                GUI.Box(new Rect(Mathf.Max(0f, (Screen.width - 480f) / 2f), 60f, 480f, 58f), discoveryNotice);
+                GUI.Box(new Rect(Mathf.Max(0f, (Screen.width - Mathf.Min(480f, Screen.width)) / 2f),
+                    Mathf.Max(0f, Screen.height - 72f), Mathf.Min(480f, Screen.width), 58f), discoveryNotice);
             return false;
         }
 

@@ -17,6 +17,11 @@ public partial class PlayerMove
             return true;
         }
 
+        if (!CanCompletePendingCut())
+        {
+            CancelStoredErrorReplacement("원본 오류 상태가 바뀌어 묶음 Cut을 취소했습니다.");
+            return true;
+        }
         int storedErrorCount = GetStoredErrorCount();
         if (storedErrorCount == 0)
         {

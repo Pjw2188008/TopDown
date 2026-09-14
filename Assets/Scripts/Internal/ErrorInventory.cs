@@ -61,6 +61,27 @@ public sealed class ErrorInventory
     /// <summary>숫자 키에 대응하는 고정 슬롯. 소비해도 다른 슬롯이 당겨지지 않습니다.</summary>
     public StoredErrorType GetSlot(int index) => index >= 0 && index < Capacity ? slots[index] : StoredErrorType.None;
 
+    /// <summary>묶음 획득/교체를 전부 검증한 뒤 한 번에 반영합니다. 실패하면 모든 슬롯과 배율을 보존합니다.</summary>
+    public bool TryStoreBatch(StoredErrorType[] incoming, float[] values, StoredErrorType[] discarded)
+    {
+        if (incoming == null || values == null || discarded == null || incoming.Length == 0
+            || incoming.Length != values.Length || incoming.Length > Capacity) return false;
+        var planned = new ErrorInventory(Capacity);
+        Array.Copy(occupied, planned.occupied, occupied.Length);
+        Array.Copy(multipliers, planned.multipliers, multipliers.Length);
+        Array.Copy(slots, planned.slots, slots.Length);
+        planned.Count = Count;
+        foreach (StoredErrorType type in discarded)
+            if (!planned.Remove(type)) return false;
+        for (int i = 0; i < incoming.Length; i++)
+            if (!planned.TryStore(incoming[i], values[i])) return false;
+        Array.Copy(planned.occupied, occupied, occupied.Length);
+        Array.Copy(planned.multipliers, multipliers, multipliers.Length);
+        Array.Copy(planned.slots, slots, slots.Length);
+        Count = planned.Count;
+        return true;
+    }
+
     public int SlotIndexOf(StoredErrorType type) => Contains(type) ? Array.IndexOf(slots, type) : -1;
 
     public StoredErrorType GetTypeAt(int index)

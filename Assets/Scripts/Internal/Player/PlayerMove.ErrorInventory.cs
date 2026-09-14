@@ -1,72 +1,105 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>PlayerMove의 오류 보관·교체 구현 부분입니다. 별도 컴포넌트가 아니므로 직접 부착하지 않습니다.</summary>
 public partial class PlayerMove
 {
-    private void BeginStoredErrorReplacement(
-        StoredErrorType newErrorType,
-        MonoBehaviour source,
-        float storedMultiplier)
+    private readonly List<MonoBehaviour> pendingCutSources = new List<MonoBehaviour>();
+    private readonly List<StoredErrorType> pendingCutTypes = new List<StoredErrorType>();
+
+    private void BeginErrorCutBatch(List<MonoBehaviour> sources)
     {
-        if (isReplacingStoredError
-            || !isEditMode
-            || source == null
-            || newErrorType == StoredErrorType.None)
+        if (isReplacingStoredError || !isEditMode || sources.Count == 0) return;
+        if (sources.Count > storedErrors.Capacity)
         {
+            Debug.Log("보관함은 2칸입니다. 3종의 새 오류는 한 번에 Cut할 수 없습니다.");
             return;
         }
-
-        if (GetStoredErrorCount() < MaxStoredErrors)
+        pendingCutSources.Clear();
+        pendingCutTypes.Clear();
+        foreach (MonoBehaviour component in sources)
         {
-            Debug.LogWarning("보관함에 빈 슬롯이 있어 교체 UI를 열지 않았습니다.", this);
+            pendingCutSources.Add(component);
+            pendingCutTypes.Add(((IErrorSource)component).ErrorType);
+        }
+        if (GetPendingCutReplacementCount() == 0)
+        {
+            CommitPendingErrorCut(new StoredErrorType[0]);
             return;
         }
-
-        pendingReplacementErrorType = newErrorType;
-        pendingReplacementSource = source;
-        pendingReplacementMultiplier = storedMultiplier;
-        selectedReplacementIndex = 0;
         isReplacingStoredError = true;
         isSelectingStoredError = false;
+        selectedReplacementIndex = 0;
+        Debug.Log("묶음 Cut: " + GetPendingCutDisplayName() + " · 교체를 확정하기 전에는 원본/보관함을 변경하지 않습니다.");
+    }
 
-        Debug.Log($"보관함이 가득 찼습니다. {GetStoredErrorDisplayName(newErrorType)}와 교체할 오류를 선택하세요.");
+    private int GetPendingCutReplacementCount()
+        => Mathf.Max(0, pendingCutSources.Count - (storedErrors.Capacity - storedErrors.Count));
+
+    private string GetPendingCutDisplayName()
+    {
+        string names = "";
+        foreach (StoredErrorType type in pendingCutTypes)
+        {
+            if (names.Length > 0) names += " + ";
+            names += GetStoredErrorDisplayName(type);
+        }
+        return names;
+    }
+
+    private bool CanCompletePendingCut()
+    {
+        if (!isEditMode || pendingCutSources.Count == 0 || pendingCutSources.Count != pendingCutTypes.Count) return false;
+        for (int i = 0; i < pendingCutSources.Count; i++)
+        {
+            MonoBehaviour component = pendingCutSources[i];
+            if (component == null || !component.isActiveAndEnabled || !(component is IErrorSource source)
+                || !source.IsActive || !source.CanCut || source.ErrorType != pendingCutTypes[i]
+                || storedErrors.Contains(source.ErrorType)) return false;
+        }
+        return true;
     }
 
     private void ConfirmStoredErrorReplacement()
     {
         if (!isReplacingStoredError || !isEditMode) return;
-        selectedReplacementIndex = Mathf.Clamp(selectedReplacementIndex, 0, storedErrors.Count - 1);
-        StoredErrorType discarded = GetStoredErrorTypeAtIndex(selectedReplacementIndex);
-        if (!CanCompletePendingCut()
-            || !storedErrors.TryReplace(discarded, pendingReplacementErrorType, pendingReplacementMultiplier))
+        int needed = GetPendingCutReplacementCount();
+        var discarded = new List<StoredErrorType>();
+        if (needed > 0)
         {
-            CancelStoredErrorReplacement("새 오류 원본이 사라졌거나 더 이상 Cut할 수 없어 교체를 취소했습니다.");
+            selectedReplacementIndex = Mathf.Clamp(selectedReplacementIndex, 0, storedErrors.Count - 1);
+            discarded.Add(GetStoredErrorTypeAtIndex(selectedReplacementIndex));
+            for (int i = 0; discarded.Count < needed && i < storedErrors.Count; i++)
+            {
+                StoredErrorType type = GetStoredErrorTypeAtIndex(i);
+                if (!discarded.Contains(type)) discarded.Add(type);
+            }
+        }
+        CommitPendingErrorCut(discarded.ToArray());
+    }
+
+    private void CommitPendingErrorCut(StoredErrorType[] discarded)
+    {
+        if (!CanCompletePendingCut())
+        {
+            CancelStoredErrorReplacement("묶음 오류 중 일부가 사라졌거나 더 이상 Cut할 수 없어 전체 획득을 취소했습니다.");
             return;
         }
-        StoredErrorType incoming = pendingReplacementErrorType;
-        ((IErrorSource)pendingReplacementSource).RemoveError();
+        var values = new float[pendingCutSources.Count];
+        for (int i = 0; i < values.Length; i++) values[i] = ((IErrorSource)pendingCutSources[i]).StoredMultiplier;
+        if (!storedErrors.TryStoreBatch(pendingCutTypes.ToArray(), values, discarded))
+        {
+            CancelStoredErrorReplacement("모든 오류를 저장할 수 없어 전체 획득을 취소했습니다.");
+            return;
+        }
+        string names = GetPendingCutDisplayName();
+        StoredErrorType first = pendingCutTypes[0];
+        // 보관함 전체 반영에 성공한 경우에만 함께 선택한 원본 오류들을 제거합니다.
+        foreach (MonoBehaviour component in pendingCutSources) ((IErrorSource)component).RemoveError();
         CancelStoredErrorReplacement(null);
-        selectedStoredErrorIndex = GetStoredErrorIndex(incoming);
+        selectedStoredErrorIndex = GetStoredErrorIndex(first);
         RefreshStoredErrorSelection();
-        Debug.Log(GetStoredErrorDisplayName(discarded) + "을(를) 폐기하고 " + GetStoredErrorDisplayName(incoming) + "을(를) 저장했습니다.");
-    }
-
-    private bool CanCompletePendingCut()
-    {
-        return pendingReplacementSource != null
-            && pendingReplacementSource is IErrorSource source
-            && source.ErrorType == pendingReplacementErrorType && source.CanCut
-            && !storedErrors.Contains(source.ErrorType);
-    }
-
-    private void CompletePendingErrorCut(StoredErrorType type, MonoBehaviour component, float multiplier)
-    {
-        if (component == null || !(component is IErrorSource source) || !source.CanCut
-            || source.ErrorType != type || !storedErrors.TryStore(type, multiplier)) return;
-        source.RemoveError();
-        selectedStoredErrorIndex = GetStoredErrorIndex(type);
-        RefreshStoredErrorSelection();
-        Debug.Log(ErrorRules.DisplayName(type) + " 오류를 Cut해 보관함에 저장했습니다.");
+        Debug.Log(names + " 오류를 한 번에 Cut해 보관함에 저장했습니다.");
     }
 
     private void DiscardStoredError(StoredErrorType type)
@@ -78,9 +111,8 @@ public partial class PlayerMove
     private void CancelStoredErrorReplacement(string message)
     {
         isReplacingStoredError = false;
-        pendingReplacementErrorType = StoredErrorType.None;
-        pendingReplacementSource = null;
-        pendingReplacementMultiplier = 0f;
+        pendingCutSources.Clear();
+        pendingCutTypes.Clear();
         selectedReplacementIndex = 0;
 
         if (!string.IsNullOrEmpty(message))

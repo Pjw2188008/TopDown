@@ -141,8 +141,11 @@ public partial class PlayerMove
         Vector2 center = (Vector2)transform.position + attackDirection * GetCurrentAttackRange();
         float angle = Mathf.Atan2(attackDirection.y, attackDirection.x) * Mathf.Rad2Deg;
         Collider2D[] hits = Physics2D.OverlapBoxAll(center, attackSizeSide * GetCurrentAttackScale(), angle, enemyLayer);
+        var handledObjects = new System.Collections.Generic.HashSet<GameObject>();
         foreach (Collider2D hit in hits)
         {
+            if (isEditMode && isReplacingStoredError) break;
+            if (!handledObjects.Add(hit.gameObject)) continue;
             if (hit.gameObject == gameObject || TryHandleErrorHit(hit)) continue;
             if (!CombatDamageUtility.TryApplyDamage(hit.gameObject, attackDamage, gameObject))
                 Debug.Log("근접 공격 히트: " + hit.name);

@@ -39,7 +39,7 @@ public partial class PlayerMove : MonoBehaviour, ICombatDamageable
     [SerializeField, Min(0f)] private float dashStaminaRecoveryDelay = 0.8f;
     [Tooltip("회복 대기 시간이 지나면 초당 회복할 스태미나입니다. 편집 모드 슬로모션과 도감 정지를 따릅니다.")]
     [SerializeField, Min(0f)] private float dashStaminaRecoveryPerSecond = 25f;
-    [Tooltip("화면 왼쪽 아래 가드 게이지 위에 스태미나를 표시합니다.")]
+    [Tooltip("좌측 상단 임시 HUD에 대쉬 스태미나 게이지를 표시합니다.")]
     [SerializeField] private bool showDashStamina = true;
     [Tooltip("대쉬를 막는 Collider2D의 레이어입니다. Trigger는 무시하고 플레이어와 충돌하도록 설정된 레이어만 검사합니다.")]
     [SerializeField] private LayerMask dashBlockingLayers = Physics2D.DefaultRaycastLayers;
@@ -112,6 +112,12 @@ public partial class PlayerMove : MonoBehaviour, ICombatDamageable
     [Tooltip("반사 오류를 전투 기술에 1회 Paste했을 때 받은 피해를 공격자에게 되돌리는 시간입니다. Paste한 오류는 즉시 보관함에서 사라집니다.")]
     [SerializeField, Min(0.1f)] private float reflectionCombatDuration = 5f;
 
+    [Header("임시 플레이어 HUD")]
+    [Tooltip("좌측 상단의 HP/대쉬 스태미나/가드와 네모 오류 슬롯 2개를 표시합니다. 별도 Canvas나 이미지 연결은 필요하지 않습니다.")]
+    [SerializeField] private bool showPlayerHud = true;
+    [Tooltip("임시 HUD 전체 크기입니다. 작은 Game 뷰에서는 화면에 맞춰 자동 축소됩니다. 카메라 Size와는 무관합니다.")]
+    [SerializeField, Range(0.5f, 2f)] private float playerHudScale = 1f;
+
     [Header("플레이어 체력")]
     [Tooltip("플레이어가 받을 수 있는 최대 피해량입니다. 반사되지 않은 적 투사체가 이 체력을 감소시킵니다.")]
     [SerializeField, Min(1f)] private float maxHealth = 10f;
@@ -129,7 +135,7 @@ public partial class PlayerMove : MonoBehaviour, ICombatDamageable
     [Tooltip("가드하지 않을 때 초당 자동 회복되는 가드 게이지입니다. 가드 중에는 회복하지 않습니다. 게임 시간 기준입니다.")]
     [SerializeField, Min(0f)] private float guardGaugeRecoveryPerSecond = 20f;
 
-    [Tooltip("화면 왼쪽 아래에 가드 게이지와 현재 상태를 표시합니다.")]
+    [Tooltip("좌측 상단 임시 HUD에 가드 게이지를 표시합니다.")]
     [SerializeField] private bool showGuardGauge = true;
 
     [Header("패링 / 첨삭")]
@@ -224,9 +230,6 @@ public partial class PlayerMove : MonoBehaviour, ICombatDamageable
     private float reflectionCombatTimer;
     private int selectedStoredErrorIndex;
     private bool isSelectingStoredError;
-    private StoredErrorType pendingReplacementErrorType;
-    private MonoBehaviour pendingReplacementSource;
-    private float pendingReplacementMultiplier;
     private int selectedReplacementIndex;
     private bool isReplacingStoredError;
 

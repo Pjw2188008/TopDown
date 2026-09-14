@@ -40,21 +40,7 @@ public partial class PlayerMove
         Debug.Log("가드 게이지 소진: 가드 해제. 우클릭을 놓고 게이지 회복 후 다시 누르세요.", this);
     }
 
-    private void DrawGuardGauge()
-    {
-        if (!showGuardGauge || !Application.isPlaying) return;
-        float maximum = Mathf.Max(1f, maxGuardGauge);
-        float y = Mathf.Max(20f, Screen.height - 86f);
-        GUI.Box(new Rect(20f, y, 260f, 66f), GUIContent.none);
-        string status = isGuarding ? "가드 중" : guardRequiresRelease ? "가드 해제 · 우클릭 놓기" : "회복 / 대기";
-        GUI.Label(new Rect(30f, y + 5f, 240f, 22f), $"가드 {currentGuardGauge:0.0} / {maximum:0}  {status}");
-        Color previousColor = GUI.color;
-        GUI.color = new Color(0.15f, 0.15f, 0.15f, 1f);
-        GUI.DrawTexture(new Rect(30f, y + 34f, 240f, 16f), Texture2D.whiteTexture);
-        GUI.color = isGuarding ? new Color(0.3f, 0.75f, 1f) : new Color(0.4f, 0.85f, 0.5f);
-        GUI.DrawTexture(new Rect(30f, y + 34f, 240f * Mathf.Clamp01(currentGuardGauge / maximum), 16f), Texture2D.whiteTexture);
-        GUI.color = previousColor;
-    }
+
 
     // 편집 모드의 입력에는 간섭하지 않습니다. 공격 도중 가드로 공격을 끊을 수 없습니다.
     private bool IsGuardRequested()

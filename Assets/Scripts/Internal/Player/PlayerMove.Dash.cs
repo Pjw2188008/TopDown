@@ -113,21 +113,5 @@ public partial class PlayerMove
             + recoveryTime * Mathf.Max(0f, dashStaminaRecoveryPerSecond));
     }
 
-    private void DrawDashStamina()
-    {
-        if (!showDashStamina || !Application.isPlaying) return;
-        float maximum = Mathf.Max(1f, maxDashStamina);
-        float y = Mathf.Max(20f, Screen.height - 162f);
-        GUI.Box(new Rect(20f, y, 260f, 66f), GUIContent.none);
-        string status = Time.unscaledTime < dashFeedbackUntil ? "스태미나 부족"
-            : isDashing ? "대쉬 중" : "Space · 대쉬";
-        GUI.Label(new Rect(30f, y + 5f, 245f, 22f), $"스태미나 {currentDashStamina:0} / {maximum:0}  {status}");
-        Color previousColor = GUI.color;
-        GUI.color = new Color(0.15f, 0.15f, 0.15f, 1f);
-        GUI.DrawTexture(new Rect(30f, y + 34f, 240f, 16f), Texture2D.whiteTexture);
-        GUI.color = currentDashStamina < Mathf.Max(1f, dashStaminaCost)
-            ? new Color(0.85f, 0.45f, 0.2f) : new Color(0.9f, 0.8f, 0.25f);
-        GUI.DrawTexture(new Rect(30f, y + 34f, 240f * Mathf.Clamp01(currentDashStamina / maximum), 16f), Texture2D.whiteTexture);
-        GUI.color = previousColor;
-    }
+
 }
