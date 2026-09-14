@@ -1,6 +1,6 @@
 /// <summary>
 /// 편집 모드의 오류 선택/준비/취소 상태입니다. 보관함을 소비하지 않으며 실제 Paste 성공 후에만 종료합니다.
-/// Q를 놓는 입력은 처리하지 않습니다. 일반 모드의 전투 Paste와 독립적이며 직접 부착하지 않습니다.
+/// 현재 조작은 PressSlot(1/2)로 직접 준비합니다. PressQ/Scroll은 기존 모델 호환용이며 플레이어 입력에 연결하지 않습니다.
 /// </summary>
 public sealed class EnvironmentPasteSession
 {
@@ -9,6 +9,17 @@ public sealed class EnvironmentPasteSession
     public StoredErrorType SelectedError { get; private set; }
     public bool IsBusy => State != PasteState.Idle;
     public bool IsArmed => State == PasteState.Armed;
+
+    /// <summary>숫자 키로 해당 슬롯을 즉시 준비합니다. 같은 슬롯은 취소, 다른 슬롯은 변경합니다.</summary>
+    public void PressSlot(ErrorInventory inventory, int slot)
+    {
+        Validate(inventory);
+        StoredErrorType error = inventory.GetSlot(slot);
+        if (error == StoredErrorType.None) return;
+        if (IsArmed && SelectedError == error) { Cancel(); return; }
+        SelectedError = error;
+        State = PasteState.Armed;
+    }
 
     public void PressQ(ErrorInventory inventory, int preferredIndex)
     {

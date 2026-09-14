@@ -77,7 +77,7 @@ public partial class PlayerMove
     {
         if (isEditMode)
         {
-            Debug.Log("편집 모드에서는 오류를 저장하지 않고, 일반 상태에서만 Q로 버프를 사용할 수 있습니다.");
+            Debug.Log("전투 기술 적용은 일반 모드에서 슬롯 번호 1/2를 사용하세요.");
             return;
         }
 

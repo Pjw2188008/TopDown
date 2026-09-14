@@ -40,7 +40,7 @@ public partial class PlayerMove
         if (!ErrorRules.CanPasteTo(selected, target.TargetType))
         { Debug.Log(ErrorRules.DisplayName(selected) + " 오류는 " + target.TargetType + " 대상에 Paste할 수 없습니다."); return false; }
         if (target.TargetType == PasteTargetType.CombatSkill)
-        { Debug.Log("전투 기술 Paste는 일반 모드에서 Q를 사용해야 합니다."); return false; }
+        { Debug.Log("전투 기술 Paste는 일반 모드에서 슬롯 번호 1/2를 사용해야 합니다."); return false; }
 
         float multiplier = storedErrors.GetMultiplier(selected);
         switch (selected)

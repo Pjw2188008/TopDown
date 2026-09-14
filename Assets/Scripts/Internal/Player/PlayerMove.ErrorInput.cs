@@ -40,113 +40,43 @@ public partial class PlayerMove
         return true;
     }
 
+    /// <summary>숫자 1/2(또는 숫자패드)로 고정 슬롯을 직접 사용합니다. Q/휠 선택 단계는 없습니다.</summary>
     private void HandleStoredErrorSelectionInput()
     {
-        if (isReplacingStoredError)
+        isSelectingStoredError = false;
+        if (isReplacingStoredError || Keyboard.current == null) return;
+        if (isEditMode) environmentPaste.Validate(storedErrors);
+
+        int slot = Keyboard.current.digit1Key.wasPressedThisFrame || Keyboard.current.numpad1Key.wasPressedThisFrame ? 0
+            : Keyboard.current.digit2Key.wasPressedThisFrame || Keyboard.current.numpad2Key.wasPressedThisFrame ? 1 : -1;
+        if (slot < 0) return;
+
+        StoredErrorType error = storedErrors.GetSlot(slot);
+        if (error == StoredErrorType.None)
         {
+            Debug.Log((slot + 1) + "번 슬롯이 비어 있습니다.");
             return;
         }
 
-        if (isEditMode)
+        // 같은 번호를 다시 눌러 취소하는 것은 전투 효과가 활성화되어 있어도 허용합니다.
+        if (isEditMode && environmentPaste.IsArmed && environmentPaste.SelectedError == error)
         {
-            HandleEnvironmentPasteSelectionInput();
+            environmentPaste.Cancel();
+            Debug.Log("Paste 준비를 취소했습니다. 오류는 보관함에 유지됩니다.");
             return;
         }
-
-        int storedErrorCount = GetStoredErrorCount();
-
-        if (Keyboard.current.qKey.wasPressedThisFrame)
-        {
-            if (IsAnyCombatErrorActive())
-            {
-                isSelectingStoredError = false;
-                Debug.Log($"{GetActiveCombatErrorDisplayName()} 효과가 유지되는 동안에는 다른 오류를 사용할 수 없습니다.");
-                return;
-            }
-
-            if (storedErrorCount == 0)
-            {
-                isSelectingStoredError = false;
-                Debug.Log("보관함에 사용할 오류가 없습니다.");
-                return;
-            }
-
-            ClampSelectedStoredErrorIndex();
-
-            // 하나는 즉시 적용, 둘은 선택 중 다시 Q를 눌렀을 때만 적용합니다.
-            if (storedErrorCount == 1 || isSelectingStoredError)
-            {
-                isSelectingStoredError = false;
-                ConfirmSelectedStoredError();
-                return;
-            }
-
-            isSelectingStoredError = true;
-            Debug.Log($"오류 선택 시작: {GetStoredErrorDisplayName(GetSelectedStoredErrorType())}");
-        }
-
-        if (!isSelectingStoredError)
-        {
-            return;
-        }
-
-        if (Mouse.current != null)
-        {
-            float scrollY = Mouse.current.scroll.ReadValue().y;
-            int previousIndex = selectedStoredErrorIndex;
-            selectedStoredErrorIndex = ErrorInventory.StepSelection(selectedStoredErrorIndex, storedErrorCount, scrollY);
-            if (previousIndex != selectedStoredErrorIndex)
-                Debug.Log($"오류 선택: {GetStoredErrorDisplayName(GetSelectedStoredErrorType())}");
-        }
-
-        // Q를 놓아도 선택 상태를 유지합니다. 다음 Q 누름이 전투 Paste를 확정합니다.
-    }
-
-    private void ConfirmSelectedStoredError()
-    {
         if (IsAnyCombatErrorActive())
         {
-            Debug.Log($"{GetActiveCombatErrorDisplayName()} 효과가 유지되는 동안에는 다른 오류를 사용할 수 없습니다.");
+            Debug.Log(GetActiveCombatErrorDisplayName() + " 효과가 유지되는 동안에는 다른 오류를 사용할 수 없습니다.");
             return;
         }
 
-        if (GetSelectedStoredErrorType() == StoredErrorType.None)
-        {
-            Debug.Log("선택할 수 있는 오류가 없습니다.");
-            return;
-        }
-
-        if (!isEditMode)
+        // 기존 전투 적용 코드는 종류순 인덱스를 사용하므로 고정 슬롯의 오류 종류를 변환해 전달합니다.
+        selectedStoredErrorIndex = storedErrors.IndexOf(error);
+        if (isEditMode)
+            environmentPaste.PressSlot(storedErrors, slot);
+        else
             TryActivateStoredCombatError();
-    }
-
-    private void HandleEnvironmentPasteSelectionInput()
-    {
-        isSelectingStoredError = false;
-        environmentPaste.Validate(storedErrors);
-        if (Keyboard.current.qKey.wasPressedThisFrame)
-        {
-            // 준비 취소는 전투 오류의 활성 상태와 관계없이 허용합니다.
-            if (!environmentPaste.IsArmed && IsAnyCombatErrorActive())
-            {
-                Debug.Log(GetActiveCombatErrorDisplayName() + " 효과가 유지되는 동안에는 다른 오류를 사용할 수 없습니다.");
-                return;
-            }
-            if (storedErrors.Count == 0)
-            {
-                Debug.Log("보관함에 사용할 오류가 없습니다.");
-                return;
-            }
-            environmentPaste.PressQ(storedErrors, selectedStoredErrorIndex);
-            if (!environmentPaste.IsBusy) Debug.Log("Paste 준비를 취소했습니다. 오류는 보관함에 유지됩니다.");
-        }
-
-        // Q를 놓아도 소비/확정하지 않습니다. 다음 Q 누름이 준비를 확정합니다.
-        if (Mouse.current != null)
-            environmentPaste.Scroll(storedErrors, Mouse.current.scroll.ReadValue().y);
-
-        if (environmentPaste.IsBusy)
-            selectedStoredErrorIndex = GetStoredErrorIndex(environmentPaste.SelectedError);
     }
 
     private bool HandleEnvironmentPasteClick()

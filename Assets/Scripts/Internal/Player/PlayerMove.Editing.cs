@@ -80,7 +80,8 @@ public partial class PlayerMove
             for (int index = 0; index < replacementCandidateCount; index++)
             {
                 string marker = index == selectedReplacementIndex ? ">> " : "    ";
-                replacementText += marker + GetStoredErrorDisplayName(GetStoredErrorTypeAtIndex(index)) + "\n";
+                replacementText += marker + "[" + (storedErrors.SlotIndexOf(GetStoredErrorTypeAtIndex(index)) + 1) + "] "
+                    + GetStoredErrorDisplayName(GetStoredErrorTypeAtIndex(index)) + "\n";
             }
 
             replacementText += "마우스 휠: 변경  |  좌클릭: 교체 확정";
@@ -88,45 +89,25 @@ public partial class PlayerMove
             return;
         }
 
-        if (isEditMode && environmentPaste.IsBusy)
+        DrawStoredErrorSlots();
+    }
+
+    private void DrawStoredErrorSlots()
+    {
+        if (!Application.isPlaying) return;
+        string text = "오류 보관함\n";
+        for (int slot = 0; slot < storedErrors.Capacity; slot++)
         {
-            if (environmentPaste.IsArmed)
-            {
-                GUI.Box(new Rect(20f, 20f, 350f, 80f),
-                    "Paste 준비: " + GetStoredErrorDisplayName(environmentPaste.SelectedError)
-                    + "\n좌클릭: Paste  |  Q: 취소  |  E: 편집 모드 종료"
-                    + "\n적용 성공 전까지 보관함에서 소비되지 않습니다.");
-            }
-            else
-            {
-                string text = "환경 Paste 오류 선택\n";
-                for (int index = 0; index < storedErrors.Count; index++)
-                {
-                    StoredErrorType type = storedErrors.GetTypeAt(index);
-                    text += (type == environmentPaste.SelectedError ? "▶ " : "   ")
-                        + GetStoredErrorDisplayName(type) + "\n";
-                }
-                text += "휠: 변경  |  Q 다시 누르기: 준비  |  E: 취소";
-                GUI.Box(new Rect(20f, 20f, 350f, 105f), text);
-            }
-            return;
+            StoredErrorType error = storedErrors.GetSlot(slot);
+            string marker = isEditMode && environmentPaste.IsArmed && environmentPaste.SelectedError == error ? " ▶ " : "    ";
+            text += marker + "[" + (slot + 1) + "] " + GetStoredErrorDisplayName(error) + "\n";
         }
-
-        if (!isSelectingStoredError || GetStoredErrorCount() < 2)
-        {
-            return;
-        }
-
-        string selectionText = "전투 오류 선택  |  Q를 다시 누르면 적용\n";
-        int storedErrorCount = GetStoredErrorCount();
-
-        for (int index = 0; index < storedErrorCount; index++)
-        {
-            string marker = index == selectedStoredErrorIndex ? "▶ " : "   ";
-            selectionText += marker + GetStoredErrorDisplayName(GetStoredErrorTypeAtIndex(index)) + "\n";
-        }
-
-        selectionText += "마우스 휠로 변경";
-        GUI.Box(new Rect(20f, 20f, 260f, 92f), selectionText);
+        text += isEditMode
+            ? environmentPaste.IsArmed ? "좌클릭: Paste  |  같은 번호: 취소  |  다른 번호: 변경"
+                : "1 / 2: Paste 준비 → 대상 좌클릭"
+            : "1 / 2: 해당 슬롯의 오류를 전투 기술에 즉시 적용";
+        if (IsAnyCombatErrorActive())
+            text += "\n" + GetActiveCombatErrorDisplayName() + " 전투 효과 유지 중 · 추가 사용 불가";
+        GUI.Box(new Rect(20f, 20f, 440f, 116f), text);
     }
 }
