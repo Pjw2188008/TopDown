@@ -118,7 +118,7 @@ public partial class PlayerMove
         if (wanted <= .00001f) return false;
         float allowed = InteractionMotion.AllowedDistance(transform, null, step.normalized, wanted,
             interactionBlockingLayers, interactionHits);
-        transform.position += (Vector3)(step.normalized * allowed);
+        ApplyPlayerDisplacement(step.normalized * allowed);
         Physics2D.SyncTransforms();
         moved = allowed > .00001f;
         return false;

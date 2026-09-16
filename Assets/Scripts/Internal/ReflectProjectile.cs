@@ -105,7 +105,7 @@ public sealed class ReflectProjectile : MonoBehaviour
         foreach (RaycastHit2D hit in hits)
         {
             if (hit.collider == null
-                || hit.collider.gameObject == gameObject
+                || hit.collider.GetComponentInParent<ReflectProjectile>() != null
                 || IsOwnerCollider(hit.collider))
             {
                 continue;

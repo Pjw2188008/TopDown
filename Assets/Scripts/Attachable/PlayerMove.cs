@@ -6,6 +6,7 @@ using UnityEngine.UI;
 /// 플레이어 설정과 실행 순서의 진입점입니다. 기능 구현은 Internal/Player의 partial 파일로 분리됩니다.
 /// 플레이어 GameObject에 직접 부착해야 하는 핵심 조작 컴포넌트입니다.
 /// </summary>
+[RequireComponent(typeof(Rigidbody2D))]
 public partial class PlayerMove : MonoBehaviour, ICombatDamageable
 {
     private const int MaxStoredErrors = 2;
@@ -265,6 +266,7 @@ public partial class PlayerMove : MonoBehaviour, ICombatDamageable
         }
 
         EnsureProjectileCollider();
+        EnsurePlayerPhysics();
         CreateEditModeOverlay();
         UpdateEditModeVisual();
     }
@@ -324,9 +326,9 @@ public partial class PlayerMove : MonoBehaviour, ICombatDamageable
         {
             moveDirection = moveDirection.normalized;
             lastDirection = moveDirection;
-            transform.position += (Vector3)(moveDirection * GetCurrentMoveSpeed() * Time.deltaTime);
+            Vector2 moved = MovePlayerWithCollision(moveDirection * GetCurrentMoveSpeed() * Time.deltaTime);
             didRunThisFrame = Keyboard.current.spaceKey.isPressed && runSpeedMultiplier > 1f
-                && moveSpeed > 0f && Time.deltaTime > 0f;
+                && moved.sqrMagnitude > .00000001f;
             runAfterimageDirection = moveDirection;
         }
 

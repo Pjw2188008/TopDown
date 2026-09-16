@@ -1,5 +1,13 @@
 # 스크립트 구조
 
+## 플레이어 Rigidbody2D / 투사체 충돌
+
+- ReflectProjectile의 충돌 검색은 다른 ReflectProjectile(자식 Collider 포함)을 제외합니다. 서로 지나가며, 그 뒤의 벽/플레이어/적 타격과 반사/패링은 계속 검사합니다.
+- Player 프리팹에 Rigidbody2D와 BoxCollider2D를 추가했습니다. 씬에 따로 만든 PlayerMove도 실행 시 누락된 몸 Collider와 Rigidbody2D를 준비합니다. 기존 Collider 크기/오프셋은 유지하며 몸 Collider는 Trigger를 끕니다.
+- Rigidbody2D는 Kinematic, Gravity Scale 0, Freeze Rotation, Continuous, Interpolate None입니다. 플레이어를 물리 반동으로 밀지 않고, 이동 전 충돌 검사를 한 뒤 Rigidbody 위치를 갱신합니다. 코드가 실행 시 이 설정을 보장하므로 Dynamic으로 변경하지 마세요.
+- 걷기/달리기는 Movement Blocking Layers에서 벽을 검사하며 약 0.02의 접촉 여유를 유지합니다. 벽으로 대각선 이동하면 열린 축으로 미끄러집니다. 대쉬와 상호작용은 기존 전용 충돌 검사를 유지하되 같은 Rigidbody 위치 적용 함수를 사용합니다.
+- PlayerMove.Physics.cs는 별도 부착하지 않습니다. 이 구조에는 외력 기반 넉백을 추가하지 않았습니다. 기존 근접 적의 플레이어 몸 충돌 제외 설정은 유지됩니다.
+
 ## 2026-09-16 리팩토링
 
 - 씬에 붙이는 `EnemyController.cs`의 경로/GUID와 Inspector 필드는 유지했습니다. 내부 구현은 `Internal/Enemy/EnemyController.Movement.cs`, `.Combat.cs`, `.Collisions.cs`, `.Effects.cs`로 분리했습니다. 이 partial 파일들은 별도로 부착하지 않습니다.

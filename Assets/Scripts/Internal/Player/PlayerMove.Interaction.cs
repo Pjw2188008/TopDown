@@ -99,7 +99,7 @@ public partial class PlayerMove
         float allowed = InteractionMotion.AllowedDistance(transform, heldInteractable.transform, direction, wanted, interactionBlockingLayers, interactionHits);
         allowed = Mathf.Min(allowed, InteractionMotion.AllowedDistance(heldInteractable.transform, transform, direction, wanted, interactionBlockingLayers, interactionHits));
         Vector2 displacement = direction * allowed;
-        transform.position += (Vector3)displacement;
+        ApplyPlayerDisplacement(displacement);
         heldInteractable.MoveBy(transform, displacement);
         Physics2D.SyncTransforms();
         lastDirection = interactionFacing;

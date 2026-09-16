@@ -51,7 +51,7 @@ public partial class PlayerMove
         didDashThisFrame = true;
         float wanted = Mathf.Max(0.1f, dashSpeed) * step;
         float distance = GetUnblockedDashDistance(wanted);
-        transform.position += (Vector3)(dashDirection * distance);
+        ApplyPlayerDisplacement(dashDirection * distance);
         didRunThisFrame = distance > 0.00001f;
         runAfterimageDirection = dashDirection;
         dashRemaining = Mathf.Max(0f, dashRemaining - step);
@@ -63,7 +63,7 @@ public partial class PlayerMove
     {
         Collider2D body = GetComponent<Collider2D>();
         if (body == null || !body.enabled) return wanted;
-        // 이동을 Transform으로 처리하는 기존 구조이므로 Cast 전에 최신 위치를 동기화합니다.
+        // 같은 프레임의 Rigidbody 위치 변경을 Cast에 반영합니다.
         Physics2D.SyncTransforms();
         var filter = new ContactFilter2D();
         filter.SetLayerMask(dashBlockingLayers.value & Physics2D.GetLayerCollisionMask(gameObject.layer));

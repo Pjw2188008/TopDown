@@ -76,12 +76,16 @@ public partial class PlayerMove
 
     private void EnsureProjectileCollider()
     {
-        if (GetComponent<Collider2D>() != null)
+        Collider2D existing = GetComponent<Collider2D>();
+        if (existing != null)
         {
+            existing.isTrigger = false;
+            existing.enabled = true;
             return;
         }
 
         BoxCollider2D playerCollider = gameObject.AddComponent<BoxCollider2D>();
+        if (spriteRenderer == null) spriteRenderer = GetComponent<SpriteRenderer>();
         if (spriteRenderer != null && spriteRenderer.sprite != null)
         {
             playerCollider.size = spriteRenderer.sprite.bounds.size;
