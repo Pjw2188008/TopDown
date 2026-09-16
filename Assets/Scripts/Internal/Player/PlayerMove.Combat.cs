@@ -5,6 +5,8 @@ public partial class PlayerMove
 {
     /// <summary>근접 적의 임시 타격 이펙트가 재사용하는 읽기 전용 스프라이트입니다.</summary>
     public Sprite AttackEffectVisual => attackEffectSprite;
+    private readonly System.Collections.Generic.HashSet<GameObject> handledAttackObjects = new System.Collections.Generic.HashSet<GameObject>();
+    private readonly System.Collections.Generic.HashSet<ICombatDamageable> handledAttackReceivers = new System.Collections.Generic.HashSet<ICombatDamageable>();
     private void TryAttack()
     {
         if (IsMovingObject || Time.time < nextAttackTime || isAttacking || isGuarding || isPlayingParry || isDashing || didDashThisFrame || IsGuardRequested())
@@ -143,17 +145,17 @@ public partial class PlayerMove
         Vector2 center = (Vector2)transform.position + attackDirection * GetCurrentAttackRange();
         float angle = Mathf.Atan2(attackDirection.y, attackDirection.x) * Mathf.Rad2Deg;
         Collider2D[] hits = Physics2D.OverlapBoxAll(center, attackSizeSide * GetCurrentAttackScale(), angle, enemyLayer);
-        var handledObjects = new System.Collections.Generic.HashSet<GameObject>();
-        var handledReceivers = new System.Collections.Generic.HashSet<ICombatDamageable>();
+        handledAttackObjects.Clear();
+        handledAttackReceivers.Clear();
         foreach (Collider2D hit in hits)
         {
             if (isEditMode && isReplacingStoredError) break;
-            if (!handledObjects.Add(hit.gameObject)) continue;
+            if (!handledAttackObjects.Add(hit.gameObject)) continue;
             if (hit.gameObject == gameObject || TryHandleErrorHit(hit)) continue;
             if (CombatDamageUtility.TryFindReceiver(hit.gameObject, out ICombatDamageable receiver))
             {
                 // 같은 적의 루트/자식 Collider가 여러 개여도 한 공격당 피해는 한 번만 줍니다.
-                if (handledReceivers.Add(receiver)) receiver.ReceiveDamage(attackDamage, gameObject, true);
+                if (handledAttackReceivers.Add(receiver)) receiver.ReceiveDamage(attackDamage, gameObject, true);
             }
             else
                 Debug.Log("근접 공격 히트: " + hit.name);

@@ -34,17 +34,20 @@ public static class CombatDamageUtility
     {
         receiver = null;
         if (target == null) return false;
-        MonoBehaviour[] behaviours = target.GetComponentsInParent<MonoBehaviour>(true);
-
-        foreach (MonoBehaviour behaviour in behaviours)
+        var behaviours = UnityEngine.Pool.ListPool<MonoBehaviour>.Get();
+        try
         {
-            if (behaviour is ICombatDamageable damageable)
+            target.GetComponentsInParent(true, behaviours);
+            foreach (MonoBehaviour behaviour in behaviours)
             {
-                receiver = damageable;
-                return true;
+                if (behaviour is ICombatDamageable damageable)
+                {
+                    receiver = damageable;
+                    return true;
+                }
             }
+            return false;
         }
-
-        return false;
+        finally { UnityEngine.Pool.ListPool<MonoBehaviour>.Release(behaviours); }
     }
 }

@@ -1,5 +1,13 @@
 # 스크립트 구조
 
+## 2026-09-16 리팩토링
+
+- 씬에 붙이는 `EnemyController.cs`의 경로/GUID와 Inspector 필드는 유지했습니다. 내부 구현은 `Internal/Enemy/EnemyController.Movement.cs`, `.Combat.cs`, `.Collisions.cs`, `.Effects.cs`로 분리했습니다. 이 partial 파일들은 별도로 부착하지 않습니다.
+- `PlayerMove.Interaction.cs`는 F 입력/안내/애니메이션, `PlayerMove.InteractionPositioning.cs`는 잡기 간격/방향별 자리 이동을 담당합니다. PlayerMove 연결은 그대로입니다.
+- 몬스터 충돌 검색은 재사용 List로 처리하고 플레이어 Collider를 한 프레임에 한 번만 수집합니다. 대상이 바뀌지 않으면 PlayerMove 참조도 재사용합니다. 동적으로 추가/활성화된 Collider는 계속 반영합니다.
+- 상호작용 충돌/경계 계산과 피해 수신자 탐색은 Unity ListPool을 사용하고 finally에서 반환합니다. 공격 중복 방지 HashSet도 재사용합니다. 기존 피해 순서/패링/충돌 필터는 유지합니다.
+- 코드 분리는 유지보수 목적이며 빌드 크기가 크게 줄어드는 변경은 아닙니다. 원본 이미지의 해상도/압축/메타 설정은 변경하지 않았습니다.
+
 ## EnemyController — 순찰/추적 근접 몬스터
 
 - `Assets/Scripts/EnemyController.cs`를 적 루트에 부착합니다. 기존 Stat/Range/Player 필드와 수치는 유지했습니다. EnemyStagger는 자동 추가하므로 MeleeEnemy/ProjectileEnemy를 중복 부착하지 마세요.
