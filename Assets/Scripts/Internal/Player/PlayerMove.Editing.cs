@@ -70,5 +70,6 @@ public partial class PlayerMove
         if (DrawErrorCodex()) return;
         DrawPlayerHud();
         DrawParryFeedback();
+        DrawInteractionPrompt();
     }
 }

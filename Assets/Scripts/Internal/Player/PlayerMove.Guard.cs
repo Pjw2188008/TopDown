@@ -45,7 +45,7 @@ public partial class PlayerMove
     // 편집 모드의 입력에는 간섭하지 않습니다. 공격 도중 가드로 공격을 끊을 수 없습니다.
     private bool IsGuardRequested()
     {
-        return isActiveAndEnabled && guardHasFocus && !isErrorCodexOpen && !isEditMode && !isAttacking
+        return !IsMovingObject && isActiveAndEnabled && guardHasFocus && !isErrorCodexOpen && !isEditMode && !isAttacking
             && !isDashing && !didDashThisFrame
             && currentGuardGauge > 0f && !guardRequiresRelease
             && Mouse.current != null && Mouse.current.rightButton.isPressed;
@@ -152,12 +152,14 @@ public partial class PlayerMove
     private void OnApplicationFocus(bool hasFocus)
     {
         guardHasFocus = hasFocus;
+        if (!hasFocus) ReleaseInteraction();
         if (!hasFocus) CancelDash();
         if (!hasFocus) EndGuard();
     }
 
     private void OnDisable()
     {
+        ReleaseInteraction();
         CancelDash();
         ClearRunAfterimages();
         CloseErrorCodex();

@@ -275,6 +275,7 @@ public partial class PlayerMove : MonoBehaviour, ICombatDamageable
         didDashThisFrame = false;
         // 도감 클릭이 공격/Cut/Paste 입력으로 전달되지 않도록 가장 먼저 처리합니다.
         if (HandleErrorCodexInput()) return;
+        bool interactionInputConsumed = HandleInteractionInput();
         UpdateDashStamina(Time.deltaTime);
         UpdateErrorDiscovery();
         RefreshParryInput();
@@ -285,13 +286,13 @@ public partial class PlayerMove : MonoBehaviour, ICombatDamageable
 
         // 취소/성공한 프레임에도 같은 좌클릭이 Cut 공격으로 이어지지 않도록 입력을 소비합니다.
         bool pasteInputConsumed = environmentPaste.IsBusy;
-        if (!isDashing && Keyboard.current[editModeKey].wasPressedThisFrame)
+        if (!IsMovingObject && !interactionInputConsumed && !isDashing && Keyboard.current[editModeKey].wasPressedThisFrame)
         {
             ToggleEditMode();
         }
 
         bool replacementInputConsumed = !isDashing && HandleStoredErrorReplacementInput();
-        if (!replacementInputConsumed && !isDashing)
+        if (!IsMovingObject && !interactionInputConsumed && !replacementInputConsumed && !isDashing)
         {
             HandleStoredErrorSelectionInput();
         }
@@ -315,7 +316,11 @@ public partial class PlayerMove : MonoBehaviour, ICombatDamageable
         if (dashHandled) moveDirection = dashDirection;
         bool isMoving = dashHandled || (moveDirection != Vector2.zero && !isGuarding && !isPlayingParry);
 
-        if (isMoving && !dashHandled)
+        if (IsMovingObject)
+        {
+            isMoving = MoveWithInteractable(moveDirection);
+        }
+        else if (isMoving && !dashHandled)
         {
             moveDirection = moveDirection.normalized;
             lastDirection = moveDirection;
@@ -325,7 +330,7 @@ public partial class PlayerMove : MonoBehaviour, ICombatDamageable
             runAfterimageDirection = moveDirection;
         }
 
-        if (!isSelectingStoredError
+        if (!IsMovingObject && !interactionInputConsumed && !isSelectingStoredError
             && !isReplacingStoredError
             && !replacementInputConsumed
             && !pasteInputConsumed
@@ -342,7 +347,11 @@ public partial class PlayerMove : MonoBehaviour, ICombatDamageable
 
         // 공격을 끝낸 프레임에도 우클릭을 유지 중이면 즉시 가드로 이어집니다.
         UpdateGuardState();
-        if (!isAttacking && !isGuarding && !isPlayingParry)
+        if (IsMovingObject)
+        {
+            UpdateInteractionAnimation(isMoving);
+        }
+        else if (!isAttacking && !isGuarding && !isPlayingParry)
         {
             UpdateAnimation(isMoving ? moveDirection : lastDirection, isMoving);
         }
@@ -355,6 +364,7 @@ public partial class PlayerMove : MonoBehaviour, ICombatDamageable
 
     private void OnDestroy()
     {
+        ReleaseInteraction();
         DestroyRunAfterimages();
         CloseErrorCodex();
         if (parryFeedbackCanvas != null) Destroy(parryFeedbackCanvas.gameObject);

@@ -1,5 +1,44 @@
 # 스크립트 구조
 
+## EnemyController — 순찰/추적 근접 몬스터
+
+- `Assets/Scripts/EnemyController.cs`를 적 루트에 부착합니다. 기존 Stat/Range/Player 필드와 수치는 유지했습니다. EnemyStagger는 자동 추가하므로 MeleeEnemy/ProjectileEnemy를 중복 부착하지 마세요.
+- Player를 비우면 활성 PlayerMove를 찾습니다. 감지 → 추적 → 공격 준비(기본 0.4초) → 한 번 타격 → 쿨타임 순서입니다. 예고 시작에 방향/타격 위치를 고정하므로 범위 밖으로 피할 수 있습니다.
+- Attack Area Size는 공격 시작 범위, Attack Reach는 앞쪽 타격 중심 거리, Attack Hit Size는 실제 타격 크기입니다. 기즈모는 노란색=감지, 빨간색=공격 시작, 하늘색=실제 타격입니다.
+- 주황색 사각 예고가 끝나면 공격 이펙트와 타격이 함께 발생합니다. Attack Effect Sprite에 오른쪽 방향 이미지를 넣을 수 있습니다. 비우면 플레이어 공격 이미지, 그것도 없으면 빨간 임시 사각형을 사용합니다. 유지 시간 동안 피해는 반복되지 않습니다.
+- 기존 근접 패링/가드/반사 피해 처리를 사용합니다. 패링 성공 시 피해/가드 게이지 소모 없이 EnemyStagger 경직으로 이동/공격을 중단합니다. 경직 시간은 PlayerMove 패링 설정을 따릅니다.
+- 플레이어 공격은 ICombatDamageable을 통해 적 체력을 감소시킵니다. 여러 자식 Collider가 있어도 한 공격당 한 번만 피해를 줍니다. 체력 0이면 사망합니다.
+- Ignore Player Body Collision은 이 적과 플레이어 몸 충돌만 제외합니다. Collider를 끄거나 전역 충돌표를 바꾸지 않아 공격 검색/투사체 판정은 유지합니다. 비활성화 시 이 컴포넌트가 설정한 충돌 제외만 해제합니다.
+- Enemy 프리팹은 Enemy 레이어로 연결했습니다. Auto Assign Enemy Layer가 켜져 있으면 실행 중 Default Collider도 Enemy로 지정합니다. 커스텀 레이어는 PlayerMove의 Enemy Layer 마스크에 포함하세요.
+- 기존 적 피해 10 / 플레이어 최대 HP 10 / 테스트용 Restore Health On Defeat 설정은 그대로입니다. HP가 바로 가득 차면 자동 회복 옵션을 끄거나 테스트 피해량을 낮추세요.
+
+## F 상호작용 — 물체 잡고 옮기기
+
+- 가까운 물체에서 **F → 잡기**, **WASD → 함께 이동**, **F → 놓기**입니다. 누른 채 유지하지 않습니다.
+- 이동 입력에 맞춰 물체 반대편에 자리 잡은 뒤 함께 밀어 움직입니다. D는 물체 왼쪽, A는 오른쪽, W는 아래, S는 위에 섭니다. 대각선은 좌우 배치를 우선하며 실제 물체 이동은 대각선입니다. 가까운 Collider부터 선택하고 벽 너머의 대상은 잡지 않습니다.
+- 방향 전환 시 캐릭터가 걷기 속도로 물체 둘레의 모서리를 돌아갑니다. 자리 이동 중 물체는 멈추며, 도착한 뒤 함께 이동합니다. 키를 놓으면 자리 이동도 멈춥니다. 벽/장애물을 통과하지 않고, 양쪽 모서리 경로가 모두 막히면 멈추므로 다른 방향을 누르거나 F로 놓으세요. 범용 길찾기가 아니라 물체 주변의 짧은 경로만 검사합니다.
+- PlayerMove > 상호작용 > **잡기 간격**(기본 0.3)은 Collider 경계 사이의 여유 공간입니다. 잡는 순간에는 물체만 가능한 만큼 벌리며 이미 충분히 떨어져 있으면 그대로 둡니다. 이동 입력 시 캐릭터가 이 간격에 맞춰 자리를 잡습니다. 0은 최초 간격 보정을 끄지만 자리 이동에는 최소 충돌 여유 0.04를 둡니다. 스프라이트 투명 여백이 아닌 Collider 월드 사각 경계를 기준으로 합니다.
+- 옮길 물체 루트에 **MovableInteractable**을 붙이세요. BoxCollider2D가 자동으로 추가됩니다. Collider는 활성 상태이고 Is Trigger가 꺼져 있어야 합니다.
+- 빠른 테스트: Play 종료 → **Tools > Story > Interaction > Create Test Box**. 플레이어 오른쪽에 임시 상자를 만듭니다. 기존 씬에는 자동으로 상자를 추가하지 않습니다.
+- PlayerMove의 상호작용 설정: 키(F), 검색 거리(기본 1.5), 대상 레이어, 장애물 레이어, 안내 UI/범위 기즈모. 선택한 Player의 노란 원으로 범위를 확인합니다.
+- MovableInteractable의 Move Speed Multiplier(기본 0.6)는 잡은 동안 걷기 속도에 곱합니다. Space 달리기/대쉬, 공격, 가드, E 편집 전환, 1/2 오류 사용은 잡고 있는 동안 차단합니다. 놓은 뒤 정상 조작으로 돌아갑니다.
+- B 도감은 열 수 있고 잡은 상태로 일시 정지됩니다. 도감을 닫고 계속 옮기거나 F로 놓으세요.
+- 플레이어와 물체를 같은 거리만큼 이동하며 둘 중 하나라도 장애물에 닿으면 함께 멈춥니다. Trigger/레이어 충돌 제외 설정은 유지합니다. 검사 방식은 Collider 월드 사각 경계 기반이라 회전/복잡한 모양에서는 보수적으로 멈출 수 있습니다.
+- Rigidbody2D는 필수가 아닙니다. 있다면 잡는 동안 Kinematic으로 전환하고 놓을 때 기존 Body Type을 복구합니다. 잡기 전의 속도는 되살리지 않습니다. 자식에 별도 Rigidbody2D가 있는 복합 물체는 지원하지 않습니다.
+- 물체 또는 Player 비활성화/삭제, 앱 포커스 이탈 시 잡기가 해제됩니다. MovingEnemy처럼 독립적으로 Transform을 움직이는 스크립트와 같은 물체에 붙이지 마세요.
+- 환경 오류로 크기가 변한 물체도 현재 크기의 Collider를 기준으로 처리합니다. MovableInteractable만으로 오류 호환성이 생기는 것은 아닙니다. Paste가 필요하면 PasteTarget을 별도로 설정합니다.
+
+### 상호작용 애니메이션
+
+- `Assets/Player/Ani/Interact_Idle_Up/Down/Right.anim`: 잡은 채 정지.
+- `Assets/Player/Ani/Interact_Move_Up/Down/Right.anim`: 잡은 채 이동.
+- 기존 이동 스프라이트를 임시 프레임으로 사용합니다. 기존 Move/Attack/Guard/Parry 클립은 변경하지 않습니다.
+- Player를 선택하고 Ctrl+6 → 위 Interact 클립 선택 → **SpriteRenderer > Sprite** 트랙 프레임을 직접 교체하세요. Animator의 Motion에 다른 클립을 연결해도 됩니다.
+- 이동 입력에 따라 방향을 바꿉니다. W는 Up, S는 Down, D는 Right, A는 Right 클립 flipX입니다. 대각선은 일반 이동처럼 좌우를 우선하며, 키를 놓으면 마지막 방향의 Interact_Idle 클립을 사용합니다. 자리 이동 중에도 해당 방향의 Interact_Move 클립을 사용합니다.
+- 스크립트가 6개 상태를 직접 재생하며 놓으면 Player_Idle로 복귀합니다. Any State 전환이나 별도 입력 파라미터는 필요하지 않습니다.
+- `Tools > Story > Interaction > Set Up Animator`는 누락된 상태/클립만 복구하며 이미 편집한 프레임이나 연결된 Motion은 덮어쓰지 않습니다.
+- `Internal/Player/PlayerMove.Interaction.cs`, `Internal/InteractionMotion.cs`, `Editor/InteractionSetup.cs`는 별도 부착하지 않습니다.
+
 ## 같은 대상의 오류 2종 한 번에 Cut
 
 - 동일 GameObject에 서로 다른 오류 컴포넌트(예: GiantErrorEffect + AccelerationErrorEffect)를 활성화하면 한 번의 편집 모드 Cut으로 둘 다 획득합니다. 별도 묶음 컴포넌트는 필요하지 않습니다.

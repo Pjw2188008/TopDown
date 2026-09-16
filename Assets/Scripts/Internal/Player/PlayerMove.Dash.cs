@@ -19,7 +19,7 @@ public partial class PlayerMove
 
     private bool TryBeginDash(Vector2 movement)
     {
-        if (isDashing || isAttacking || isGuarding || isPlayingParry || IsGuardRequested()
+        if (IsMovingObject || isDashing || isAttacking || isGuarding || isPlayingParry || IsGuardRequested()
             || !guardHasFocus || isErrorCodexOpen || !isActiveAndEnabled || Time.timeScale <= 0f
             || isSelectingStoredError || isReplacingStoredError || environmentPaste.IsBusy
             || dashCooldownRemaining > 0f || animator == null || spriteRenderer == null) return false;

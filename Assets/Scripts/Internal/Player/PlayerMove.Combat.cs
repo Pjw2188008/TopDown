@@ -3,9 +3,11 @@ using UnityEngine;
 /// <summary>PlayerMove의 공격·피해·이펙트·기즈모 구현 부분입니다. 별도 컴포넌트가 아니므로 직접 부착하지 않습니다.</summary>
 public partial class PlayerMove
 {
+    /// <summary>근접 적의 임시 타격 이펙트가 재사용하는 읽기 전용 스프라이트입니다.</summary>
+    public Sprite AttackEffectVisual => attackEffectSprite;
     private void TryAttack()
     {
-        if (Time.time < nextAttackTime || isAttacking || isGuarding || isPlayingParry || isDashing || didDashThisFrame || IsGuardRequested())
+        if (IsMovingObject || Time.time < nextAttackTime || isAttacking || isGuarding || isPlayingParry || isDashing || didDashThisFrame || IsGuardRequested())
         {
             return;
         }
@@ -142,12 +144,18 @@ public partial class PlayerMove
         float angle = Mathf.Atan2(attackDirection.y, attackDirection.x) * Mathf.Rad2Deg;
         Collider2D[] hits = Physics2D.OverlapBoxAll(center, attackSizeSide * GetCurrentAttackScale(), angle, enemyLayer);
         var handledObjects = new System.Collections.Generic.HashSet<GameObject>();
+        var handledReceivers = new System.Collections.Generic.HashSet<ICombatDamageable>();
         foreach (Collider2D hit in hits)
         {
             if (isEditMode && isReplacingStoredError) break;
             if (!handledObjects.Add(hit.gameObject)) continue;
             if (hit.gameObject == gameObject || TryHandleErrorHit(hit)) continue;
-            if (!CombatDamageUtility.TryApplyDamage(hit.gameObject, attackDamage, gameObject))
+            if (CombatDamageUtility.TryFindReceiver(hit.gameObject, out ICombatDamageable receiver))
+            {
+                // 같은 적의 루트/자식 Collider가 여러 개여도 한 공격당 피해는 한 번만 줍니다.
+                if (handledReceivers.Add(receiver)) receiver.ReceiveDamage(attackDamage, gameObject, true);
+            }
+            else
                 Debug.Log("근접 공격 히트: " + hit.name);
         }
     }
@@ -181,6 +189,7 @@ public partial class PlayerMove
 
     private void OnDrawGizmosSelected()
     {
+        DrawInteractionGizmo();
         DrawErrorDiscoveryGizmo();
         DrawParryFeedbackGizmo();
         if (spriteRenderer == null)
