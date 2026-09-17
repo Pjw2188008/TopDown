@@ -1643,6 +1643,26 @@ PrefabInstance:
       value: Player
       objectReference: {fileID: 0}
     - target: {fileID: 8267755902489468697, guid: 7269fa672a599bc4d83d94012aa651ec, type: 3}
+      propertyPath: interactionGrabGap
+      value: 0.08
+      objectReference: {fileID: 0}
+    - target: {fileID: 8267755902489468697, guid: 7269fa672a599bc4d83d94012aa651ec, type: 3}
+      propertyPath: parryFeedbackImageOffset
+      value: 3.22
+      objectReference: {fileID: 0}
+    - target: {fileID: 8267755902489468697, guid: 7269fa672a599bc4d83d94012aa651ec, type: 3}
+      propertyPath: parryFeedbackImageSize.x
+      value: 96.4
+      objectReference: {fileID: 0}
+    - target: {fileID: 8267755902489468697, guid: 7269fa672a599bc4d83d94012aa651ec, type: 3}
+      propertyPath: parryFeedbackImageSize.y
+      value: 31.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 8267755902489468697, guid: 7269fa672a599bc4d83d94012aa651ec, type: 3}
+      propertyPath: movementBlockingLayers.m_Bits
+      value: 115
+      objectReference: {fileID: 0}
+    - target: {fileID: 8267755902489468697, guid: 7269fa672a599bc4d83d94012aa651ec, type: 3}
       propertyPath: interactionBlockingLayers.m_Bits
       value: 115
       objectReference: {fileID: 0}
