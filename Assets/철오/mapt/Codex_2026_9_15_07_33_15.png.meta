@@ -81,7 +81,7 @@ TextureImporter:
   spriteMeshType: 1
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
-  spritePixelsToUnits: 122
+  spritePixelsToUnits: 100
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
@@ -168,10 +168,10 @@ TextureImporter:
       name: Codex_2026_9_15_07_33_15_1
       rect:
         serializedVersion: 2
-        x: 0
-        y: 297
-        width: 516
-        height: 265
+        x: 14
+        y: 308
+        width: 48
+        height: 206
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -212,10 +212,10 @@ TextureImporter:
       name: Codex_2026_9_15_07_33_15_3
       rect:
         serializedVersion: 2
-        x: 836
-        y: 298
-        width: 160
-        height: 106
+        x: 943
+        y: 306
+        width: 41
+        height: 95
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -234,10 +234,10 @@ TextureImporter:
       name: Codex_2026_9_15_07_33_15_4
       rect:
         serializedVersion: 2
-        x: 1002
-        y: 297
-        width: 534
-        height: 266
+        x: 1009
+        y: 307
+        width: 64
+        height: 207
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -256,10 +256,10 @@ TextureImporter:
       name: Codex_2026_9_15_07_33_15_5
       rect:
         serializedVersion: 2
-        x: 0
-        y: 46
-        width: 238
-        height: 242
+        x: 15
+        y: 50
+        width: 212
+        height: 179
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -278,10 +278,10 @@ TextureImporter:
       name: Codex_2026_9_15_07_33_15_6
       rect:
         serializedVersion: 2
-        x: 242
-        y: 60
-        width: 125
-        height: 188
+        x: 251
+        y: 68
+        width: 41
+        height: 156
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -300,10 +300,10 @@ TextureImporter:
       name: Codex_2026_9_15_07_33_15_7
       rect:
         serializedVersion: 2
-        x: 370
-        y: 49
-        width: 285
-        height: 189
+        x: 377
+        y: 60
+        width: 73
+        height: 173
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -322,10 +322,10 @@ TextureImporter:
       name: Codex_2026_9_15_07_33_15_8
       rect:
         serializedVersion: 2
-        x: 654
-        y: 25
-        width: 265
-        height: 261
+        x: 669
+        y: 60
+        width: 154
+        height: 174
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -366,10 +366,10 @@ TextureImporter:
       name: Codex_2026_9_15_07_33_15_10
       rect:
         serializedVersion: 2
-        x: 1036
-        y: 29
-        width: 491
-        height: 257
+        x: 1049
+        y: 40
+        width: 189
+        height: 202
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -393,7 +393,7 @@ TextureImporter:
         width: 122
         height: 122
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -415,7 +415,7 @@ TextureImporter:
         width: 122
         height: 122
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -437,7 +437,7 @@ TextureImporter:
         width: 122
         height: 122
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -446,6 +446,116 @@ TextureImporter:
       bones: []
       spriteID: a6a8b899e5f0dd24e82bc726d8fd104a
       internalID: 149247511
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Codex_2026_9_15_07_33_15_14
+      rect:
+        serializedVersion: 2
+        x: 1091
+        y: 305
+        width: 51
+        height: 210
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: f89dea7dc803468488ab3180fe3033e1
+      internalID: 2041353440
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Codex_2026_9_15_07_33_15_15
+      rect:
+        serializedVersion: 2
+        x: 1462
+        y: 305
+        width: 60
+        height: 210
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: d094a277072e1f34fad9fe73c9b83b7d
+      internalID: -1970843586
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Codex_2026_9_15_07_33_15_16
+      rect:
+        serializedVersion: 2
+        x: 74
+        y: 310
+        width: 101
+        height: 204
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 0f1cf235d29507941bb67ce9a5f82e74
+      internalID: -1186873870
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Codex_2026_9_15_07_33_15_17
+      rect:
+        serializedVersion: 2
+        x: 379
+        y: 306
+        width: 129
+        height: 208
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 4777558cc9d9f75469dac67af352a010
+      internalID: -959103735
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Codex_2026_9_15_07_33_15_18
+      rect:
+        serializedVersion: 2
+        x: 74
+        y: 405
+        width: 101
+        height: 109
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 8007491a690985f4d885a08fef6fca9b
+      internalID: -580327407
       vertices: []
       indices: 
       edges: []
@@ -470,6 +580,11 @@ TextureImporter:
       Codex_2026_9_15_07_33_15_11: -1536112365
       Codex_2026_9_15_07_33_15_12: 1021245965
       Codex_2026_9_15_07_33_15_13: 149247511
+      Codex_2026_9_15_07_33_15_14: 2041353440
+      Codex_2026_9_15_07_33_15_15: -1970843586
+      Codex_2026_9_15_07_33_15_16: -1186873870
+      Codex_2026_9_15_07_33_15_17: -959103735
+      Codex_2026_9_15_07_33_15_18: -580327407
       Codex_2026_9_15_07_33_15_2: -2109563753238371366
       Codex_2026_9_15_07_33_15_3: -4366552271879954872
       Codex_2026_9_15_07_33_15_4: -2211999125124794449
