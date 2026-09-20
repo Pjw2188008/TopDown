@@ -349,10 +349,10 @@ TextureImporter:
       name: Codex_2026_9_20_04_11_05-Photoroom (1)_42
       rect:
         serializedVersion: 2
-        x: 637
-        y: 712
-        width: 347
-        height: 228
+        x: 651
+        y: 817
+        width: 96
+        height: 85
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -393,10 +393,10 @@ TextureImporter:
       name: Codex_2026_9_20_04_11_05-Photoroom (1)_44
       rect:
         serializedVersion: 2
-        x: 985
-        y: 711
-        width: 331
-        height: 230
+        x: 1001
+        y: 751
+        width: 71
+        height: 54
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -415,10 +415,10 @@ TextureImporter:
       name: Codex_2026_9_20_04_11_05-Photoroom (1)_45
       rect:
         serializedVersion: 2
-        x: 1316
-        y: 711
-        width: 208
-        height: 230
+        x: 1333
+        y: 855
+        width: 48
+        height: 47
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -481,10 +481,10 @@ TextureImporter:
       name: Codex_2026_9_20_04_11_05-Photoroom (1)_48
       rect:
         serializedVersion: 2
-        x: 1071
-        y: 479
-        width: 220
-        height: 232
+        x: 1080
+        y: 492
+        width: 69
+        height: 188
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -503,10 +503,10 @@ TextureImporter:
       name: Codex_2026_9_20_04_11_05-Photoroom (1)_49
       rect:
         serializedVersion: 2
-        x: 1320
-        y: 479
-        width: 204
-        height: 232
+        x: 1323
+        y: 564
+        width: 66
+        height: 102
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -525,9 +525,9 @@ TextureImporter:
       name: Codex_2026_9_20_04_11_05-Photoroom (1)_50
       rect:
         serializedVersion: 2
-        x: 1226
+        x: 1234
         y: 519
-        width: 80
+        width: 69
         height: 147
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
@@ -539,28 +539,6 @@ TextureImporter:
       bones: []
       spriteID: 29ea8fc30ddfa0fd0800000000000000
       internalID: -2374806782666559854
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: Codex_2026_9_20_04_11_05-Photoroom (1)_51
-      rect:
-        serializedVersion: 2
-        x: 1312
-        y: 487
-        width: 6
-        height: 178
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: a98cdadc8add79ff0800000000000000
-      internalID: -29311155479656294
       vertices: []
       indices: 
       edges: []
@@ -781,6 +759,94 @@ TextureImporter:
       bones: []
       spriteID: 52c794ab2885d3340800000000000000
       internalID: 4845126092614892581
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Codex_2026_9_20_04_11_05-Photoroom (1)_0
+      rect:
+        serializedVersion: 2
+        x: 768
+        y: 817
+        width: 86
+        height: 84
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 30bdc803edc13f4408ff176c22345529
+      internalID: -6068035026951300056
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Codex_2026_9_20_04_11_05-Photoroom (1)_1
+      rect:
+        serializedVersion: 2
+        x: 648
+        y: 723
+        width: 90
+        height: 94
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 4352624709f573e499e8c0c848ef7d3b
+      internalID: -820578500589476915
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Codex_2026_9_20_04_11_05-Photoroom (1)_2
+      rect:
+        serializedVersion: 2
+        x: 1043
+        y: 856
+        width: 105
+        height: 45
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 38510134eec293a4082bcb433a4467df
+      internalID: -2866908097692501534
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Codex_2026_9_20_04_11_05-Photoroom (1)_3
+      rect:
+        serializedVersion: 2
+        x: 1043
+        y: 869
+        width: 105
+        height: 32
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 870482840c0b0544c9b63b1e7aef7c1d
+      internalID: 8743168017834743795
       vertices: []
       indices: 
       edges: []
