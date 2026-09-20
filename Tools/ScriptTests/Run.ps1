@@ -16,9 +16,10 @@ New-Item -ItemType Directory -Path $testOutput | Out-Null
 $testExecutable = Join-Path $testOutput 'RegressionTests.exe'
 $compilerArguments = @('/nologo', '/target:exe', '/nostdlib', ('/r:' + $coreLibrary), ('/out:' + $testExecutable), (Join-Path $PSScriptRoot 'RegressionTests.cs'))
 foreach ($relativePath in @(
-    'Attachable\GiantErrorEffect.cs', 'Attachable\AccelerationErrorEffect.cs', 'Attachable\ReflectionErrorEffect.cs',
-    'Internal\ErrorDefinitions.cs', 'Internal\ErrorInventory.cs', 'Internal\ErrorEffectState.cs',
-    'Internal\IErrorSource.cs', 'Internal\AttackMath.cs', 'Internal\EnvironmentPasteSession.cs'
+    'Errors\Attachable\GiantErrorEffect.cs', 'Errors\Attachable\AccelerationErrorEffect.cs', 'Errors\Attachable\ReflectionErrorEffect.cs',
+    'Errors\Internal\ErrorDefinitions.cs', 'Errors\Internal\ErrorInventory.cs', 'Errors\Internal\ErrorEffectState.cs',
+    'Errors\Internal\IErrorSource.cs', 'Shared\Internal\AttackMath.cs', 'Errors\Internal\EnvironmentPasteSession.cs',
+    'Shared\Internal\SpriteTint.cs'
 )) {
     $compilerArguments += Join-Path $scriptDirectory $relativePath
 }

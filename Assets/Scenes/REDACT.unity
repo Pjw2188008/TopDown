@@ -731,6 +731,71 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1001 &669103322
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 4808539869694249862, guid: 3b180e7d4476819408b9c679ed43e79c, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 4.26
+      objectReference: {fileID: 0}
+    - target: {fileID: 4808539869694249862, guid: 3b180e7d4476819408b9c679ed43e79c, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4808539869694249862, guid: 3b180e7d4476819408b9c679ed43e79c, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4808539869694249862, guid: 3b180e7d4476819408b9c679ed43e79c, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4808539869694249862, guid: 3b180e7d4476819408b9c679ed43e79c, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4808539869694249862, guid: 3b180e7d4476819408b9c679ed43e79c, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4808539869694249862, guid: 3b180e7d4476819408b9c679ed43e79c, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4808539869694249862, guid: 3b180e7d4476819408b9c679ed43e79c, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4808539869694249862, guid: 3b180e7d4476819408b9c679ed43e79c, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4808539869694249862, guid: 3b180e7d4476819408b9c679ed43e79c, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4969722355340721167, guid: 3b180e7d4476819408b9c679ed43e79c, type: 3}
+      propertyPath: player
+      value: 
+      objectReference: {fileID: 6412291357195916940}
+    - target: {fileID: 4969722355340721167, guid: 3b180e7d4476819408b9c679ed43e79c, type: 3}
+      propertyPath: activationRadius
+      value: 3.85
+      objectReference: {fileID: 0}
+    - target: {fileID: 6426376559683717262, guid: 3b180e7d4476819408b9c679ed43e79c, type: 3}
+      propertyPath: m_Name
+      value: RangedEnemySpawner
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 3b180e7d4476819408b9c679ed43e79c, type: 3}
 --- !u!1 &878250849
 GameObject:
   m_ObjectHideFlags: 0
@@ -1384,10 +1449,9 @@ GameObject:
   - component: {fileID: 2200000003}
   - component: {fileID: 2200000004}
   - component: {fileID: 2200000005}
-  - component: {fileID: 2200000006}
   - component: {fileID: 2200000007}
   m_Layer: 6
-  m_Name: Reflection Projectile Enemy
+  m_Name: Reflection Error Test Source
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1523,29 +1587,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   triggerOnStart: 1
   reflectedTint: {r: 0.35, g: 0.9, b: 1, a: 1}
---- !u!114 &2200000006
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2200000001}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f47bac5d1e6f708b293456789abcdef0, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  target: {fileID: 6412291357195916940}
-  attackRange: 6
-  showAttackRangeGizmo: 1
-  fireInterval: 1.5
-  projectileSpeed: 5
-  projectileDamage: 1
-  projectileLifetime: 6
-  maxProjectileBounces: 2
-  projectileRadius: 0.12
-  projectileColor: {r: 1, g: 0.82, b: 0.15, a: 1}
-  maxHealth: 4
 --- !u!114 &2200000007
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1685,3 +1726,4 @@ SceneRoots:
   - {fileID: 2100000012}
   - {fileID: 2200000002}
   - {fileID: 878250853}
+  - {fileID: 669103322}

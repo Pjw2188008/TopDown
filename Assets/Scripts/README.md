@@ -1,5 +1,50 @@
 # 스크립트 구조
 
+## 기능별 폴더 안내
+
+```text
+Assets/Scripts/
+├─ Player/             플레이어 입력·행동·HUD·카메라
+│  ├─ Attachable/      PlayerMove, CameraFollow
+│  └─ Internal/        PlayerMove.* partial 구현
+├─ Errors/             오류 효과·호환성·보관함·도감
+│  ├─ Attachable/      오류 효과 3종, PasteTarget
+│  └─ Internal/        오류 규칙·모델·인터페이스
+├─ Enemies/
+│  ├─ Melee/
+│  │  ├─ Attachable/   EnemyController, MeleeEnemy
+│  │  └─ Internal/     EnemyController.* partial 구현
+│  ├─ Ranged/
+│  │  ├─ Attachable/   RangedEnemy, RangedEnemySpawner
+│  │  └─ Internal/     RangedEnemy.*, ReflectProjectile, Editor 도구
+│  └─ Shared/
+│     └─ Attachable/   MovingEnemy, EnemyStagger
+├─ Interaction/
+│  ├─ Attachable/      MovableInteractable
+│  └─ Internal/Editor/ 상호작용 Animator 설정 도구
+└─ Shared/
+   ├─ Attachable/      공용 빨간 피격 표시(DamageBlink)
+   └─ Internal/        공용 피해 전달·공격 계산·충돌 이동
+```
+
+- **Attachable**: 씬/프리팹에 붙이는 컴포넌트입니다. 모두 필수라는 뜻은 아닙니다. EnemyStagger처럼 다른 컴포넌트가 자동 추가하는 경우도 있습니다.
+- **Internal**: 직접 붙이지 않는 partial 구현, 모델, 유틸리티 또는 런타임 자동 생성 컴포넌트입니다. 삭제해도 된다는 뜻은 아닙니다.
+- **Internal/Editor**: Unity 편집기 메뉴 도구입니다. Editor 폴더 아래에 두어 빌드에서 제외하며 오브젝트에 부착하지 않습니다.
+- PlayerMove.*의 오류 입력·HUD는 플레이어의 일부이므로 Player/Internal에 둡니다. 재사용 가능한 오류 효과와 규칙은 Errors에 둡니다.
+- 각 기능 폴더의 README에 파일별 역할과 부착 위치를 정리했습니다.
+- 기존 스크립트의 .meta GUID, 클래스명, 직렬화 필드명과 기본값을 유지합니다. 기존 씬/프리팹에 스크립트를 다시 붙이지 마세요.
+- 프리팹·애니메이션·스프라이트는 기존 위치를 유지합니다. 이번 정리는 스크립트 및 문서에만 적용합니다.
+
+## 현재 원거리 몬스터 구성
+
+피격 시 플레이어·근접·원거리 몬스터는 공용 DamageBlink로 약 0.35초 빨간색으로 표시된 뒤 원래 색상으로 돌아옵니다. 캐릭터를 숨기지 않습니다. 실제 HP 감소 때만 자동 실행되며 무적 시간은 없습니다. 세부 설정은 Shared/README.md를 참고하세요.
+
+- `Enemies/Ranged/Attachable/RangedEnemy.cs`: 이동, 공격 애니메이션, 주기적 발사와 체력. 원거리 적 루트에 부착합니다.
+- `Enemies/Ranged/Attachable/RangedEnemySpawner.cs`: 플레이어가 감지 범위에 진입하면 적 프리팹을 생성합니다.
+- `Enemies/Ranged/Internal/ReflectProjectile.cs`: 탄환 한 발의 이동·충돌·피해·패링/반사. 적이 자동 추가하므로 직접 부착하지 않습니다.
+- 씬에는 `Assets/RangedEnemy/RangedEnemySpawner.prefab`을 배치합니다. 세부 설정은 `Assets/RangedEnemy/README.md`를 확인하세요.
+- 이전 테스트용 발사 컴포넌트와 씬 연결은 제거했습니다. `REDACT`의 `Reflection Error Test Source`는 반사·거대화 오류 원본만 남긴 정적 테스트 오브젝트이며 공격하지 않습니다.
+
 ## 플레이어 Rigidbody2D / 투사체 충돌
 
 - ReflectProjectile의 충돌 검색은 다른 ReflectProjectile(자식 Collider 포함)을 제외합니다. 서로 지나가며, 그 뒤의 벽/플레이어/적 타격과 반사/패링은 계속 검사합니다.
@@ -10,7 +55,7 @@
 
 ## 2026-09-16 리팩토링
 
-- 씬에 붙이는 `EnemyController.cs`의 경로/GUID와 Inspector 필드는 유지했습니다. 내부 구현은 `Internal/Enemy/EnemyController.Movement.cs`, `.Combat.cs`, `.Collisions.cs`, `.Effects.cs`로 분리했습니다. 이 partial 파일들은 별도로 부착하지 않습니다.
+- 씬에 붙이는 `EnemyController.cs`의 GUID와 Inspector 필드는 유지했습니다. 본체 경로는 `Enemies/Melee/Attachable`이며 내부 구현은 `Enemies/Melee/Internal/EnemyController.Movement.cs`, `.Combat.cs`, `.Collisions.cs`, `.Effects.cs`로 분리했습니다. 이 partial 파일들은 별도로 부착하지 않습니다.
 - `PlayerMove.Interaction.cs`는 F 입력/안내/애니메이션, `PlayerMove.InteractionPositioning.cs`는 잡기 간격/방향별 자리 이동을 담당합니다. PlayerMove 연결은 그대로입니다.
 - 몬스터 충돌 검색은 재사용 List로 처리하고 플레이어 Collider를 한 프레임에 한 번만 수집합니다. 대상이 바뀌지 않으면 PlayerMove 참조도 재사용합니다. 동적으로 추가/활성화된 Collider는 계속 반영합니다.
 - 상호작용 충돌/경계 계산과 피해 수신자 탐색은 Unity ListPool을 사용하고 finally에서 반환합니다. 공격 중복 방지 HashSet도 재사용합니다. 기존 피해 순서/패링/충돌 필터는 유지합니다.
@@ -18,7 +63,7 @@
 
 ## EnemyController — 순찰/추적 근접 몬스터
 
-- `Assets/Scripts/EnemyController.cs`를 적 루트에 부착합니다. 기존 Stat/Range/Player 필드와 수치는 유지했습니다. EnemyStagger는 자동 추가하므로 MeleeEnemy/ProjectileEnemy를 중복 부착하지 마세요.
+- `Assets/Scripts/Enemies/Melee/Attachable/EnemyController.cs`를 적 루트에 부착합니다. 기존 Stat/Range/Player 필드와 수치는 유지했습니다. EnemyStagger는 자동 추가하므로 MeleeEnemy/RangedEnemy를 중복 부착하지 마세요.
 - Player를 비우면 활성 PlayerMove를 찾습니다. 감지 → 추적 → 공격 준비(기본 0.4초) → 한 번 타격 → 쿨타임 순서입니다. 예고 시작에 방향/타격 위치를 고정하므로 범위 밖으로 피할 수 있습니다.
 - Attack Area Size는 공격 시작 범위, Attack Reach는 앞쪽 타격 중심 거리, Attack Hit Size는 실제 타격 크기입니다. 기즈모는 노란색=감지, 빨간색=공격 시작, 하늘색=실제 타격입니다.
 - 주황색 사각 예고가 끝나면 공격 이펙트와 타격이 함께 발생합니다. Attack Effect Sprite에 오른쪽 방향 이미지를 넣을 수 있습니다. 비우면 플레이어 공격 이미지, 그것도 없으면 빨간 임시 사각형을 사용합니다. 유지 시간 동안 피해는 반복되지 않습니다.
@@ -53,7 +98,7 @@
 - 이동 입력에 따라 방향을 바꿉니다. W는 Up, S는 Down, D는 Right, A는 Right 클립 flipX입니다. 대각선은 일반 이동처럼 좌우를 우선하며, 키를 놓으면 마지막 방향의 Interact_Idle 클립을 사용합니다. 자리 이동 중에도 해당 방향의 Interact_Move 클립을 사용합니다.
 - 스크립트가 6개 상태를 직접 재생하며 놓으면 Player_Idle로 복귀합니다. Any State 전환이나 별도 입력 파라미터는 필요하지 않습니다.
 - `Tools > Story > Interaction > Set Up Animator`는 누락된 상태/클립만 복구하며 이미 편집한 프레임이나 연결된 Motion은 덮어쓰지 않습니다.
-- `Internal/Player/PlayerMove.Interaction.cs`, `Internal/InteractionMotion.cs`, `Editor/InteractionSetup.cs`는 별도 부착하지 않습니다.
+- `Player/Internal/PlayerMove.Interaction.cs`, `Shared/Internal/InteractionMotion.cs`, `Interaction/Internal/Editor/InteractionSetup.cs`는 별도 부착하지 않습니다.
 
 ## 같은 대상의 오류 2종 한 번에 Cut
 
@@ -74,16 +119,16 @@
 - 기존 좌측 하단 게이지와 텍스트형 보관함은 제거해 중복 표시하지 않습니다. 교체 안내는 슬롯 아래, 오류 발견 알림은 화면 하단에 표시합니다.
 - PlayerMove > 임시 플레이어 HUD의 `Show Player Hud`로 전체 표시를 끄고 `Player Hud Scale`로 크기를 조절할 수 있습니다.
 - 작은 Game 뷰에서는 자동 축소합니다. 카메라 Size에 영향받지 않으며 별도 Canvas/프리팹/이미지 연결 없이 Play하면 나타납니다.
-- `Internal/Player/PlayerMove.Hud.cs`는 표시 전용 partial 구현이므로 직접 부착하지 않습니다. HP/회복/스태미나 비용 등 게임 규칙은 변경하지 않습니다.
+- `Player/Internal/PlayerMove.Hud.cs`는 표시 전용 partial 구현이므로 직접 부착하지 않습니다. HP/회복/스태미나 비용 등 게임 규칙은 변경하지 않습니다.
 
-## 투사체 몬스터 공격 범위
+## 원거리 몬스터 공격 범위
 
-- `ProjectileEnemy → Attack Range` 안에 플레이어가 있을 때만 투사체를 발사합니다(기본 반경 6 월드 단위).
+- `RangedEnemy → Attack Range` 안에 플레이어가 있을 때만 공격을 시작합니다(기본 반경 5 월드 단위).
 - 몬스터 중심과 플레이어 중심의 XY 거리로 판정하며 경계도 포함합니다. 벽/시야 검사는 추가하지 않습니다.
 - 범위 밖으로 나가면 새 발사를 멈춥니다. 이미 발사된 투사체는 기존 수명/충돌 규칙대로 남습니다.
-- 기존 `Fire Interval`과 경직 제한은 유지합니다. 범위 밖에서도 발사 쿨타임은 흐르므로 준비된 상태에서 들어오면 바로 발사하고, 들락날락해도 발사 간격을 무시하지 않습니다.
-- 몬스터 선택 → Scene의 Gizmos 켜기: 빨간색 원이 공격 범위입니다. `Show Attack Range Gizmo`로 표시를 끌 수 있습니다.
-- 기존 이동/반사/체력/씬 배치는 변경하지 않습니다. 기존 ProjectileEnemy에 새 설정이 자동으로 추가됩니다.
+- `Attack Interval`은 공격 시작 사이 최소 간격이며, `First Attack Delay`는 생성 직후 대기 시간입니다. 경직 중에는 공격을 취소합니다.
+- 몬스터 선택 → Scene의 Gizmos 켜기: 빨간색은 공격 범위, 노란색은 접근을 멈추는 거리입니다. 스포너의 청록색 원은 생성 감지 범위입니다.
+- 공격 클립의 설정된 진행률에 한 발을 발사하며, 발사 순간 플레이어가 있던 위치를 향해 직진합니다. 발사 후 추적하지 않고, 기본 속도는 10입니다.
 
 ## 오류 슬롯 단축키 (1 / 2)
 
@@ -109,7 +154,7 @@
 - 대쉬는 플레이어 Collider2D의 경로를 검사하여 `Dash Blocking Layers`의 장애물 앞에서 멈춥니다. Trigger와 충돌 무시 대상은 통과합니다. 기존 걷기/달리기의 이동 충돌 방식은 변경하지 않습니다.
 - 무적/피해 감소/새 애니메이션은 추가하지 않습니다. 기존 이동 클립을 사용하고 대쉬 중에도 피해를 받을 수 있습니다.
 - 대쉬 잔상은 기존 잔상 풀을 공유하고 기본 0.035초 간격으로 생성합니다. `Show Run Afterimages`를 끄면 달리기/대쉬 잔상 모두 꺼집니다.
-- `Internal/Player/PlayerMove.Dash.cs`는 PlayerMove partial이므로 별도로 부착하지 않습니다.
+- `Player/Internal/PlayerMove.Dash.cs`는 PlayerMove partial이므로 별도로 부착하지 않습니다.
 
 ## 달리기 (Space 유지)
 
@@ -121,7 +166,7 @@
   기존 Sprite/Material을 공유하여 Sprite Atlas도 그대로 사용합니다. 별도 이미지/프리팹을 넣을 필요가 없습니다.
 - 최대 12개 렌더러를 재사용합니다. 잔상에는 충돌/공격/오류가 없으며 환경 Paste 대상 검색에서도 제외합니다.
 - 게임 시간에 따라 사라져 편집 모드에서는 느려지고 도감에서는 정지합니다. Player 비활성화 시 숨기고 파괴 시 정리합니다.
-- `Internal/Player/PlayerMove.RunAfterimages.cs`는 partial 구현이므로 따로 부착하지 않습니다.
+- `Player/Internal/PlayerMove.RunAfterimages.cs`는 partial 구현이므로 따로 부착하지 않습니다.
 
 - WASD 이동 중 Space를 누르고 있으면 이동 속도만 증가하고, 놓으면 즉시 걷기 속도로 복귀합니다.
 - PlayerMove의 `Run Speed Multiplier`로 배율을 조절합니다(기본 1.5배). Move Speed가 5이면 달리기는 7.5입니다.
@@ -152,7 +197,7 @@
 - **이번 구현은 발견/도감만 추가합니다. 기존 Cut/Paste 조건은 유지하며 패링·퍼즐을 통한 별도 노출 조건은 아직 추가하지 않았습니다.**
 - 테스트 초기화: PlayerMove 컴포넌트 컨텍스트 메뉴 → `오류 도감/발견 기록 초기화 (저장 기록 포함)`.
   오류 도감 키 3개만 삭제하며 다른 세이브/설정은 유지합니다. 실행 중 범위 안에 있으면 다음 검사에서 다시 발견하므로 멀리 이동한 뒤 초기화하세요.
-- `Internal/ErrorCodex.cs`: 도감 모델/오류 설명. `Internal/Player/PlayerMove.ErrorCodex.cs`: 발견/저장/입력/UI. 둘 다 별도 부착하지 않습니다.
+- `Errors/Internal/ErrorCodex.cs`: 도감 모델/오류 설명. `Player/Internal/PlayerMove.ErrorCodex.cs`: 발견/저장/입력/UI. 둘 다 별도 부착하지 않습니다.
 
 ### 도감 확인 순서
 
@@ -167,17 +212,18 @@
 씬/프리팹/Animator/스프라이트는 수정하지 않았습니다.
 
 ## 부착할 파일
-Attachable의 기존 컴포넌트를 그대로 사용합니다. 새 파일을 다시 붙일 필요는 없습니다.
+각 기능 폴더의 Attachable에 있는 기존 컴포넌트를 그대로 사용합니다. 새 파일을 다시 붙일 필요는 없습니다.
 - PlayerMove.cs: Inspector 설정 및 Start/Update 실행 순서.
 - CameraFollow.cs: LateUpdate에서 플레이어 위치 + Offset으로 즉시 추적합니다. 보간 지연과 Smooth Speed 설정은 제거했습니다.
   Offset X/Y가 0이면 플레이어 Transform을 화면 중앙에 유지합니다. 카메라 Size와 기존 Offset은 변경하지 않습니다.
 - MovingEnemy.cs: 왕복 이동과 가속 적용.
-- ProjectileEnemy.cs: 발사 주기·적 체력·투사체 생성.
+- RangedEnemy.cs: 원거리 적 이동·공격 애니메이션·발사 주기·체력·투사체 생성.
+- RangedEnemySpawner.cs: 감지 범위 진입 시 원거리 적 생성.
 - GiantErrorEffect.cs / AccelerationErrorEffect.cs / ReflectionErrorEffect.cs: 대상의 실제 효과.
 - PasteTarget.cs: Paste 대상 분류.
 
 ## 직접 부착하지 않는 파일
-Internal/Player의 PlayerMove.*.cs는 하나의 PlayerMove 클래스를 나눈 partial 구현입니다.
+Player/Internal의 PlayerMove.*.cs는 하나의 PlayerMove 클래스를 나눈 partial 구현입니다.
 컴포넌트가 추가된 것이 아니며 같은 필드와 상태를 공유합니다.
 - Movement: 이동/조준.
 - Combat: 공격 애니메이션/판정/이펙트/피해/기즈모.
@@ -188,14 +234,14 @@ Internal/Player의 PlayerMove.*.cs는 하나의 PlayerMove 클래스를 나눈 p
 - ErrorInteractions: Cut와 환경 Paste.
 - CombatErrors: 전투 Paste와 버프 시간.
 
-Internal의 독립 규칙:
+각 기능 폴더의 Internal에 있는 독립 규칙:
 - ErrorInventory: 최대 2개, 종류 중복 금지, 배율 보관, 검증 후 교체.
 - ErrorDefinitions / ErrorRules: 오류 종류, 표시 이름, 호환 대상 표.
 - ErrorEffectState: 원본/붙여넣기 출처 및 활성 여부.
 - IErrorSource: 오류를 공통 방식으로 제거하는 규약. IAccelerationTarget도 이 파일에 있습니다.
 - AttackMath: 4방향 공격과 끝에서 세 번째 프레임 시점 계산.
 - CombatDamage: 피해 수신자 탐색/전달.
-- ReflectProjectile: ProjectileEnemy가 자동 부착하는 투사체 컴포넌트.
+- ReflectProjectile: RangedEnemy가 자동 부착하는 공용 투사체 컴포넌트.
 
 ## 유지한 게임 규칙
 - 이동은 8방향, 대각선 이동 이미지는 좌우 클립.
@@ -254,7 +300,7 @@ Unity에서 Play를 끈 상태로 변경분을 가져오고 컴파일 후 다음
 - 성공 시 체력 및 가드 게이지 소모 없음. 창이 지나거나 같은 입력의 두 번째 공격은 기존 가드 규칙(게이지 -10).
 - 공격 중/편집 모드/포커스 없음/게이지 0/가드 브레이크 재입력 대기 중에는 패링 불가.
 - 근접: MeleeEnemy가 ReceiveMeleeAttack으로 피해 전달 → 패링 성공 → EnemyStagger에 Parry Stun Duration(기본 1초) 적용.
-- EnemyStagger가 켜진 동안 MovingEnemy의 순찰과 MeleeEnemy/ProjectileEnemy의 공격이 중단됩니다. 가속 오류와 별개입니다.
+- EnemyStagger가 켜진 동안 MovingEnemy의 순찰과 MeleeEnemy/RangedEnemy의 공격이 중단됩니다. 가속 오류와 별개입니다.
 - 원거리: ReflectProjectile의 실제 탄환을 발사자 방향으로 되돌리고 소유자를 플레이어로 변경합니다.
   벽 반사 횟수와 관계없이 패링할 수 있고, 기존 속도/피해/남은 수명은 유지합니다.
   패링한 탄환도 명중 대상의 반사 오류를 따릅니다. 반사 오류 활성 적에게 맞으면 새 소유자인 플레이어에게 피해가 돌아옵니다.
@@ -281,6 +327,6 @@ Unity에서 Play를 끈 상태로 변경분을 가져오고 컴파일 후 다음
 ### 근접 패링 테스트 적 구성
 씬/기존 적 구성은 자동 변경하지 않았습니다. 별도 적 GameObject에 SpriteRenderer와 MeleeEnemy를 붙이세요.
 EnemyStagger와 BoxCollider2D는 자동 추가됩니다. 순찰하려면 같은 루트에 MovingEnemy도 추가하세요.
-ProjectileEnemy와 MeleeEnemy를 같은 오브젝트에 함께 붙이지 마세요(체력 수신자 중복).
+RangedEnemy와 MeleeEnemy를 같은 오브젝트에 함께 붙이지 마세요(체력 수신자 중복).
 공격 범위에 들어오면 '! 근접 공격 준비' 표시 후 타격합니다. Windup Duration을 조절해서 타이밍을 시험하세요.
 미래의 근접 공격 스크립트도 PlayerMove.ReceiveMeleeAttack을 호출하고 EnemyStagger.IsStunned 동안 공격을 중단해야 합니다.

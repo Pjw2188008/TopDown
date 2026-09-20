@@ -28,8 +28,9 @@ namespace UnityEngine
     }
     public struct Color
     {
-        public Color(float r, float g, float b, float a) { }
-        public static Color white => new Color();
+        public float r, g, b, a;
+        public Color(float r, float g, float b, float a) { this.r = r; this.g = g; this.b = b; this.a = a; }
+        public static Color white => new Color(1f, 1f, 1f, 1f);
     }
     public class SpriteRenderer { public Color color; }
     public class AnimationCurve
