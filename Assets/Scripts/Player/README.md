@@ -18,6 +18,7 @@ PlayerMove.* 파일은 PlayerMove 하나를 나눈 partial 구현이며 같은 �
 - CombatErrors: 전투 오류 적용.
 - ErrorCodex: 발견·도감 입력·저장·UI.
 - Hud: 임시 HUD 표시.
+- InstantDeath: 레이저 즉사 후 동작 정리, 최초 생성 위치(또는 Instant Death Respawn Point)로 복귀, HP 회복. 일반 피해 처리와 별개입니다.
 
 오류 규칙 모델 자체는 ../Errors, 옮길 수 있는 물체 컴포넌트는 ../Interaction에 있습니다.
 

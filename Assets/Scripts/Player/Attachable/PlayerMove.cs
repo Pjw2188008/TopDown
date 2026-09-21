@@ -273,6 +273,7 @@ public partial class PlayerMove : MonoBehaviour, ICombatDamageable
 
     private void Update()
     {
+        if (IsInstantlyDead) return;
         didRunThisFrame = false;
         didDashThisFrame = false;
         // 도감 클릭이 공격/Cut/Paste 입력으로 전달되지 않도록 가장 먼저 처리합니다.

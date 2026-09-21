@@ -12,6 +12,7 @@ public partial class PlayerMove
 
     private void Awake()
     {
+        CaptureRespawnPosition();
         EnsureProjectileCollider();
         EnsurePlayerPhysics();
     }

@@ -233,6 +233,7 @@ public partial class PlayerMove
 
     public bool ReceiveDamage(float amount, GameObject source, bool canReflect)
     {
+        if (IsInstantlyDead) return false;
         if (amount <= 0f)
         {
             return false;

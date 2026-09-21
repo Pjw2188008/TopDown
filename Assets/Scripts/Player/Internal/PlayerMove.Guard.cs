@@ -100,6 +100,7 @@ public partial class PlayerMove
 
     private void LateUpdate()
     {
+        if (IsInstantlyDead) return;
         UpdateRunAfterimages(Time.deltaTime);
         if (isErrorCodexOpen) return;
         UpdateParryFeedbackImage();

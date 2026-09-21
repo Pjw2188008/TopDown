@@ -19,6 +19,9 @@ Assets/Scripts/
 │  │  └─ Internal/     RangedEnemy.*, ReflectProjectile, Editor 도구
 │  └─ Shared/
 │     └─ Attachable/   MovingEnemy, EnemyStagger
+├─ Hazards/            즉사 레이저·사물 차단
+│  ├─ Attachable/      LaserHazard, LaserBlocker
+│  └─ Internal/Editor/ 레이저 생성 메뉴
 ├─ Interaction/
 │  ├─ Attachable/      MovableInteractable
 │  └─ Internal/Editor/ 상호작용 Animator 설정 도구
