@@ -103,7 +103,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1eac61666618285439847b596700c688, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  moveSpeed: 5
+  moveSpeed: 4
   runSpeedMultiplier: 1.5
   dashSpeed: 18
   dashDuration: 0.16
@@ -167,6 +167,20 @@ MonoBehaviour:
   attackEffectDuration: 0.18
   attackEffectSizeMultiplier: {x: 1, y: 1}
   attackEffectSortingOrderOffset: 1
+  interactionKey: 20
+  interactionRange: 1.5
+  interactionGrabGap: 0.3
+  interactionLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  interactionBlockingLayers:
+    serializedVersion: 2
+    m_Bits: 115
+  showInteractionPrompt: 1
+  showInteractionGizmo: 1
+  movementBlockingLayers:
+    serializedVersion: 2
+    m_Bits: 115
 --- !u!95 &5072769700244613530
 Animator:
   serializedVersion: 7
@@ -254,8 +268,8 @@ BoxCollider2D:
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 1, y: 1}
-    newSize: {x: 1, y: 1}
+    oldSize: {x: 0.5234375, y: 0.9296875}
+    newSize: {x: 1.2407408, y: 2.2037036}
     adaptiveTilingThreshold: 0.5
     drawMode: 0
     adaptiveTiling: 0
