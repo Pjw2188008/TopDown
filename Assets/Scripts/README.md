@@ -5,8 +5,8 @@
 ```text
 Assets/Scripts/
 ├─ Player/             플레이어 입력·행동·HUD·카메라
-│  ├─ Attachable/      PlayerMove, CameraFollow
-│  └─ Internal/        PlayerMove.* partial 구현
+│  ├─ Attachable/      PlayerMove, CameraFollow, CameraBoundsArea
+│  └─ Internal/        PlayerMove.* partial, 카메라 경계 계산·Editor 도구
 ├─ Errors/             오류 효과·호환성·보관함·도감
 │  ├─ Attachable/      오류 효과 3종, PasteTarget
 │  └─ Internal/        오류 규칙·모델·인터페이스
@@ -214,8 +214,9 @@ Assets/Scripts/
 ## 부착할 파일
 각 기능 폴더의 Attachable에 있는 기존 컴포넌트를 그대로 사용합니다. 새 파일을 다시 붙일 필요는 없습니다.
 - PlayerMove.cs: Inspector 설정 및 Start/Update 실행 순서.
-- CameraFollow.cs: LateUpdate에서 플레이어 위치 + Offset으로 즉시 추적합니다. 보간 지연과 Smooth Speed 설정은 제거했습니다.
-  Offset X/Y가 0이면 플레이어 Transform을 화면 중앙에 유지합니다. 카메라 Size와 기존 Offset은 변경하지 않습니다.
+- CameraFollow.cs: LateUpdate에서 플레이어 위치 + Offset으로 즉시 추적하며 현재 CameraBoundsArea 안으로 화면 전체를 제한합니다.
+  구역이 없으면 기존 자유 추적입니다. 화면보다 작은 구역에서는 기본적으로 Size를 줄이며 큰 구역으로 이동하면 복구합니다.
+- CameraBoundsArea.cs: 빈 오브젝트에 부착하는 구역 경계. Hierarchy의 Story → Camera Bounds Area로 만들고 Scene 사각형 핸들을 조절합니다. 상세 설정은 Player/README.md를 참고하세요.
 - MovingEnemy.cs: 왕복 이동과 가속 적용.
 - RangedEnemy.cs: 원거리 적 이동·공격 애니메이션·발사 주기·체력·투사체 생성.
 - RangedEnemySpawner.cs: 감지 범위 진입 시 원거리 적 생성.
