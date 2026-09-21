@@ -4,6 +4,20 @@ using UnityEngine;
 /// <summary>PlayerMove의 오류 보관·교체 구현 부분입니다. 별도 컴포넌트가 아니므로 직접 부착하지 않습니다.</summary>
 public partial class PlayerMove
 {
+    // 튜토리얼은 입력 클릭이나 보관함 개수 대신 실제 저장 완료 기록을 읽습니다.
+    public bool IsInEditMode => isEditMode;
+    public int SuccessfulCutVersion { get; private set; }
+    public string LastSuccessfulCutNames { get; private set; } = string.Empty;
+    private struct CutReceipt { public int version; public string names; }
+    private readonly Dictionary<int, CutReceipt> successfulCutsByTarget = new Dictionary<int, CutReceipt>();
+
+    /// <summary>지정 오브젝트(또는 자식)의 원본을 실제 저장한 기록만 조회합니다. 실패/취소는 기록되지 않습니다.</summary>
+    public bool TryGetTargetCutAfter(int targetInstanceId, int afterVersion, out string names)
+    {
+        if (successfulCutsByTarget.TryGetValue(targetInstanceId, out CutReceipt record) && record.version > afterVersion)
+        { names = record.names; return true; }
+        names = string.Empty; return false;
+    }
     private readonly List<MonoBehaviour> pendingCutSources = new List<MonoBehaviour>();
     private readonly List<StoredErrorType> pendingCutTypes = new List<StoredErrorType>();
 
@@ -93,12 +107,20 @@ public partial class PlayerMove
             return;
         }
         string names = GetPendingCutDisplayName();
+        // 원본 제거 과정에서 오브젝트가 사라져도 어느 대상에서 가져왔는지 보존합니다.
+        var targetIds = new HashSet<int>();
+        foreach (MonoBehaviour component in pendingCutSources)
+            for (Transform source = component.transform; source != null; source = source.parent)
+                targetIds.Add(source.gameObject.GetInstanceID());
         StoredErrorType first = pendingCutTypes[0];
         // 보관함 전체 반영에 성공한 경우에만 함께 선택한 원본 오류들을 제거합니다.
         foreach (MonoBehaviour component in pendingCutSources) ((IErrorSource)component).RemoveError();
         CancelStoredErrorReplacement(null);
         selectedStoredErrorIndex = GetStoredErrorIndex(first);
         RefreshStoredErrorSelection();
+        LastSuccessfulCutNames = names;
+        SuccessfulCutVersion++;
+        foreach (int id in targetIds) successfulCutsByTarget[id] = new CutReceipt { version = SuccessfulCutVersion, names = names };
         Debug.Log(names + " 오류를 한 번에 Cut해 보관함에 저장했습니다.");
     }
 
