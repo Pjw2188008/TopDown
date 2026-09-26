@@ -1161,7 +1161,7 @@ TextureImporter:
         serializedVersion: 2
         x: 263
         y: 434
-        width: 83
+        width: 66
         height: 148
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
@@ -1855,6 +1855,28 @@ TextureImporter:
       bones: []
       spriteID: ecba9bbd549770840800000000000000
       internalID: 5190250436513868750
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Codex_2026_9_20_04_19_28-Photoroom_0
+      rect:
+        serializedVersion: 2
+        x: 287
+        y: 443
+        width: 35
+        height: 134
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 7571fb5045d511347ab2e11798295c88
+      internalID: -7440472788650450005
       vertices: []
       indices: 
       edges: []
