@@ -2,10 +2,9 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
-using UnityEngine.InputSystem;
 
 /// <summary>
-/// 시작 안내 → 지정 구역 도착 → 다음 안내를 관리합니다. 빈 Tutorial 오브젝트에 부착합니다.
+/// 이동 구역 도착, 오류 조작, 허수아비 공격/패링 성공에 따른 안내를 관리합니다. 빈 Tutorial 오브젝트에 부착합니다.
 /// 플레이어 입력/속도/시간을 변경하지 않고, 지정한 도착 구역도 자동 생성/수정하지 않습니다.
 /// </summary>
 [DisallowMultipleComponent]
@@ -13,13 +12,19 @@ using UnityEngine.InputSystem;
 public sealed partial class TutorialSequence : MonoBehaviour
 {
     // 0번 값을 유지하여 기존 이동 튜토리얼의 직렬화 데이터와 호환합니다.
-    public enum CompletionCondition { ArrivalArea = 0, EditModeEnabled = 1, CutSucceeded = 2, Manual = 3, Confirm = 4 }
+    public enum CompletionCondition
+    {
+        ArrivalArea = 0, EditModeEnabled = 1, CutSucceeded = 2, Manual = 3,
+        // 기존 씬의 4번 및 코드 참조를 유지하되, 확인 키 대신 표시 시간이 끝나면 자동 진행합니다.
+        [InspectorName("Auto Advance (완료 안내)")] Confirm = 4,
+        EnvironmentPasteSucceeded = 5, TrainingAttackHit = 6, TrainingProjectileParried = 7
+    }
     [Serializable]
     public sealed class Step
     {
-        [Tooltip("완료 조건: ArrivalArea=구역 도착, EditModeEnabled=편집 모드 활성, CutSucceeded=실제 Cut 저장 성공, Manual=외부 호출, Confirm=Enter 확인.")]
+        [Tooltip("완료 조건: ArrivalArea=구역 도착, EditModeEnabled=편집 모드 활성, CutSucceeded=Cut 성공, Manual=외부 호출, Auto Advance(기존 Confirm)=안내 시간 후 자동 진행, EnvironmentPasteSucceeded=환경 Paste, TrainingAttackHit=허수아비 공격 적중, TrainingProjectileParried=허수아비 탄환 패링.")]
         public CompletionCondition completionCondition;
-        [Tooltip("안내를 보여 줄 최소 실제 시간(초)입니다. 편집 모드 슬로모션에는 영향받지 않으며 게임 일시 정지 중에는 흐르지 않습니다.")]
+        [Tooltip("안내를 보여 줄 최소 실제 시간(초). 완료 안내는 이 시간 후 자동 진행합니다(0이면 다음 갱신에 즉시 진행). 다른 단계는 성공 조건도 만족해야 합니다. 슬로모션에는 영향받지 않으며 일시 정지 중에는 흐르지 않습니다.")]
         [Min(0f)] public float minimumDisplaySeconds;
         [Tooltip("이 단계에서 화면에 표시할 안내입니다.")]
         [TextArea(2, 6)] public string message;
@@ -31,6 +36,18 @@ public sealed partial class TutorialSequence : MonoBehaviour
         public string cutTargetDisplayName;
         [Tooltip("선택적 목표 표식 위치입니다. 비우면 대상 Renderer/Collider의 위쪽에 표시합니다.")]
         public Transform cutTargetMarkerAnchor;
+        [Tooltip("EnvironmentPasteSucceeded에서 붙여넣을 오류입니다. 기본은 Giant(거대화)이며 None은 완료되지 않습니다.")]
+        public StoredErrorType pasteError = StoredErrorType.Giant;
+        [Tooltip("환경 Paste를 성공해야 할 사물입니다. 이 오브젝트 또는 자식의 PasteTarget에 적용해야 합니다. 비우면 해당 종류 오류의 모든 환경 Paste를 인정합니다.")]
+        public GameObject pasteTarget;
+        [Tooltip("Paste 대상의 안내용 이름입니다. 예: 작은 상자. 해당 단계 Message의 {target}을 대체합니다.")]
+        public string pasteTargetDisplayName;
+        [Tooltip("선택적 Paste 목표 표식 위치입니다. 비우면 대상 Renderer/Collider의 위쪽에 표시합니다.")]
+        public Transform pasteTargetMarkerAnchor;
+        [Tooltip("공격/패링 연습용 허수아비입니다. 도착 단계에서는 숨기고, TrainingAttackHit/TrainingProjectileParried 단계에서 나타나 발사합니다. 같은 허수아비를 연결하세요.")]
+        public TutorialTrainingDummy combatDummy;
+        [Tooltip("해당 단계가 시작된 뒤 필요한 공격 적중/투사체 패링 성공 횟수입니다. 일반 가드나 다른 적은 인정하지 않습니다.")]
+        [Min(1)] public int requiredCombatSuccesses = 1;
         [Tooltip("이 단계가 시작될 때 한 번 호출됩니다. 다음 튜토리얼 오브젝트 활성화 등에 연결할 수 있습니다. 이 이벤트 안에서 단계 전환을 재호출하지 마세요.")]
         public UnityEvent onEntered = new UnityEvent();
     }
@@ -64,6 +81,13 @@ public sealed partial class TutorialSequence : MonoBehaviour
     private int cutTargetInstanceId;
     private bool requiresSpecificCutTarget;
     private string capturedTargetName = string.Empty;
+    private PlayerMove pasteObservedPlayer;
+    private int pasteVersionAtEntry;
+    private int pasteTargetInstanceId;
+    private bool requiresSpecificPasteTarget;
+    private string capturedPasteTargetName = string.Empty;
+    private PlayerMove combatObservedPlayer;
+    private int combatCountAtEntry;
 
     public int CurrentStepIndex => currentStepIndex;
     public bool IsRunning => running;
@@ -73,8 +97,19 @@ public sealed partial class TutorialSequence : MonoBehaviour
         {
             var step = CurrentStep; if (step == null) return string.Empty;
             string template = step.message ?? string.Empty;
-            string targetName = GetCutTargetName(step);
-            string result = template.Replace("{error}", string.IsNullOrEmpty(capturedCutNames) ? "Cut한 오류" : capturedCutNames).Replace("{target}", targetName);
+            // 저장된 씬을 덮어쓰지 않고 과거 기본 안내의 Enter 요청만 화면에서 교체합니다.
+            if (step.completionCondition == CompletionCondition.Confirm)
+                template = template.Replace("설명을 읽었다면 Enter를 누르세요.", "잠시 후 자동으로 진행합니다.")
+                    .Replace("확인했다면 Enter를 누르세요.", "잠시 후 자동으로 진행합니다.");
+            bool pasteStep = step.completionCondition == CompletionCondition.EnvironmentPasteSucceeded;
+            string targetName = IsCombatStep(step) ? (step.combatDummy != null ? step.combatDummy.name : "허수아비")
+                : pasteStep ? GetPasteTargetName(step) : GetCutTargetName(step);
+            string errorName = pasteStep ? ErrorRules.DisplayName(step.pasteError)
+                : string.IsNullOrEmpty(capturedCutNames) ? "Cut한 오류" : capturedCutNames;
+            string result = template.Replace("{error}", errorName).Replace("{target}", targetName)
+                .Replace("{count}", Mathf.Max(1, step.requiredCombatSuccesses).ToString());
+            if (pasteStep && requiresSpecificPasteTarget && !template.Contains("{target}"))
+                result = "Paste 대상: " + targetName + "\n" + result;
             if (step.completionCondition == CompletionCondition.CutSucceeded && requiresSpecificCutTarget && !template.Contains("{target}"))
                 result = "Cut 대상: " + targetName + "\n" + result;
             return result;
@@ -87,21 +122,29 @@ public sealed partial class TutorialSequence : MonoBehaviour
         if (step.cutTarget != null) return step.cutTarget.name;
         return string.IsNullOrEmpty(capturedTargetName) ? "오류 원본" : capturedTargetName;
     }
+    private string GetPasteTargetName(Step step)
+    {
+        if (!string.IsNullOrWhiteSpace(step.pasteTargetDisplayName)) return step.pasteTargetDisplayName;
+        if (step.pasteTarget != null) return step.pasteTarget.name;
+        return string.IsNullOrEmpty(capturedPasteTargetName) ? "호환되는 물체" : capturedPasteTargetName;
+    }
     private Step CurrentStep => running && steps != null && currentStepIndex >= 0 && currentStepIndex < steps.Length ? steps[currentStepIndex] : null;
 
     private void Start() { if (beginOnStart) BeginTutorial(); }
     private void OnEnable() { hasPreviousPosition = false; }
-    private void OnDisable() { hasPreviousPosition = false; if (Application.isPlaying) HideTutorialUI(); }
+    private void OnDisable() { hasPreviousPosition = false; if (Application.isPlaying) { EndCombatPractice(false); HideTutorialUI(); } }
 
     /// <summary>첫 안내부터 다시 시작합니다. PlayerPrefs나 플레이어 상태는 변경하지 않습니다.</summary>
     public void BeginTutorial()
     {
         if (transitioning) return;
+        EndCombatPractice(true);
         running = steps != null && steps.Length > 0;
         currentStepIndex = running ? 0 : -1;
         hasPreviousPosition = false;
         capturedCutNames = string.Empty;
         capturedTargetName = string.Empty;
+        capturedPasteTargetName = string.Empty;
         if (running) EnterCurrentStep();
         else RefreshTutorialUI();
     }
@@ -110,9 +153,17 @@ public sealed partial class TutorialSequence : MonoBehaviour
     public void CompleteCurrentStep()
     {
         if (!running || transitioning) return;
+        var previousStep = CurrentStep;
         bool preserveCutBaseline = CurrentStep != null && CurrentStep.completionCondition == CompletionCondition.EditModeEnabled;
         hasPreviousPosition = false;
         currentStepIndex++;
+        if (IsCombatStep(previousStep) && previousStep.combatDummy != null
+            && (!IsCombatStep(CurrentStep) || CurrentStep.combatDummy != previousStep.combatDummy))
+        {
+            if (previousStep.completionCondition == CompletionCondition.TrainingProjectileParried)
+                previousStep.combatDummy.FinishPractice();
+            else previousStep.combatDummy.EndPractice(false);
+        }
         if (steps == null || currentStepIndex >= steps.Length)
         {
             running = false;
@@ -122,12 +173,41 @@ public sealed partial class TutorialSequence : MonoBehaviour
         else EnterCurrentStep(preserveCutBaseline && CurrentStep != null && CurrentStep.completionCondition == CompletionCondition.CutSucceeded);
     }
 
-    public void StopTutorial() { running = false; hasPreviousPosition = false; RefreshTutorialUI(); }
+    public void StopTutorial() { EndCombatPractice(false); running = false; hasPreviousPosition = false; RefreshTutorialUI(); }
+
+    private static bool IsCombatStep(Step step) => step != null && (step.completionCondition == CompletionCondition.TrainingAttackHit
+        || step.completionCondition == CompletionCondition.TrainingProjectileParried);
+
+    private int GetCombatCount(Step step) => step?.combatDummy == null ? 0
+        : step.completionCondition == CompletionCondition.TrainingAttackHit ? step.combatDummy.AttackSuccessCount : step.combatDummy.ParrySuccessCount;
+
+    private void EndCombatPractice(bool reset)
+    {
+        if (steps == null) return;
+        foreach (var step in steps)
+        {
+            if (step?.combatDummy == null) continue;
+            if (reset) step.combatDummy.ResetPractice();
+            else step.combatDummy.EndPractice(false);
+        }
+    }
 
     private void EnterCurrentStep(bool preserveCutBaseline = false)
     {
         stepDisplayTime = 0f;
         if (player == null) player = FindFirstObjectByType<PlayerMove>();
+        combatObservedPlayer = player;
+        if (IsCombatStep(CurrentStep) && CurrentStep.combatDummy != null)
+            CurrentStep.combatDummy.BeginPractice(player);
+        else if (CurrentStep?.completionCondition == CompletionCondition.ArrivalArea && CurrentStep.combatDummy != null)
+            CurrentStep.combatDummy.EndPractice(true);
+        combatCountAtEntry = GetCombatCount(CurrentStep);
+        pasteObservedPlayer = player;
+        pasteVersionAtEntry = player != null ? player.SuccessfulEnvironmentPasteVersion : 0;
+        requiresSpecificPasteTarget = CurrentStep != null && CurrentStep.pasteTarget != null;
+        pasteTargetInstanceId = requiresSpecificPasteTarget ? CurrentStep.pasteTarget.GetInstanceID() : 0;
+        capturedPasteTargetName = string.Empty;
+        if (CurrentStep != null) capturedPasteTargetName = GetPasteTargetName(CurrentStep);
         if (!preserveCutBaseline || cutObservedPlayer != player)
         {
             cutObservedPlayer = player;
@@ -166,6 +246,11 @@ public sealed partial class TutorialSequence : MonoBehaviour
             cutVersionAtEntry = player.SuccessfulCutVersion;
         }
         stepDisplayTime += Time.unscaledDeltaTime;
+        if (pasteObservedPlayer != player)
+        {
+            pasteObservedPlayer = player;
+            pasteVersionAtEntry = player.SuccessfulEnvironmentPasteVersion;
+        }
         var step = CurrentStep;
         if (step == null) return;
         if (step.completionCondition != CompletionCondition.ArrivalArea)
@@ -175,7 +260,18 @@ public sealed partial class TutorialSequence : MonoBehaviour
             bool complete = false;
             switch (step.completionCondition)
             {
+                case CompletionCondition.TrainingAttackHit:
+                case CompletionCondition.TrainingProjectileParried:
+                    if (step.combatDummy == null) break;
+                    step.combatDummy.BeginPractice(player); // 비활성/재활성 또는 늦게 생성된 플레이어를 안전하게 연결합니다.
+                    if (combatObservedPlayer != player) { combatObservedPlayer = player; combatCountAtEntry = GetCombatCount(step); }
+                    complete = GetCombatCount(step) - combatCountAtEntry >= Mathf.Max(1, step.requiredCombatSuccesses);
+                    break;
                 case CompletionCondition.EditModeEnabled: complete = player.IsInEditMode; break;
+                case CompletionCondition.EnvironmentPasteSucceeded:
+                    complete = player.HasEnvironmentPasteAfter(requiresSpecificPasteTarget ? pasteTargetInstanceId : 0,
+                        step.pasteError, pasteVersionAtEntry);
+                    break;
                 case CompletionCondition.CutSucceeded:
                     if (requiresSpecificCutTarget)
                     {
@@ -189,7 +285,7 @@ public sealed partial class TutorialSequence : MonoBehaviour
                     }
                     break;
                 case CompletionCondition.Confirm:
-                    complete = Keyboard.current != null && (Keyboard.current.enterKey.wasPressedThisFrame || Keyboard.current.numpadEnterKey.wasPressedThisFrame);
+                    complete = true; // 위의 최소 표시 시간 검사 후 키 입력 없이 완료합니다.
                     break;
             }
             if (complete) CompleteCurrentStep();

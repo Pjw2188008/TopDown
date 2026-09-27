@@ -4,6 +4,34 @@ using UnityEngine.InputSystem;
 /// <summary>PlayerMove의 오류 Cut·환경 Paste 구현 부분입니다. 별도 컴포넌트가 아니므로 직접 부착하지 않습니다.</summary>
 public partial class PlayerMove
 {
+    // 환경 Paste 성공만 기록합니다. 슬롯 선택/취소/실패/전투 기술 사용은 포함하지 않습니다.
+    public int SuccessfulEnvironmentPasteVersion { get; private set; }
+    private readonly System.Collections.Generic.Dictionary<int, System.Collections.Generic.Dictionary<StoredErrorType, int>>
+        successfulEnvironmentPastes = new System.Collections.Generic.Dictionary<int, System.Collections.Generic.Dictionary<StoredErrorType, int>>();
+
+    /// <summary>대상(또는 자식)에 지정 오류를 실제 Paste했는지 조회합니다. targetInstanceId=0은 모든 환경 대상입니다.</summary>
+    public bool HasEnvironmentPasteAfter(int targetInstanceId, StoredErrorType error, int afterVersion)
+        => successfulEnvironmentPastes.TryGetValue(targetInstanceId, out var byError)
+            && byError.TryGetValue(error, out int version) && version > afterVersion;
+
+    private void RecordEnvironmentPaste(PasteTarget target, StoredErrorType error)
+    {
+        SuccessfulEnvironmentPasteVersion++;
+        RecordEnvironmentPasteForTarget(0, error);
+        for (Transform current = target.transform; current != null; current = current.parent)
+            RecordEnvironmentPasteForTarget(current.gameObject.GetInstanceID(), error);
+    }
+
+    private void RecordEnvironmentPasteForTarget(int id, StoredErrorType error)
+    {
+        if (!successfulEnvironmentPastes.TryGetValue(id, out var byError))
+        {
+            byError = new System.Collections.Generic.Dictionary<StoredErrorType, int>();
+            successfulEnvironmentPastes.Add(id, byError);
+        }
+        byError[error] = SuccessfulEnvironmentPasteVersion;
+    }
+
     private bool TryHandleErrorHit(Collider2D hit)
     {
         var candidates = new System.Collections.Generic.List<MonoBehaviour>();
@@ -57,6 +85,7 @@ public partial class PlayerMove
             default: return false;
         }
         DiscardStoredError(selected);
+        RecordEnvironmentPaste(target, selected);
         Debug.Log(ErrorRules.DisplayName(selected) + " 오류를 " + target.name + "에 Paste했습니다.");
         return true;
     }

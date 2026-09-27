@@ -15,6 +15,10 @@ public sealed class ReflectProjectile : MonoBehaviour
     private float remainingLifetime;
     private int remainingBounces;
     private bool inheritsReflection;
+    private bool wasParried;
+
+    /// <summary>실제 패링으로 해당 플레이어에게 소유권이 넘어간 탄환인지 확인합니다. 표면 반사는 포함하지 않습니다.</summary>
+    public bool WasParriedBy(PlayerMove player) => wasParried && player != null && owner == player.gameObject;
 
     /// <summary>
     /// 투사체를 생성한 공격자와 이동·피해·반사 정보를 전달받아 초기화합니다.
@@ -30,6 +34,7 @@ public sealed class ReflectProjectile : MonoBehaviour
         bool reflectFromOrdinarySurfaces)
     {
         owner = projectileOwner;
+        wasParried = false;
         direction = launchDirection.sqrMagnitude > 0f ? launchDirection.normalized : Vector2.right;
         speed = Mathf.Max(0f, moveSpeed);
         damage = Mathf.Max(0f, projectileDamage);
@@ -64,11 +69,21 @@ public sealed class ReflectProjectile : MonoBehaviour
         PlayerMove player = hitObject.GetComponentInParent<PlayerMove>();
         if (damage > 0f && player != null && player.TryParryProjectile())
         {
+            // 발사자 소유권이 플레이어로 바뀌기 전에 해당 연습 허수아비의 성공만 기록합니다.
+            var dummy = owner != null ? owner.GetComponent<TutorialTrainingDummy>() : null;
+            if (dummy != null) dummy.RecordParry(player);
             // 실제 투사체를 돌려보냅니다. 발사자를 새 목표로, 패링한 플레이어를 새 소유자로 설정합니다.
             Vector2 returnDirection = owner != null
                 ? (Vector2)owner.transform.position - closestHit.centroid : -direction;
             direction = returnDirection.sqrMagnitude > 0.0001f ? returnDirection.normalized : -direction;
             owner = player.gameObject;
+            wasParried = true;
+            if (dummy != null)
+            {
+                dummy.ShowReturnedProjectile(this);
+                // 연습 탄환은 수명이 거의 끝난 순간 패링해도 발사자에게 돌아갈 시간을 확보합니다.
+                remainingLifetime = Mathf.Max(remainingLifetime, returnDirection.magnitude / Mathf.Max(.1f, speed) + .25f);
+            }
             transform.position = closestHit.centroid + direction * (radius + 0.02f);
             return;
         }

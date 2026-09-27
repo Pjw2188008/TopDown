@@ -155,7 +155,9 @@ public partial class PlayerMove
             if (CombatDamageUtility.TryFindReceiver(hit.gameObject, out ICombatDamageable receiver))
             {
                 // 같은 적의 루트/자식 Collider가 여러 개여도 한 공격당 피해는 한 번만 줍니다.
-                if (handledAttackReceivers.Add(receiver)) receiver.ReceiveDamage(attackDamage, gameObject, true);
+                if (handledAttackReceivers.Add(receiver) && receiver.ReceiveDamage(attackDamage, gameObject, true)
+                    && !isEditMode && receiver is TutorialTrainingDummy dummy)
+                    dummy.RecordAttack(this);
             }
             else
                 Debug.Log("근접 공격 히트: " + hit.name);

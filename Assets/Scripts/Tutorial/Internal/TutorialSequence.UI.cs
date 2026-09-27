@@ -29,6 +29,7 @@ public sealed partial class TutorialSequence
 
     private void RefreshTutorialUI()
     {
+        RefreshDestinationOutline();
         bool visible = isActiveAndEnabled && running && showInstructions && CurrentStep != null && Time.timeScale > 0f;
         SetUIVisible(instructionPanel, visible);
         if (visible)
@@ -39,7 +40,8 @@ public sealed partial class TutorialSequence
         }
         bool hasTarget = TryGetTutorialTargetPoint(out Vector3 targetPoint);
         bool markerVisible = visible && showDestinationLabel && destinationMarker != null && hasTarget;
-        SetCutMarkerText(markerVisible && CurrentStep.completionCondition == CompletionCondition.CutSucceeded);
+        SetCutMarkerText(markerVisible && (CurrentStep.completionCondition == CompletionCondition.CutSucceeded
+            || CurrentStep.completionCondition == CompletionCondition.EnvironmentPasteSucceeded || IsCombatStep(CurrentStep)));
         if (markerVisible && followDestination) markerVisible = PositionDestinationMarker();
         if (destinationMarker != null) SetUIVisible(destinationMarker.gameObject, markerVisible);
     }
@@ -73,15 +75,20 @@ public sealed partial class TutorialSequence
             point = new Vector3(area.bounds.center.x, area.bounds.max.y, area.transform.position.z);
             return true;
         }
-        if (step.completionCondition != CompletionCondition.CutSucceeded || step.cutTarget == null || !step.cutTarget.activeInHierarchy) return false;
-        if (step.cutTargetMarkerAnchor != null) { point = step.cutTargetMarkerAnchor.position; return true; }
-        var renderer = step.cutTarget.GetComponentInChildren<Renderer>();
+        bool paste = step.completionCondition == CompletionCondition.EnvironmentPasteSucceeded;
+        bool combat = IsCombatStep(step);
+        if (!paste && !combat && step.completionCondition != CompletionCondition.CutSucceeded) return false;
+        GameObject target = combat ? (step.combatDummy != null ? step.combatDummy.gameObject : null) : paste ? step.pasteTarget : step.cutTarget;
+        Transform anchor = combat ? null : paste ? step.pasteTargetMarkerAnchor : step.cutTargetMarkerAnchor;
+        if (target == null || !target.activeInHierarchy) return false;
+        if (anchor != null) { point = anchor.position; return true; }
+        var renderer = target.GetComponentInChildren<Renderer>();
         if (renderer != null && renderer.enabled)
         { point = new Vector3(renderer.bounds.center.x, renderer.bounds.max.y, renderer.bounds.center.z); return true; }
-        var collider = step.cutTarget.GetComponentInChildren<Collider2D>();
+        var collider = target.GetComponentInChildren<Collider2D>();
         if (collider != null && collider.enabled)
-        { point = new Vector3(collider.bounds.center.x, collider.bounds.max.y, step.cutTarget.transform.position.z); return true; }
-        point = step.cutTarget.transform.position;
+        { point = new Vector3(collider.bounds.center.x, collider.bounds.max.y, target.transform.position.z); return true; }
+        point = target.transform.position;
         return true;
     }
 
@@ -94,7 +101,8 @@ public sealed partial class TutorialSequence
             overriddenMarkerText = label;
             if (label != null) originalMarkerText = label.text;
         }
-        if (label != null) label.text = "Cut 대상 ↓";
+        if (label != null) label.text = IsCombatStep(CurrentStep) ? "연습 허수아비 ↓"
+            : CurrentStep?.completionCondition == CompletionCondition.EnvironmentPasteSucceeded ? "Paste 대상 ↓" : "Cut 대상 ↓";
     }
 
     private void SetUIVisible(GameObject target, bool visible)
@@ -106,6 +114,7 @@ public sealed partial class TutorialSequence
 
     private void HideTutorialUI()
     {
+        HideDestinationOutline();
         SetCutMarkerText(false);
         SetUIVisible(instructionPanel, false);
         if (destinationMarker != null) SetUIVisible(destinationMarker.gameObject, false);
