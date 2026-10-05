@@ -67,9 +67,12 @@ public partial class PlayerMove
 
     private void OnGUI()
     {
-        if (DrawErrorCodex()) return;
-        DrawPlayerHud();
-        DrawParryFeedback();
-        DrawInteractionPrompt();
+        using (GameUIFont.UseIMGUI())
+        {
+            if (DrawErrorCodex()) return;
+            DrawPlayerHud();
+            DrawParryFeedback();
+            DrawInteractionPrompt();
+        }
     }
 }

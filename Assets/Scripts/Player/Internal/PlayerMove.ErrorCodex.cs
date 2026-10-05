@@ -141,7 +141,7 @@ public partial class PlayerMove
         if (codexBodyStyle == null)
         {
             codexBodyStyle = new GUIStyle(GUI.skin.label) { wordWrap = true, fontSize = 17 };
-            codexTitleStyle = new GUIStyle(GUI.skin.label) { fontSize = 24, fontStyle = FontStyle.Bold };
+            codexTitleStyle = new GUIStyle(GUI.skin.label) { fontSize = 24, font = GameUIFont.Bold, fontStyle = FontStyle.Normal };
         }
         GUI.Box(new Rect(10f, 10f, 880f, 600f), GUIContent.none);
         GUI.Label(new Rect(35f, 28f, 650f, 36f), $"이상현상 도감  ·  {errorCodex.Count}/{ErrorCodex.Entries.Count}", codexTitleStyle);

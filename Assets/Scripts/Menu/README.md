@@ -9,9 +9,20 @@
 
 ## 직접 편집
 
+### UI2 양피지 설정 화면
+
+- 타이틀 배경 `UI.png`와 투명 시작 버튼은 유지하고, 설정 창 및 화면 변경 확인창 배경에 `Assets/UI2.png`를 연결했습니다.
+- `Settings Overlay > Settings Window > Parchment Background (UI2)`의 RawImage가 원본을 표시합니다. 이미지의 검은 바깥 부분을 포함하여 원본을 그대로 사용합니다.
+- 설정 창은 960×640, 확인창은 660×440으로 원본 3:2 비율을 유지합니다. Canvas Scaler가 화면에 맞춰 전체 크기를 조정합니다.
+- 짙은 먹색 글자와 붉은 선택 밑줄을 사용합니다. `MainMenuController > Tab Selection Marks`는 화면/조작법/소리 순서로 연결되어 있습니다.
+- 설정 화면을 편집하려면 Hierarchy에서 `Settings Overlay`를 잠시 활성화하고 원하는 Page를 켜세요. 실행 시 시작 메뉴로 돌아가며 설정은 기본으로 숨겨집니다.
+- 실행 중 위치/크기를 다시 쓰는 코드는 없습니다. Rect Transform에서 직접 조정할 수 있습니다.
+- `Tools > Story > Main Menu > Apply UI2 Settings Theme`는 열려 있는 메뉴에 기본 양피지 배치를 다시 적용하는 편집기 도구입니다. 커스텀 위치를 바꾼 뒤에는 필요할 때만 사용하세요. Undo를 지원하며 자동 저장하지 않습니다.
+- 기존 해상도/화면 모드, 키 안내, 음량/음소거, 해상도 유지/되돌리기 기능은 동일합니다.
+
 ### 투명 시작 버튼
 
-시작 화면의 게임 시작 / 설정 / 게임 종료는 사각형 배경 없이 글자만 표시합니다. 마우스 또는 방향키로 선택하면 양옆 장식과 글자 확대/색상 강조가 나타나며, 클릭/Enter 입력 시 밝게 강조한 뒤 약 0.18초 후 동작합니다. 연속 입력은 한 번만 처리합니다. 설정 창 안의 조절 버튼은 기존 스타일을 유지합니다.
+시작 화면의 게임 시작 / 설정 / 게임 종료는 사각형 배경 없이 글자만 표시합니다. 마우스 또는 방향키로 선택하면 양옆 장식과 글자 확대/색상 강조가 나타나며, 클릭/Enter 입력 시 밝게 강조한 뒤 약 0.18초 후 동작합니다. 연속 입력은 한 번만 처리합니다. 설정 창 안의 조절 버튼은 UI2 양피지에 맞춘 별도 스타일을 사용합니다.
 
 각 버튼의 `MenuButtonFeedback`에서 Normal/Selected/Clicked Color, Selected Scale, Click Duration을 조정할 수 있습니다. 양옆 장식은 `Selection Ornaments` 자식에서 위치/모양을 수정합니다. 버튼의 Image는 투명하지만 클릭 영역을 위해 유지하세요. 글자 Shadow는 밝은 배경에서도 읽히도록 추가했습니다.
 
@@ -21,7 +32,7 @@ Hierarchy의 `Main Menu Canvas` 안에서 UI를 수정하세요.
 - `Main Buttons`: 게임 시작 / 설정 / 게임 종료 버튼의 Rect Transform, Image 색상, 자식 Text를 조정합니다.
 - `Settings Overlay`: 편집할 때 활성화하여 `Settings Window`의 탭과 페이지를 조정할 수 있습니다. 실행 시에는 자동으로 숨겨집니다.
 - `MainMenuController`: UI 참조와 Tutorial Scene을 연결합니다. 기존 참조를 삭제했다면 다시 연결하세요.
-- `Korean Font`: 배포 가능한 한글 Font를 직접 넣을 수 있습니다. 비워두면 런타임에 맑은 고딕 등 OS 한글 폰트를 찾습니다. Windows에서 한글 표시를 검증했습니다. 다른 플랫폼 배포 시에는 사용 허가된 한글 폰트를 연결하세요. 에디터 비실행 시 기본 폰트로 한글이 안 보이면 이 설정은 실행 시 적용됩니다.
+- `Korean Font`: 본문에 PF스타더스트 3.0을 연결했습니다. 비워두면 `Assets/Resources/GameUIFont.asset`의 일반체를 사용하고 강조 문구는 같은 설정의 Bold를 사용합니다. OS 폰트를 검색하지 않으며 에디터와 빌드가 동일한 폰트 파일을 사용합니다. 씬의 Text에도 연결되어 Play 전부터 확인할 수 있습니다.
 - UI 위치/크기는 실행 중 스크립트가 덮어쓰지 않습니다. Canvas Scaler 기준은 1280×720, Expand입니다.
 
 ## 설정 저장 / 화면 안전장치

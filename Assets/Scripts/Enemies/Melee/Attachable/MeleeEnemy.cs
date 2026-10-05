@@ -70,8 +70,9 @@ public sealed class MeleeEnemy : MonoBehaviour, ICombatDamageable
         if (position.z < 0f) return;
         Color previous = GUI.color;
         GUI.color = stagger.IsStunned ? Color.cyan : Color.yellow;
-        GUI.Label(new Rect(position.x - 60f, Screen.height - position.y, 150f, 24f),
-            stagger.IsStunned ? "첨삭 · 경직" : "! 근접 공격 준비");
+        using (GameUIFont.UseIMGUI())
+            GUI.Label(new Rect(position.x - 60f, Screen.height - position.y, 150f, 24f),
+                stagger.IsStunned ? "첨삭 · 경직" : "! 근접 공격 준비");
         GUI.color = previous;
     }
     private void OnDrawGizmosSelected() { Gizmos.color = Color.yellow; Gizmos.DrawWireSphere(transform.position, attackRange); }

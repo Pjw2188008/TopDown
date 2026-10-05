@@ -32,7 +32,7 @@ public static class MainMenuSceneBuilder
     public static Scene Build()
     {
         if (File.Exists(ScenePath)) throw new IOException("Existing MainMenu scene is protected.");
-        font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+        font = GameUIFont.Regular;
         Scene scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
         var cameraObject = new GameObject("Menu Camera", typeof(Camera), typeof(AudioListener));
         cameraObject.tag = "MainCamera";
@@ -154,6 +154,8 @@ public static class MainMenuSceneBuilder
         settings.gameObject.SetActive(false);
         controls.gameObject.SetActive(false);
         audio.gameObject.SetActive(false);
+        Texture2D settingsArt = AssetDatabase.LoadAssetAtPath<Texture2D>("Assets/UI2.png");
+        if (settingsArt != null) SettingsParchmentTheme.Apply(controller, settingsArt);
         Directory.CreateDirectory("Assets/Scenes");
         EditorSceneManager.SaveScene(scene, ScenePath);
         AssetDatabase.SaveAssets();

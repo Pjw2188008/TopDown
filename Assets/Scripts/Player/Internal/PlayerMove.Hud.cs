@@ -48,7 +48,7 @@ public partial class PlayerMove
         hudLabelStyle.normal.textColor = Color.white;
         hudValueStyle = new GUIStyle(hudLabelStyle) { alignment = TextAnchor.MiddleRight };
         hudSlotStyle = new GUIStyle(hudLabelStyle)
-        { alignment = TextAnchor.MiddleCenter, fontSize = 17, fontStyle = FontStyle.Bold, wordWrap = true };
+        { alignment = TextAnchor.MiddleCenter, fontSize = 17, font = GameUIFont.Bold, fontStyle = FontStyle.Normal, wordWrap = true };
         hudCaptionStyle = new GUIStyle(hudLabelStyle)
         { fontSize = 12, alignment = TextAnchor.UpperLeft, wordWrap = true };
         hudCaptionStyle.normal.textColor = new Color(0.76f, 0.82f, 0.89f);

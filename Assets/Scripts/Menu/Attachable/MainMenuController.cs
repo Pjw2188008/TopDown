@@ -14,7 +14,7 @@ public sealed class MainMenuController : MonoBehaviour
     public string tutorialScene = "Assets/Scenes/REDACT.unity";
     [Tooltip("씬 전환 중에만 로딩 우선순위를 높여 로딩에 더 많은 처리 시간을 줍니다. 완료/실패/종료 시 이전 설정으로 복원됩니다.")]
     public bool prioritizeSceneLoading = true;
-    [Tooltip("한글 폰트를 직접 연결할 수 있습니다. 비워 두면 실행 PC의 한글 OS 폰트를 사용합니다.")]
+    [Tooltip("본문 폰트를 직접 연결할 수 있습니다. 비우면 Resources/GameUIFont의 PF스타더스트를 사용합니다.")]
     public Font koreanFont;
     [Header("메인 화면 / 설정 창")]
     [Tooltip("직접 위치와 크기를 조정할 수 있는 메뉴 Canvas입니다.")] public Canvas menuCanvas;
@@ -22,6 +22,8 @@ public sealed class MainMenuController : MonoBehaviour
     [Tooltip("설정 전체 패널입니다.")] public GameObject settingsPanel;
     [Tooltip("화면 / 조작법 / 소리 탭 내용 순서입니다.")] public GameObject[] pages;
     [Tooltip("화면 / 조작법 / 소리 탭 버튼 순서입니다.")] public Button[] tabButtons;
+    [Tooltip("선택된 설정 탭 아래 표시할 장식입니다. 탭 버튼과 같은 순서로 연결합니다.")]
+    public GameObject[] tabSelectionMarks;
     [Tooltip("튜토리얼 시작 버튼입니다.")] public Button startButton;
     [Tooltip("설정 열기 버튼입니다.")] public Button settingsButton;
     [Tooltip("게임 종료 버튼입니다.")] public Button quitButton;
@@ -50,7 +52,6 @@ public sealed class MainMenuController : MonoBehaviour
     private FullScreenMode oldMode;
     private float confirmDeadline;
     private bool pendingDisplay, loading;
-    private Font runtimeFont;
     private Coroutine mainActionRoutine;
     private bool mainActionPending;
     private MenuSceneLoadOperation sceneLoad;
@@ -132,15 +133,8 @@ public sealed class MainMenuController : MonoBehaviour
 
     private void ApplyFont()
     {
-        Font font = koreanFont;
-        if (font == null)
-        {
-            runtimeFont = Font.CreateDynamicFontFromOSFont(
-                new[] { "Malgun Gothic", "맑은 고딕", "Apple SD Gothic Neo", "Noto Sans CJK KR", "Noto Sans KR" }, 24);
-            font = runtimeFont;
-        }
-        if (font != null)
-            foreach (Text label in menuCanvas.GetComponentsInChildren<Text>(true)) label.font = font;
+        foreach (Text label in menuCanvas.GetComponentsInChildren<Text>(true))
+            GameUIFont.Apply(label, koreanFont);
     }
 
     public void OpenSettings()
@@ -167,6 +161,8 @@ public sealed class MainMenuController : MonoBehaviour
         for (int i = 0; i < pages.Length; i++)
         {
             pages[i].SetActive(i == index);
+            if (tabSelectionMarks != null && i < tabSelectionMarks.Length && tabSelectionMarks[i] != null)
+                tabSelectionMarks[i].SetActive(i == index);
             // 색상만 변경합니다. 크기/위치/글꼴은 사용자가 편집한 값을 유지합니다.
             ColorBlock colors = tabButtons[i].colors;
             colors.normalColor = i == index ? new Color(.65f, .5f, .3f) : Color.white;
@@ -323,6 +319,5 @@ public sealed class MainMenuController : MonoBehaviour
 
     private void OnDestroy()
     {
-        if (runtimeFont != null) Destroy(runtimeFont);
     }
 }

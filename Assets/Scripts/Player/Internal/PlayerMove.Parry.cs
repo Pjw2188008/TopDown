@@ -143,7 +143,8 @@ public partial class PlayerMove
             {
                 alignment = TextAnchor.MiddleCenter,
                 fontSize = 18,
-                fontStyle = FontStyle.Bold
+                font = GameUIFont.Bold,
+                fontStyle = FontStyle.Normal
             };
             parryFeedbackStyle.normal.textColor = Color.white;
         }

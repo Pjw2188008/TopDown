@@ -121,7 +121,8 @@ public sealed class ReflectProjectile : MonoBehaviour
         {
             if (hit.collider == null
                 || hit.collider.GetComponentInParent<ReflectProjectile>() != null
-                || IsOwnerCollider(hit.collider))
+                || IsOwnerCollider(hit.collider)
+                || IsDetectionTrigger(hit.collider))
             {
                 continue;
             }
@@ -133,6 +134,16 @@ public sealed class ReflectProjectile : MonoBehaviour
             }
         }
         return foundHit;
+    }
+
+    // 입장/튜토리얼 감지 영역은 벽이 아닙니다. 생성 위치를 감싸는 Trigger에
+    // CircleCast가 거리 0으로 맞아 탄환이 즉시 사라지지 않도록 제외합니다.
+    // 단, 허수아비 등의 피격 Trigger 및 오류를 붙이는 대상의 Trigger는 유지합니다.
+    private static bool IsDetectionTrigger(Collider2D collider)
+    {
+        return collider.isTrigger
+            && !CombatDamageUtility.TryFindReceiver(collider.gameObject, out _)
+            && collider.GetComponentInParent<PasteTarget>() == null;
     }
 
     private bool CanReflectFrom(Collider2D hitCollider)

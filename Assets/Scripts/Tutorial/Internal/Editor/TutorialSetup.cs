@@ -50,9 +50,9 @@ public static class TutorialSetup
         rect.sizeDelta = new Vector2(Mathf.Max(160, size.x), Mathf.Max(80, size.y));
         var background = panel.GetComponent<Image>(); background.color = new Color(.05f, .07f, .12f, .88f); background.raycastTarget = false;
         Font font = data.FindProperty("instructionFont").objectReferenceValue as Font;
-        if (font == null) font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+        if (font == null) font = GameUIFont.Regular;
         var title = MakeText("Title", panel.transform, font, 16, TextAnchor.UpperLeft);
-        title.fontStyle = FontStyle.Bold; title.text = "튜토리얼 1";
+        title.font = GameUIFont.Bold; title.fontStyle = FontStyle.Normal; title.text = "튜토리얼 1";
         var titleRect = title.rectTransform; titleRect.anchorMin = new Vector2(0, 1); titleRect.anchorMax = Vector2.one;
         titleRect.pivot = new Vector2(.5f, 1); titleRect.anchoredPosition = new Vector2(0, -10); titleRect.sizeDelta = new Vector2(-28, 26);
         var body = MakeText("Message", panel.transform, font, Mathf.Max(10, data.FindProperty("fontSize").intValue), TextAnchor.UpperLeft);

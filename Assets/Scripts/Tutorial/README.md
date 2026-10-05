@@ -158,7 +158,7 @@
 - **Destination Marker → Text**: 목표 표식의 문구/색상/폰트/크기를 직접 바꿉니다. Text 대신 Image로 바꿔도 RectTransform 연결을 유지하면 됩니다.
 - **Follow Destination**: 켜면 목표 표식의 위치만 구역을 따라갑니다. Destination Offset으로 간격을 조절합니다. 끄면 표식의 위치도 RectTransform에서 수동 조절합니다. 이 옵션은 안내 패널과 무관합니다.
 - **Canvas Scaler**: 기본 1280×720, Scale With Screen Size / Expand입니다. 원하는 화면 대응 방식으로 바꿀 수 있습니다.
-- 한글이 네모로 나오면 **Title / Message / Destination Marker의 Text → Font**에 한글 지원 Font를 연결하세요. 기본은 Unity 내장 폰트입니다.
+- **Title / Message / Destination Marker의 Text → Font**에 PF스타더스트 3.0을 연결했습니다. 제목은 실제 Bold 파일을 사용합니다. 새 UI 생성 시에도 `Assets/Resources/GameUIFont.asset`의 폰트를 기본으로 연결합니다. 위치·크기·색상은 기존처럼 직접 조절할 수 있습니다.
 - 사용하는 텍스트 컴포넌트는 **UI Text(Legacy)**이며 TMP가 아닙니다. 직접 만든 패널도 Instruction Panel / Message Text / Title Text / Destination Marker 슬롯에 연결할 수 있습니다.
 - 패널은 튜토리얼 관리자 자신이나 부모가 아닌 별도 UI 오브젝트를 연결하세요. 코드는 안내 패널과 목표 표식의 표시 여부만 관리합니다.
 - 기본 UI는 Raycast Target을 꺼서 클릭/공격을 가로채지 않습니다. 안내를 위해 EventSystem을 새로 만들지 않습니다.

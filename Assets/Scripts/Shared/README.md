@@ -14,3 +14,11 @@
 - SpriteTint.cs: 기본 색상과 임시 피격 색상을 분리합니다. 오류 효과는 GetColor/SetColor로 기본 색을 다루므로 피격 색상이 영구적으로 저장되지 않습니다.
 
 Internal은 직접 부착하지 않는 공용 규칙과 표시 상태 관리 코드입니다.
+
+## 공용 픽셀 폰트
+
+- `Assets/Resources/GameUIFont.asset`에서 PF스타더스트 3.0 일반체/Bold를 연결합니다. 원본 TTF는 Assets 루트에 유지하며 별도 설치가 필요하지 않습니다.
+- `GameUIFontSettings.cs`는 폰트 설정 에셋, `GameUIFont.cs`는 Canvas 및 OnGUI 적용 도우미입니다. 오브젝트에 붙이지 않습니다.
+- 타이틀·설정·튜토리얼 Text와 HUD·보관함·도감·상호작용·패링 기본 문구·근접 적 안내에 적용합니다. Bold는 실제 Bold 파일을 쓰며 합성 Bold는 끕니다.
+- 그림에 포함된 로고·직접 지정한 패링 이미지, 외부 에셋 데모 씬은 변경하지 않습니다. UI 위치·크기·게임 입력 규칙도 유지합니다.
+- 새 Canvas Text의 Font에 PF스타더스트를 연결하세요. 기존 타이틀/튜토리얼 생성 도구는 기본 연결합니다. OnGUI는 `using (GameUIFont.UseIMGUI())` 안에 작성하면 다른 UI 스킨을 건드리지 않습니다.
