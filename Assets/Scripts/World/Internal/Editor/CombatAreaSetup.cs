@@ -9,14 +9,17 @@ public static class CombatAreaSetup
     public static void CreateAroundSelectedSpawner()
     {
         var selected = Selection.activeGameObject;
-        var spawner = selected != null ? selected.GetComponent<RangedEnemySpawner>() : null;
+        Component spawner = selected != null ? selected.GetComponent<RangedEnemySpawner>() : null;
+        if (spawner == null && selected != null) spawner = selected.GetComponent<MeleeEnemySpawner>();
         if (spawner == null || !spawner.gameObject.scene.IsValid())
-        { Debug.LogWarning("Hierarchy에서 RangedEnemySpawner를 선택하세요."); return; }
+        { Debug.LogWarning("Hierarchy에서 RangedEnemySpawner 또는 MeleeEnemySpawner를 선택하세요."); return; }
         var size = new SerializedObject(spawner).FindProperty("activationSize").vector2Value;
         var area = Build(spawner.transform.position, size);
         var data = new SerializedObject(area);
-        data.FindProperty("spawners").arraySize = 1;
-        data.FindProperty("spawners").GetArrayElementAtIndex(0).objectReferenceValue = spawner;
+        string property = spawner is MeleeEnemySpawner ? "meleeSpawners" : "spawners";
+        if (spawner is MeleeEnemySpawner) area.gameObject.name = "Combat Area - Melee Spawner";
+        data.FindProperty(property).arraySize = 1;
+        data.FindProperty(property).GetArrayElementAtIndex(0).objectReferenceValue = spawner;
         data.ApplyModifiedPropertiesWithoutUndo();
         Undo.RegisterCreatedObjectUndo(area.gameObject, "Create Combat Area");
         Selection.activeGameObject = area.gameObject;

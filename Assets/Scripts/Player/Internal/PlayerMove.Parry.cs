@@ -168,7 +168,7 @@ public partial class PlayerMove
     private void RefreshParryInput()
     {
         Mouse mouse = Mouse.current;
-        if (mouse == null) { parryAvailable = false; return; }
+        if (mouse == null || Time.timeScale <= 0f) { parryAvailable = false; return; }
         if (!mouse.rightButton.isPressed || mouse.rightButton.wasReleasedThisFrame)
             guardRequiresRelease = false;
 
@@ -176,7 +176,8 @@ public partial class PlayerMove
         if (mouse.rightButton.wasPressedThisFrame && lastParryInputFrame != Time.frameCount)
         {
             lastParryInputFrame = Time.frameCount;
-            parryAvailable = IsGuardRequested() && !isPlayingParry;
+            // 성공 연출은 입력 쿨다운이 아닙니다. 새 우클릭이면 연속 공격도 다시 패링할 수 있습니다.
+            parryAvailable = IsGuardRequested();
             parryDeadline = Time.time + Mathf.Max(0.01f, parryWindow);
         }
         if (!IsGuardRequested()) parryAvailable = false;

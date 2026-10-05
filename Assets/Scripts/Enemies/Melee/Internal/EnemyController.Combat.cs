@@ -6,7 +6,7 @@ public partial class EnemyController
 {
     private void AttackLogic()
     {
-        if (!IsInsideBox(player.position, attackAreaSize)) { currentState = State.Chase; return; }
+        if (!IsInsideBox(player.position, attackAreaSize) || !CanSeePlayer()) { currentState = State.Chase; return; }
         if (attackTimer <= 0f) BeginAttack();
     }
 
@@ -19,17 +19,18 @@ public partial class EnemyController
             : new Vector2(0f, Mathf.Sign(delta.y));
         swingCenter = (Vector2)transform.position + swingDirection * Mathf.Max(0f, attackReach);
         windingUp = true; windupRemaining = Mathf.Max(.01f, attackWindup);
-        effectRemaining = 0f;
-        if (showAttackWarning) ShowEffect(true);
-        else if (effectObject != null) effectObject.SetActive(false);
+        StartMeleeAttackAnimation();
+        BeginAttackVisual();
     }
 
     private void ResolveAttack()
     {
-        if (!windingUp || dead || stagger.IsStunned || target == null || !target.isActiveAndEnabled) { CancelAttack(); return; }
+        if (!windingUp) return;
+        if (dead || stagger.IsStunned || target == null || !target.isActiveAndEnabled) { CancelAttack(); return; }
         windingUp = false; // Consume before callbacks: one swing cannot deal repeated damage.
-        attackTimer = Mathf.Max(.01f, attackCooldown); effectRemaining = Mathf.Max(.01f, attackEffectDuration);
-        ShowEffect(false); Physics2D.SyncTransforms();
+        attackTimer = Mathf.Max(.01f, attackCooldown);
+        if (!CanSeePlayer()) return; // 준비 중 끼어든 사물/벽 너머로 찌르지 않습니다.
+        Physics2D.SyncTransforms();
         foreach (Collider2D hit in Physics2D.OverlapBoxAll(swingCenter, HitSize, SwingAngle))
         {
             if (!hit.enabled || hit.isTrigger || hit.GetComponentInParent<PlayerMove>() != target) continue;

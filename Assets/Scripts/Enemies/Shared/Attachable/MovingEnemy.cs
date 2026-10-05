@@ -21,11 +21,15 @@ public sealed class MovingEnemy : MonoBehaviour, IAccelerationTarget
     private Vector3 patrolDirection;
     private int directionSign = 1;
     private float accelerationMultiplier = 1f;
+    [Tooltip("순찰 중 우회할 장애물 레이어입니다. Trigger는 제외합니다.")]
+    [SerializeField] private LayerMask movementBlockingLayers = Physics2D.DefaultRaycastLayers;
+    [SerializeField] private EnemyNavigation navigation = new EnemyNavigation();
 
     public float CurrentSpeed => baseSpeed * accelerationMultiplier;
 
     private void Awake()
     {
+        if (GetComponentInChildren<Collider2D>() == null) gameObject.AddComponent<BoxCollider2D>();
         startPosition = transform.position;
         patrolDirection = GetPatrolDirection();
     }
@@ -34,10 +38,10 @@ public sealed class MovingEnemy : MonoBehaviour, IAccelerationTarget
     {
         if (TryGetComponent<EnemyStagger>(out var stagger) && stagger.IsStunned) return;
         Vector3 targetPosition = startPosition + patrolDirection * patrolDistance * directionSign;
-        transform.position = Vector3.MoveTowards(
-            transform.position,
-            targetPosition,
-            CurrentSpeed * Time.deltaTime);
+        Vector2 step = navigation.Step(transform, null, targetPosition, CurrentSpeed * Time.deltaTime, movementBlockingLayers);
+        Vector3 next = transform.position + (Vector3)step;
+        if (TryGetComponent<Rigidbody2D>(out var body)) body.position = next;
+        transform.position = next;
 
         if ((transform.position - targetPosition).sqrMagnitude <= 0.0001f)
         {

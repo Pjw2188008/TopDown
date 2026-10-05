@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
-/// 적 루트에 부착하는 순찰/추적 근접 몬스터입니다. 예고/타격 이펙트, 체력,
+/// 적 루트에 부착하는 순찰/우회 추적/직접 찌르기 근접 몬스터입니다. 체력,
 /// 패링 경직, 플레이어 몸 충돌 제외를 담당합니다. MeleeEnemy/RangedEnemy와 중복 부착하지 마세요.
 /// </summary>
 [DisallowMultipleComponent]
@@ -20,17 +20,17 @@ public partial class EnemyController : MonoBehaviour, ICombatDamageable
     [Tooltip("공격 준비를 시작하는 중심 사각 범위입니다. 실제 타격 범위는 Attack Hit Size입니다.")]
     public Vector2 attackAreaSize = new Vector2(2f, 2f);
     [Header("근접 공격 판정 / 이펙트")]
-    [Tooltip("주황색 공격 예고 시간입니다. 끝나는 순간 우클릭하면 기존 패링 판정이 적용됩니다.")]
+    [Tooltip("Animator를 사용하지 않는 적의 공격 예고 시간입니다. Animator 사용 시 실제 Attack 상태 진행률로 타격합니다.")]
     [Min(.01f)] public float attackWindup = .4f;
     [Tooltip("몬스터 중심에서 공격 방향으로 떨어진 타격 중심까지 거리입니다.")]
     [Min(0f)] public float attackReach = .75f;
     [Tooltip("오른쪽 공격 기준 타격 사각형 크기입니다. 위/아래 공격 시 함께 회전합니다.")]
     public Vector2 attackHitSize = new Vector2(1.2f, 1.2f);
     [Tooltip("오른쪽을 향하는 공격 이미지입니다. 비우면 플레이어 이펙트, 그것도 없으면 임시 빨간 사각형을 사용합니다.")]
-    public Sprite attackEffectSprite;
+    [HideInInspector, UnityEngine.Animations.NotKeyable] public Sprite attackEffectSprite;
     [Tooltip("타격 이펙트 유지 시간입니다. 이펙트가 남아 있어도 타격은 한 번만 발생합니다.")]
-    [Min(.01f)] public float attackEffectDuration = .18f;
-    [Tooltip("실제 타격 영역에 주황색 사각 예고를 표시합니다.")] public bool showAttackWarning = true;
+    [HideInInspector, Min(.01f)] public float attackEffectDuration = .18f;
+    [HideInInspector] public bool showAttackWarning = true; // 이전 직렬화 호환용. 공격 이미지는 생성하지 않습니다.
     [Header("References / 충돌")]
     [Tooltip("플레이어 Transform입니다. 비우면 활성 PlayerMove를 찾습니다.")] public Transform player;
     [Tooltip("이 적과 플레이어 몸 Collider만 충돌하지 않게 합니다. 공격 검색/투사체 판정은 유지합니다.")]
@@ -46,13 +46,9 @@ public partial class EnemyController : MonoBehaviour, ICombatDamageable
     private EnemyStagger stagger;
     private SpriteRenderer bodyRenderer;
     private bool windingUp, dead;
-    private float windupRemaining, effectRemaining;
+    private float windupRemaining;
     private Vector2 swingDirection = Vector2.right;
     private Vector2 swingCenter;
-    private GameObject effectObject;
-    private SpriteRenderer effectRenderer;
-    private Texture2D fallbackTexture;
-    private Sprite fallbackSprite;
     private struct CollisionPair { public Collider2D enemy, player; }
     private readonly List<CollisionPair> ignoredPairs = new List<CollisionPair>();
     private readonly List<Collider2D> ownColliderBuffer = new List<Collider2D>(4);
@@ -61,6 +57,7 @@ public partial class EnemyController : MonoBehaviour, ICombatDamageable
 
     private void Awake()
     {
+        PrepareMeleePresentation();
         currentHealth = Mathf.Max(1f, maxHealth);
         stagger = GetComponent<EnemyStagger>();
         if (stagger == null) stagger = gameObject.AddComponent<EnemyStagger>();
@@ -75,13 +72,24 @@ public partial class EnemyController : MonoBehaviour, ICombatDamageable
     }
     private void Update()
     {
+        movedThisFrame = false;
         if (dead || currentHealth <= 0f) return;
         ResolvePlayer(); RefreshBodyCollisions();
         float dt = Time.deltaTime;
         if (dt <= 0f) return;
-        attackTimer = Mathf.Max(0f, attackTimer - dt); UpdateEffect(dt);
+        attackTimer = Mathf.Max(0f, attackTimer - dt);
         if (stagger.IsStunned) { CancelAttack(); attackTimer = Mathf.Max(.01f, attackCooldown); return; }
         if (target == null || !target.isActiveAndEnabled) { CancelAttack(); return; }
+        if (animatedMeleeAttack)
+        {
+            if (meleeAnimator == null || !meleeAnimator.isActiveAndEnabled) CancelAttack();
+            return; // Animator 평가 후 LateUpdate에서 전진/타격/종료를 함께 처리합니다.
+        }
+        if (!windingUp && attackRecoveryRemaining > 0f)
+        {
+            attackRecoveryRemaining = Mathf.Max(0f, attackRecoveryRemaining - dt);
+            return; // 타격 뒤에도 공격 클립 끝까지 이동/다음 공격으로 끊지 않습니다.
+        }
         if (windingUp)
         {
             windupRemaining -= dt;
@@ -101,8 +109,5 @@ public partial class EnemyController : MonoBehaviour, ICombatDamageable
     private void OnDestroy()
     {
         RestoreBodyCollisions();
-        if (effectObject != null) Destroy(effectObject);
-        if (fallbackSprite != null) Destroy(fallbackSprite);
-        if (fallbackTexture != null) Destroy(fallbackTexture);
     }
 }

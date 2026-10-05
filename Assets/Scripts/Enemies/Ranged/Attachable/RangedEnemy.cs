@@ -125,7 +125,7 @@ public sealed partial class RangedEnemy : MonoBehaviour, ICombatDamageable, IAcc
         Vector2 difference = target.position - transform.position;
         float distance = difference.magnitude;
         Face(difference);
-        if (distance <= Mathf.Max(.1f, attackRange) && Time.time >= nextAttackAt)
+        if (distance <= Mathf.Max(.1f, attackRange) && Time.time >= nextAttackAt && CanSeeTarget())
         {
             BeginAttack(difference);
             return;

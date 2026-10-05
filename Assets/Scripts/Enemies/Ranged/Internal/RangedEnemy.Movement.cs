@@ -11,6 +11,8 @@ public sealed partial class RangedEnemy
     private readonly List<RaycastHit2D> moveHits = new List<RaycastHit2D>(16);
     private float speedMultiplier = 1f;
     private float nextTargetSearch;
+    [SerializeField] private EnemyNavigation navigation = new EnemyNavigation();
+    private bool CanSeeTarget() => target != null && navigation.HasSight(transform, target, target.position, movementBlockingLayers);
 
     private bool HasAnimator => animator != null && animator.runtimeAnimatorController != null;
 
@@ -25,15 +27,13 @@ public sealed partial class RangedEnemy
 
     private void MoveTowardsTarget(Vector2 difference, float distance, float deltaTime)
     {
-        float desiredDistance = Mathf.Min(Mathf.Max(0f, stoppingDistance), Mathf.Max(.1f, attackRange));
+        float desiredDistance = CanSeeTarget() ? Mathf.Min(Mathf.Max(0f, stoppingDistance), Mathf.Max(.1f, attackRange)) : 0f;
         Vector2 displacement = distance > desiredDistance && distance > .0001f
-            ? difference / distance * Mathf.Min(CurrentMoveSpeed * deltaTime, distance - desiredDistance)
+            ? navigation.Step(transform, target, target.position, Mathf.Min(CurrentMoveSpeed * deltaTime, distance - desiredDistance), movementBlockingLayers)
             : Vector2.zero;
         Vector2 start = transform.position;
 
-        // 축별 Cast로 벽과의 간격을 유지합니다. 대각선도 오른쪽 이동 클립 하나를 사용합니다.
-        MoveAxis(new Vector2(displacement.x, 0));
-        MoveAxis(new Vector2(0, displacement.y));
+        MoveAxis(displacement);
         Vector2 moved = (Vector2)transform.position - start;
         bool isMoving = moved.sqrMagnitude > .00000001f;
         if (isMoving) Face(moved);
