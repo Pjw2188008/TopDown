@@ -200,8 +200,11 @@ public partial class PlayerMove
         if (amount <= 0f) return false;
         if (attacker != null && TryConsumeParry())
         {
-            EnemyStagger stagger = attacker.GetComponentInParent<EnemyStagger>();
-            if (stagger != null) stagger.Stun(parryStunDuration);
+            if (!CombatParry.Notify(attacker, this))
+            {
+                EnemyStagger stagger = attacker.GetComponentInParent<EnemyStagger>();
+                if (stagger != null) stagger.Stun(parryStunDuration);
+            }
             return true;
         }
         return ReceiveDamage(amount, attacker, true);

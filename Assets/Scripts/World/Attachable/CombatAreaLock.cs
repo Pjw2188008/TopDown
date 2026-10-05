@@ -96,7 +96,7 @@ public sealed class CombatAreaLock : MonoBehaviour
         foreach (var source in meleeSpawners) if (source != null) meleeSources.Add(source);
         if (collectEnemiesInArea)
         {
-            Collect<EnemyController>(); Collect<MeleeEnemy>(); Collect<RangedEnemy>();
+            Collect<EnemyController>(); Collect<MeleeEnemy>(); Collect<RangedEnemy>(); Collect<TutorialBoss>();
             foreach (var source in FindObjectsByType<RangedEnemySpawner>(FindObjectsSortMode.None))
                 if (source.enabled && entryArea.OverlapPoint(source.transform.position)) sources.Add(source);
             foreach (var source in FindObjectsByType<MeleeEnemySpawner>(FindObjectsSortMode.None))

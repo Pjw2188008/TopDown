@@ -69,6 +69,7 @@ public sealed class ReflectProjectile : MonoBehaviour
         PlayerMove player = hitObject.GetComponentInParent<PlayerMove>();
         if (damage > 0f && player != null && player.TryParryProjectile())
         {
+            CombatParry.Notify(owner, player); // 소유권 변경 전 발사자의 패링 누적 규칙을 처리합니다.
             // 발사자 소유권이 플레이어로 바뀌기 전에 해당 연습 허수아비의 성공만 기록합니다.
             var dummy = owner != null ? owner.GetComponent<TutorialTrainingDummy>() : null;
             if (dummy != null) dummy.RecordParry(player);
