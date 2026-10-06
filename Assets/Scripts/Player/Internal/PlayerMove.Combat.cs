@@ -104,7 +104,7 @@ public partial class PlayerMove
         }
 
         float attackScale = GetCurrentAttackScale();
-        Vector2 effectCenter = (Vector2)transform.position
+        Vector2 effectCenter = (Vector2)GroundPosition
             + attackDirection * GetCurrentAttackRange();
         Vector2 targetSize = Vector2.Scale(attackSizeSide * attackScale, attackEffectSizeMultiplier);
         Vector2 spriteSize = attackEffectSprite.bounds.size;
@@ -142,7 +142,7 @@ public partial class PlayerMove
 
     private void AttackHit()
     {
-        Vector2 center = (Vector2)transform.position + attackDirection * GetCurrentAttackRange();
+        Vector2 center = (Vector2)GroundPosition + attackDirection * GetCurrentAttackRange();
         float angle = Mathf.Atan2(attackDirection.y, attackDirection.x) * Mathf.Rad2Deg;
         Collider2D[] hits = Physics2D.OverlapBoxAll(center, attackSizeSide * GetCurrentAttackScale(), angle, enemyLayer);
         handledAttackObjects.Clear();
@@ -188,7 +188,7 @@ public partial class PlayerMove
 
     private Vector2 GetCardinalAttackDirection(Vector2 direction)
     {
-        if (IsSideView) return new Vector2(Mathf.Abs(direction.x) > .0001f ? Mathf.Sign(direction.x) : (lastDirection.x < 0f ? -1f : 1f), 0f);
+        if (IsSideView) return Vector2.right * GetSideViewFacing(direction);
         return AttackMath.CardinalDirection(direction, verticalAttackHalfAngle);
     }
 
@@ -216,7 +216,7 @@ public partial class PlayerMove
 
     private void DrawAttackGizmo(Vector2 direction)
     {
-        Vector2 center = (Vector2)transform.position + direction * GetCurrentAttackRange();
+        Vector2 center = (Vector2)GroundPosition + direction * GetCurrentAttackRange();
         Vector2 size = attackSizeSide * GetCurrentAttackScale();
         Vector2 effectSize = Vector2.Scale(size, attackEffectSizeMultiplier);
         float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;

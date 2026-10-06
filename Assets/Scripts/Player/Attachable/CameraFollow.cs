@@ -45,7 +45,9 @@ public class CameraFollow : MonoBehaviour
     {
         if (player == null) return;
 
-        Vector3 desired = player.position + offset;
+        Vector3 targetPosition = player.TryGetComponent<PlayerMove>(out var playerMove)
+            ? playerMove.GroundPosition : player.position;
+        Vector3 desired = targetPosition + offset;
         if (!useAreaBounds || viewCamera == null)
         {
             activeArea = null;
@@ -54,7 +56,7 @@ public class CameraFollow : MonoBehaviour
             return;
         }
 
-        var enteredArea = CameraBoundsArea.FindAt(player.position, activeArea);
+        var enteredArea = CameraBoundsArea.FindAt(targetPosition, activeArea);
         if (enteredArea != null) activeArea = enteredArea;
         else if (!keepLastAreaOutside || activeArea == null || !activeArea.IsUsable)
             activeArea = defaultArea != null && defaultArea.IsUsable ? defaultArea : null;

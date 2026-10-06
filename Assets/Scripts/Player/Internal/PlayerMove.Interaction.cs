@@ -49,7 +49,7 @@ public partial class PlayerMove
         if (!nearbyInteractable.TryGrab(transform)) return false;
         heldInteractable = nearbyInteractable; nearbyInteractable = null;
         EnsureInteractionGrabGap();
-        interactionFacing = GetCardinalAttackDirection((Vector2)(heldInteractable.transform.position - transform.position));
+        interactionFacing = GetCardinalAttackDirection((Vector2)(heldInteractable.transform.position - GroundPosition));
         UpdateInteractionAnimation(false);
         return true;
     }
@@ -61,13 +61,13 @@ public partial class PlayerMove
         Physics2D.SyncTransforms();
         MovableInteractable best = null;
         float distance = float.PositiveInfinity;
-        foreach (Collider2D collider in Physics2D.OverlapCircleAll(transform.position, Mathf.Max(.1f, interactionRange), interactionLayers))
+        foreach (Collider2D collider in Physics2D.OverlapCircleAll(GroundPosition, Mathf.Max(.1f, interactionRange), interactionLayers))
         {
             if (collider.isTrigger || collider.transform.IsChildOf(transform)) continue;
             MovableInteractable candidate = collider.GetComponentInParent<MovableInteractable>();
             if (candidate == null || !candidate.IsAvailable) continue;
-            Vector2 nearest = collider.ClosestPoint(transform.position);
-            float candidateDistance = (nearest - (Vector2)transform.position).sqrMagnitude;
+            Vector2 nearest = collider.ClosestPoint(GroundPosition);
+            float candidateDistance = (nearest - (Vector2)GroundPosition).sqrMagnitude;
             if (candidateDistance >= distance || !HasInteractionLineOfSight(candidate, nearest)) continue;
             distance = candidateDistance; best = candidate;
         }
@@ -76,7 +76,7 @@ public partial class PlayerMove
 
     private bool HasInteractionLineOfSight(MovableInteractable candidate, Vector2 end)
     {
-        foreach (RaycastHit2D hit in Physics2D.LinecastAll(transform.position, end, interactionBlockingLayers))
+        foreach (RaycastHit2D hit in Physics2D.LinecastAll(GroundPosition, end, interactionBlockingLayers))
             if (hit.collider != null && !hit.collider.isTrigger && !hit.collider.transform.IsChildOf(transform)
                 && !hit.collider.transform.IsChildOf(candidate.transform)) return false;
         return true;
@@ -90,6 +90,7 @@ public partial class PlayerMove
         interactionFacing = movement.x != 0f
             ? new Vector2(Mathf.Sign(movement.x), 0f)
             : new Vector2(0f, Mathf.Sign(movement.y));
+        if (IsSideView) interactionFacing = Vector2.right * GetSideViewFacing(movement);
         lastDirection = interactionFacing;
         // 먼저 입력 방향의 반대편에 섭니다. 자리 이동 중에는 물체를 움직이지 않습니다.
         if (!IsSideView && !TryRepositionForInteraction(Time.deltaTime, out bool repositioned)) return repositioned;
@@ -137,7 +138,7 @@ public partial class PlayerMove
         if (screen.z <= 0 || screen.x < 0 || screen.x > Screen.width || screen.y < 0 || screen.y > Screen.height) return;
         if (interactionPromptStyle == null) interactionPromptStyle = new GUIStyle(GUI.skin.box)
         { alignment = TextAnchor.MiddleCenter, fontSize = 14, wordWrap = true };
-        string message = IsMovingObject ? $"[{interactionKey}] 놓기 · {(IsSideView ? "A/D" : "WASD")} 옮기기" : $"[{interactionKey}] {target.InteractionName} 잡기";
+        string message = IsMovingObject ? $"[{interactionKey}] 놓기 · {(IsSideView && !IsSideViewDepthMovement ? "A/D" : "WASD")} 옮기기" : $"[{interactionKey}] {target.InteractionName} 잡기";
         GUI.Box(new Rect(screen.x - 120, Screen.height - screen.y + 38, 240, 44), message, interactionPromptStyle);
     }
 
@@ -145,6 +146,6 @@ public partial class PlayerMove
     {
         if (!showInteractionGizmo) return;
         Color previous = Gizmos.color; Gizmos.color = Color.yellow;
-        Gizmos.DrawWireSphere(transform.position, Mathf.Max(.1f, interactionRange)); Gizmos.color = previous;
+        Gizmos.DrawWireSphere(GroundPosition, Mathf.Max(.1f, interactionRange)); Gizmos.color = previous;
     }
 }

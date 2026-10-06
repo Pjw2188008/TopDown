@@ -63,7 +63,7 @@ public partial class PlayerMove
         foreach (T source in FindObjectsByType<T>(FindObjectsSortMode.None))
         {
             if (!source.isActiveAndEnabled || !source.IsActive || errorCodex.IsDiscovered(source.ErrorType)) continue;
-            Vector3 difference = source.transform.position - transform.position;
+            Vector3 difference = source.transform.position - GroundPosition;
             if (!ErrorCodex.IsWithinRange(difference.x, difference.y, errorDiscoveryRadius)) continue;
             if (!errorCodex.TryDiscover(source.ErrorType)) continue;
             if (usePersistentErrorDiscoveries) PlayerPrefs.SetInt(ErrorCodexSavePrefix + (int)source.ErrorType, 1);
@@ -192,7 +192,7 @@ public partial class PlayerMove
         Gizmos.matrix = Matrix4x4.identity;
         Gizmos.color = new Color(0.3f, 1f, 0.5f, 1f);
         float radius = Mathf.Max(0f, errorDiscoveryRadius);
-        Vector3 center = transform.position;
+        Vector3 center = GroundPosition;
         Vector3 previous = center + Vector3.right * radius;
         for (int i = 1; i <= 64; i++)
         {

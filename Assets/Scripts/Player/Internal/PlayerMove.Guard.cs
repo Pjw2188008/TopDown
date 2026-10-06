@@ -100,6 +100,7 @@ public partial class PlayerMove
 
     private void LateUpdate()
     {
+        UpdateSideViewVisualHeight();
         if (IsInstantlyDead) return;
         UpdateRunAfterimages(Time.deltaTime);
         if (isErrorCodexOpen) return;
@@ -163,7 +164,7 @@ public partial class PlayerMove
         if (IsSideView)
         {
             CloseErrorCodex(); // 먼저 도감 이전 시간 배율을 복원한 뒤 편집 모드를 종료합니다.
-            sideViewFallSpeed = 0f;
+            ResetSideViewJumpHeight();
             isAttacking = false;
             environmentPaste.Cancel();
             if (isEditMode) ToggleEditMode();

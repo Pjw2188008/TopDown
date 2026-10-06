@@ -9,12 +9,12 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 856138132916773424}
-  - component: {fileID: 5780044018209029834}
   - component: {fileID: 2086901520625443436}
   - component: {fileID: 3202404416156568755}
   - component: {fileID: 6463530775594750694}
   - component: {fileID: 449582661482583072}
   - component: {fileID: 5093556406473742990}
+  - component: {fileID: 9010043113880837435}
   m_Layer: 0
   m_Name: SideViewPlayer
   m_TagString: Untagged
@@ -37,61 +37,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!212 &5780044018209029834
-SpriteRenderer:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5283376155292188163}
-  m_Enabled: 1
-  m_CastShadows: 0
-  m_ReceiveShadows: 0
-  m_DynamicOccludee: 1
-  m_StaticShadowCaster: 0
-  m_MotionVectors: 1
-  m_LightProbeUsage: 1
-  m_ReflectionProbeUsage: 1
-  m_RayTracingMode: 0
-  m_RayTraceProcedural: 0
-  m_RayTracingAccelStructBuildFlagsOverride: 0
-  m_RayTracingAccelStructBuildFlags: 1
-  m_SmallMeshCulling: 1
-  m_RenderingLayerMask: 1
-  m_RendererPriority: 0
-  m_Materials:
-  - {fileID: 2100000, guid: cad697fe2938ebd47b71c23141c189c5, type: 2}
-  m_StaticBatchInfo:
-    firstSubMesh: 0
-    subMeshCount: 0
-  m_StaticBatchRoot: {fileID: 0}
-  m_ProbeAnchor: {fileID: 0}
-  m_LightProbeVolumeOverride: {fileID: 0}
-  m_ScaleInLightmap: 1
-  m_ReceiveGI: 1
-  m_PreserveUVs: 0
-  m_IgnoreNormalsForChartDetection: 0
-  m_ImportantGI: 0
-  m_StitchLightmapSeams: 1
-  m_SelectedEditorRenderState: 0
-  m_MinimumChartSize: 4
-  m_AutoUVMaxDistance: 0.5
-  m_AutoUVMaxAngle: 89
-  m_LightmapParameters: {fileID: 0}
-  m_SortingLayerID: 0
-  m_SortingLayer: 0
-  m_SortingOrder: 10
-  m_Sprite: {fileID: 1479990314160173754, guid: 8768fcb16092c4b458227d7d36defded, type: 3}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
-  m_FlipX: 0
-  m_FlipY: 0
-  m_DrawMode: 0
-  m_Size: {x: 1.0071429, y: 0.7714286}
-  m_AdaptiveModeThreshold: 0.5
-  m_SpriteTileMode: 0
-  m_WasSpriteAssigned: 1
-  m_MaskInteraction: 0
-  m_SpriteSortPoint: 0
 --- !u!50 &2086901520625443436
 Rigidbody2D:
   serializedVersion: 5
@@ -153,9 +98,9 @@ CapsuleCollider2D:
   m_UsedByEffector: 0
   m_CompositeOperation: 0
   m_CompositeOrder: 0
-  m_Offset: {x: 0, y: 0}
-  m_Size: {x: 0.31339285, y: 0.7714286}
-  m_Direction: 0
+  m_Offset: {x: -0.060807467, y: -0.25401768}
+  m_Size: {x: 0.3585639, y: 0.18}
+  m_Direction: 1
 --- !u!95 &6463530775594750694
 Animator:
   serializedVersion: 7
@@ -210,7 +155,7 @@ MonoBehaviour:
   runAfterimageOpacity: 0.22
   runAfterimageOffset: 0.1
   animator: {fileID: 6463530775594750694}
-  spriteRenderer: {fileID: 5780044018209029834}
+  spriteRenderer: {fileID: 9010043113880837435}
   editModeKey: 19
   editTimeScale: 0.8
   editModeDarkness: 0.45
@@ -270,11 +215,12 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 4294967291
   sideViewMode: 1
+  sideViewDepthMovement: 1
   sideViewGravity: 30
   sideViewMaxFallSpeed: 20
   sideViewJumpHeight: 2
-  sideViewJumpKey: 37
-  sideViewAlternateJumpKey: 63
+  sideViewJumpKey: 24
+  sideViewAlternateJumpKey: 0
 --- !u!114 &5093556406473742990
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -290,4 +236,60 @@ MonoBehaviour:
   duration: 0.35
   hitColor: {r: 1, g: 0, b: 0, a: 1}
   useUnscaledTime: 1
-  targetRenderers: []
+  targetRenderers:
+  - {fileID: 9010043113880837435}
+--- !u!212 &9010043113880837435
+SpriteRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5283376155292188163}
+  m_Enabled: 1
+  m_CastShadows: 0
+  m_ReceiveShadows: 0
+  m_DynamicOccludee: 1
+  m_StaticShadowCaster: 0
+  m_MotionVectors: 1
+  m_LightProbeUsage: 1
+  m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 0
+  m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
+  m_RenderingLayerMask: 1
+  m_RendererPriority: 0
+  m_Materials:
+  - {fileID: 2100000, guid: cad697fe2938ebd47b71c23141c189c5, type: 2}
+  m_StaticBatchInfo:
+    firstSubMesh: 0
+    subMeshCount: 0
+  m_StaticBatchRoot: {fileID: 0}
+  m_ProbeAnchor: {fileID: 0}
+  m_LightProbeVolumeOverride: {fileID: 0}
+  m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
+  m_PreserveUVs: 0
+  m_IgnoreNormalsForChartDetection: 0
+  m_ImportantGI: 0
+  m_StitchLightmapSeams: 1
+  m_SelectedEditorRenderState: 0
+  m_MinimumChartSize: 4
+  m_AutoUVMaxDistance: 0.5
+  m_AutoUVMaxAngle: 89
+  m_LightmapParameters: {fileID: 0}
+  m_SortingLayerID: 0
+  m_SortingLayer: 0
+  m_SortingOrder: 10
+  m_Sprite: {fileID: 1479990314160173754, guid: 8768fcb16092c4b458227d7d36defded, type: 3}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_FlipX: 0
+  m_FlipY: 0
+  m_DrawMode: 0
+  m_Size: {x: 1.0071429, y: 0.7714286}
+  m_AdaptiveModeThreshold: 0.5
+  m_SpriteTileMode: 0
+  m_WasSpriteAssigned: 1
+  m_MaskInteraction: 0
+  m_SpriteSortPoint: 0
