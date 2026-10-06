@@ -188,10 +188,15 @@ public partial class PlayerMove
         RefreshParryInput();
         if (!parryAvailable || !IsGuardRequested() || Time.time > parryDeadline) return false;
         parryAvailable = false;
+        ShowSuccessfulParry();
+        return true;
+    }
+
+    private void ShowSuccessfulParry()
+    {
         parryFeedbackUntil = Time.time + 0.45f;
         PlayParryAnimation();
         Debug.Log("첨삭 성공! 피해와 가드 게이지 소모를 무효화했습니다.", this);
-        return true;
     }
 
     /// <summary>근접 공격 전용 진입점입니다. 반사 피해나 일반 피해를 근접 패링으로 잘못 처리하지 않습니다.</summary>
@@ -200,14 +205,19 @@ public partial class PlayerMove
         if (amount <= 0f) return false;
         if (attacker != null && TryConsumeParry())
         {
-            if (!CombatParry.Notify(attacker, this))
-            {
-                EnemyStagger stagger = attacker.GetComponentInParent<EnemyStagger>();
-                if (stagger != null) stagger.Stun(parryStunDuration);
-            }
+            NotifyMeleeParry(attacker);
             return true;
         }
         return ReceiveDamage(amount, attacker, true);
+    }
+
+    private void NotifyMeleeParry(GameObject attacker)
+    {
+        if (!CombatParry.Notify(attacker, this))
+        {
+            EnemyStagger stagger = attacker.GetComponentInParent<EnemyStagger>();
+            if (stagger != null) stagger.Stun(parryStunDuration);
+        }
     }
 
     /// <summary>투사체 충돌 직전에 호출합니다. 성공 후 투사체 자체가 소유자와 진행 방향을 바꿉니다.</summary>

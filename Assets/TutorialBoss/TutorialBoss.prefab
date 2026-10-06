@@ -32,7 +32,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.5423729, y: 0.5423729, z: 0.5423729}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
@@ -128,8 +128,8 @@ MonoBehaviour:
   attackCooldown: 1.2
   blockingLayers:
     serializedVersion: 2
-    m_Bits: 4294967291
-  meleeRange: 2.5
+    m_Bits: 115
+  meleeRange: 3.03
   slamWarningTime: 0.9
   slamRadius: 1.1
   slamDamage: 2
@@ -147,13 +147,14 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   bossAnimator: {fileID: 2422552104331451204}
-  slamImpactTime: 0.65
   shotReleaseTime: 0.65
   bodyVisual: {fileID: 3021318808397080844}
   circleSprite: {fileID: -7553956601875612060, guid: 90053cb72a3a38d4d8713fd41bbbd890, type: 2}
   squareSprite: {fileID: -1040553959312980097, guid: 6ab59dc1d54f6c047b54d6b254e57b02, type: 2}
   projectileSprite: {fileID: 0}
   showStatus: 1
+  slamImpactSprite: {fileID: -1709135164719763461, guid: 895782ec0fdd4cf4ba9a699450995540, type: 3}
+  slamImpactDuration: 0.18
 --- !u!114 &3510002234945900211
 MonoBehaviour:
   m_ObjectHideFlags: 0
