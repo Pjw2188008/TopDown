@@ -26,6 +26,7 @@ public partial class PlayerMove
         CaptureRespawnPosition();
         lastInstantDeathFrame = Time.frameCount;
         currentHealth = 0f;
+        sideViewFallSpeed = 0f;
         ReleaseInteraction();
         CancelDash();
         ClearRunAfterimages();

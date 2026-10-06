@@ -188,6 +188,7 @@ public partial class PlayerMove
 
     private Vector2 GetCardinalAttackDirection(Vector2 direction)
     {
+        if (IsSideView) return new Vector2(Mathf.Abs(direction.x) > .0001f ? Mathf.Sign(direction.x) : (lastDirection.x < 0f ? -1f : 1f), 0f);
         return AttackMath.CardinalDirection(direction, verticalAttackHalfAngle);
     }
 
@@ -209,8 +210,7 @@ public partial class PlayerMove
         {
             DrawAttackGizmo(Vector2.right);
             DrawAttackGizmo(Vector2.left);
-            DrawAttackGizmo(Vector2.up);
-            DrawAttackGizmo(Vector2.down);
+            if (!IsSideView) { DrawAttackGizmo(Vector2.up); DrawAttackGizmo(Vector2.down); }
         }
     }
 

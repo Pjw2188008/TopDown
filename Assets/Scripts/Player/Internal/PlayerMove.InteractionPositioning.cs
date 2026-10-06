@@ -12,6 +12,7 @@ public partial class PlayerMove
 
         // Collider의 월드 경계를 기준으로 계산합니다. 큰 물체/거대화와 중심 오프셋도 반영합니다.
         Vector2 offset = objectBounds.center - playerBounds.center;
+        if (IsSideView) offset.y = 0f;
         Vector2 direction = offset.sqrMagnitude > .0001f ? offset.normalized
             : (lastDirection.sqrMagnitude > .0001f ? lastDirection.normalized : Vector2.right);
         Vector2 separation = (Vector2)(playerBounds.extents + objectBounds.extents) + Vector2.one * interactionGrabGap;

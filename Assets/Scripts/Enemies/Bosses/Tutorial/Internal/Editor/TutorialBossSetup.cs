@@ -17,8 +17,7 @@ public static class TutorialBossSetup
             try
             {
                 int layer = LayerMask.NameToLayer("Enemy");if (layer >= 0) root.layer = layer;
-                var body = new GameObject("Body");body.transform.SetParent(root.transform,false);body.transform.localScale = Vector3.one*1.5f;
-                var visual = body.AddComponent<SpriteRenderer>();visual.sprite = square;visual.color = new Color(.5f,.3f,.85f);visual.sortingOrder = 10;
+                var visual = root.AddComponent<SpriteRenderer>();visual.sprite = square;visual.color = new Color(.5f,.3f,.85f);visual.sortingOrder = 10;
                 root.AddComponent<BoxCollider2D>().size = Vector2.one*1.5f;root.GetComponent<BoxCollider2D>().isTrigger = true;
                 var physics = root.AddComponent<Rigidbody2D>();physics.bodyType = RigidbodyType2D.Kinematic;physics.gravityScale = 0;physics.constraints = RigidbodyConstraints2D.FreezeRotation;
                 var data = new SerializedObject(root.AddComponent<TutorialBoss>());
@@ -31,6 +30,7 @@ public static class TutorialBossSetup
             finally { Object.DestroyImmediate(root); }
         }
         AssetDatabase.SaveAssets();
+        TutorialBossAnimationSetup.Configure();
     }
     private static Sprite Shape(string name,bool circle)
     {

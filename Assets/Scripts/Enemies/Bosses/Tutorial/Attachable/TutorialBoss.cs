@@ -51,6 +51,7 @@ public sealed partial class TutorialBoss : MonoBehaviour, ICombatDamageable, ICo
         GetComponent<BoxCollider2D>().isTrigger = true; // 몸끼리 밀지 않으며 공격 검색에서는 피격 대상으로 사용합니다.
         int layer = LayerMask.NameToLayer("Enemy");if (layer >= 0 && gameObject.layer == 0) gameObject.layer = layer;
         PrepareVisuals();
+        PrepareAnimation();
         SetPhase(Phase.Recovery, attackCooldown);
     }
 
@@ -66,6 +67,7 @@ public sealed partial class TutorialBoss : MonoBehaviour, ICombatDamageable, ICo
             else { phaseRemaining -= dt;if (phaseRemaining <= 0) SetPhase(Phase.Recovery, attackCooldown); }
             HideWarning();RestoreBodyPose();return;
         }
+        if (attackAnimationActive) return; // Animator 평가 후 LateUpdate에서 타격과 후딜을 처리합니다.
         if (phase == Phase.Ready)
         {
             float distance = Vector2.Distance(transform.position, player.transform.position);
@@ -75,7 +77,7 @@ public sealed partial class TutorialBoss : MonoBehaviour, ICombatDamageable, ICo
             shotDirection = aim.sqrMagnitude > .0001f ? aim.normalized : Vector2.right;
             SetPhase(distance <= Mathf.Max(.1f, meleeRange) ? Phase.SlamWarning : Phase.ShotWarning,
                 distance <= Mathf.Max(.1f, meleeRange) ? slamWarningTime : shotWarningTime);
-            ShowWarning();return;
+            ShowWarning();BeginBossAttackAnimation();return;
         }
         phaseRemaining -= dt;
         UpdateWarningAndPose();
@@ -89,7 +91,8 @@ public sealed partial class TutorialBoss : MonoBehaviour, ICombatDamageable, ICo
     }
 
     private bool CanSee(Vector2 point) => sight.HasSight(transform, player != null ? player.transform : null, point, blockingLayers);
-    private void SetPhase(Phase value, float duration) { phase = value;phaseDuration = phaseRemaining = Mathf.Max(0f, duration); }
+    private void SetPhase(Phase value, float duration)
+    { phase = value;phaseDuration = phaseRemaining = Mathf.Max(0f, duration);AnimatePhase(value); }
     private void Slam()
     {
         if (!CanSee(lockedPoint)) return;
@@ -136,6 +139,7 @@ public sealed partial class TutorialBoss : MonoBehaviour, ICombatDamageable, ICo
 
     private void OnDisable()
     {
+        StopAttackAnimation();
         HideWarning();RestoreBodyPose();
         if (impactVisual != null) impactVisual.gameObject.SetActive(false);
         foreach (var shot in projectiles) if (shot != null) Destroy(shot.gameObject);

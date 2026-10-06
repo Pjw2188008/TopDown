@@ -13,6 +13,14 @@ public partial class PlayerMove
 
     private Vector2 GetMovementInput()
     {
+        if (IsSideView)
+        {
+            var keyboard = Keyboard.current;
+            if (keyboard == null) return Vector2.zero;
+            bool left = keyboard.aKey.isPressed || keyboard.leftArrowKey.isPressed;
+            bool right = keyboard.dKey.isPressed || keyboard.rightArrowKey.isPressed;
+            return new Vector2((right ? 1f : 0f) - (left ? 1f : 0f), 0f);
+        }
         Vector2 input = Vector2.zero;
 
         if (Keyboard.current.wKey.isPressed)
@@ -40,6 +48,8 @@ public partial class PlayerMove
 
     private Vector2 GetMouseDirection()
     {
+        // 일반 전투는 마지막 이동 방향, 편집 모드는 마우스 조준을 유지합니다.
+        if (IsSideView && !isEditMode) return lastDirection.x < 0 ? Vector2.left : Vector2.right;
         if (Mouse.current == null || Camera.main == null)
             return lastDirection.sqrMagnitude > 0f ? lastDirection.normalized : Vector2.right;
 
@@ -61,6 +71,7 @@ public partial class PlayerMove
         }
 
         // 클립/프레임은 Animator와 Animation 창에서 관리합니다.
+        if (IsSideView && UpdateSideViewJumpAnimation(direction, isMoving)) return;
         // 스크립트는 이동 상태만 전달하고, 실제 클립 전환은 Controller가 담당합니다.
         animator.SetBool(IsMovingHash, isMoving);
         if (!isMoving)

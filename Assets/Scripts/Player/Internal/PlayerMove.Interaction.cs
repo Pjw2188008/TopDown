@@ -92,7 +92,7 @@ public partial class PlayerMove
             : new Vector2(0f, Mathf.Sign(movement.y));
         lastDirection = interactionFacing;
         // 먼저 입력 방향의 반대편에 섭니다. 자리 이동 중에는 물체를 움직이지 않습니다.
-        if (!TryRepositionForInteraction(Time.deltaTime, out bool repositioned)) return repositioned;
+        if (!IsSideView && !TryRepositionForInteraction(Time.deltaTime, out bool repositioned)) return repositioned;
         Vector2 direction = movement.normalized;
         float wanted = Mathf.Max(0f, moveSpeed) * heldInteractable.MoveSpeedMultiplier * Time.deltaTime;
         Physics2D.SyncTransforms();
@@ -137,7 +137,7 @@ public partial class PlayerMove
         if (screen.z <= 0 || screen.x < 0 || screen.x > Screen.width || screen.y < 0 || screen.y > Screen.height) return;
         if (interactionPromptStyle == null) interactionPromptStyle = new GUIStyle(GUI.skin.box)
         { alignment = TextAnchor.MiddleCenter, fontSize = 14, wordWrap = true };
-        string message = IsMovingObject ? $"[{interactionKey}] 놓기 · WASD 옮기기" : $"[{interactionKey}] {target.InteractionName} 잡기";
+        string message = IsMovingObject ? $"[{interactionKey}] 놓기 · {(IsSideView ? "A/D" : "WASD")} 옮기기" : $"[{interactionKey}] {target.InteractionName} 잡기";
         GUI.Box(new Rect(screen.x - 120, Screen.height - screen.y + 38, 240, 44), message, interactionPromptStyle);
     }
 

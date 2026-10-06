@@ -4,14 +4,14 @@ using UnityEngine;
 public sealed partial class TutorialBoss
 {
     [Header("교체 가능한 그림")]
-    [SerializeField, Tooltip("보스 그림 전용 자식 Renderer입니다. Sprite를 교체하세요. 몸 Collider와 분리되어 준비 중 그림만 들립니다.")] private SpriteRenderer bodyVisual;
-    [SerializeField, Tooltip("원형 바닥 경고/기본 탄환 이미지입니다.")] private Sprite circleSprite;
-    [SerializeField, Tooltip("직선 조준 경고에 늘려 쓸 사각 이미지입니다.")] private Sprite squareSprite;
-    [SerializeField, Tooltip("비우면 원형 도형 탄환을 사용합니다.")] private Sprite projectileSprite;
-    [SerializeField, Min(0f), Tooltip("내리찍기 준비 중 그림을 들어올리는 높이입니다.")] private float slamLiftHeight = .6f;
+    [SerializeField, HideInInspector] private SpriteRenderer bodyVisual;
+    // 설정용 Sprite는 애니메이션 대상에서 제외해 프레임 드롭 시 SpriteRenderer만 선택되게 합니다.
+    // 인스펙터에서 이미지 교체 및 기존 직렬화 참조는 그대로 유지합니다.
+    [SerializeField, UnityEngine.Animations.NotKeyable, Tooltip("원형 바닥 경고/기본 탄환 이미지입니다.")] private Sprite circleSprite;
+    [SerializeField, UnityEngine.Animations.NotKeyable, Tooltip("직선 조준 경고에 늘려 쓸 사각 이미지입니다.")] private Sprite squareSprite;
+    [SerializeField, UnityEngine.Animations.NotKeyable, Tooltip("비우면 원형 도형 탄환을 사용합니다.")] private Sprite projectileSprite;
     [SerializeField, Tooltip("보스 머리 위 임시 체력/균형 UI를 표시합니다.")] private bool showStatus = true;
     private SpriteRenderer warningVisual, impactVisual;
-    private Vector3 bodyRestPosition;
     private float impactRemaining;
     private Sprite runtimeCircle, runtimeSquare;
     private Texture2D runtimeCircleTexture, runtimeSquareTexture;
@@ -28,13 +28,12 @@ public sealed partial class TutorialBoss
     {
         if (circleSprite == null) { runtimeCircle = Shape(true,out runtimeCircleTexture);circleSprite = runtimeCircle; }
         if (squareSprite == null) { runtimeSquare = Shape(false,out runtimeSquareTexture);squareSprite = runtimeSquare; }
+        bodyVisual = GetComponent<SpriteRenderer>();
         if (bodyVisual == null)
         {
-            var visual = new GameObject("Body");visual.transform.SetParent(transform,false);
-            bodyVisual = visual.AddComponent<SpriteRenderer>();bodyVisual.sprite = squareSprite;bodyVisual.color = new Color(.5f,.3f,.85f);
-            bodyVisual.sortingOrder = 10;Fit(bodyVisual,Vector2.one*1.5f);
+            bodyVisual = gameObject.AddComponent<SpriteRenderer>();bodyVisual.sprite = squareSprite;bodyVisual.color = new Color(.5f,.3f,.85f);
+            bodyVisual.sortingOrder = 10;
         }
-        bodyRestPosition = bodyVisual.transform.localPosition;
         warningVisual = new GameObject("Boss Attack Warning").AddComponent<SpriteRenderer>();warningVisual.sortingOrder = 20;
         impactVisual = new GameObject("Boss Slam Impact").AddComponent<SpriteRenderer>();impactVisual.sortingOrder = 21;
         HideWarning();impactVisual.gameObject.SetActive(false);
@@ -68,10 +67,8 @@ public sealed partial class TutorialBoss
         if (phase != Phase.SlamWarning && phase != Phase.ShotWarning) return;
         float progress = 1f-Mathf.Clamp01(phaseRemaining/Mathf.Max(.01f,phaseDuration));
         if (warningVisual != null) warningVisual.color = new Color(1f,Mathf.Lerp(.65f,.1f,progress),.05f,Mathf.Lerp(.35f,.8f,progress));
-        if (phase == Phase.SlamWarning && bodyVisual != null && bodyVisual.transform != transform)
-            bodyVisual.transform.localPosition = bodyRestPosition + Vector3.up * Mathf.Max(0,slamLiftHeight)*progress;
     }
-    private void RestoreBodyPose() { if (bodyVisual != null && bodyVisual.transform != transform) bodyVisual.transform.localPosition = bodyRestPosition; }
+    private void RestoreBodyPose() { } // 단일 루트의 Transform/Collider를 연출로 변경하지 않습니다.
     private void HideWarning() { if (warningVisual != null) warningVisual.gameObject.SetActive(false); }
     private void ShowImpact(Vector2 point)
     {
@@ -82,6 +79,7 @@ public sealed partial class TutorialBoss
     }
     private void LateUpdate()
     {
+        UpdateBossAttackAnimation();
         impactRemaining -= Time.deltaTime;
         if (impactRemaining <= 0 && impactVisual != null) impactVisual.gameObject.SetActive(false);
     }

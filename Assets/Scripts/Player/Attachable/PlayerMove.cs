@@ -278,6 +278,8 @@ public partial class PlayerMove : MonoBehaviour, ICombatDamageable
         didDashThisFrame = false;
         // 도감 클릭이 공격/Cut/Paste 입력으로 전달되지 않도록 가장 먼저 처리합니다.
         if (HandleErrorCodexInput()) return;
+        if (IsSideView && (!guardHasFocus || Time.timeScale <= 0f)) return;
+        UpdateSideViewGravity(Time.deltaTime);
         bool interactionInputConsumed = HandleInteractionInput();
         UpdateDashStamina(Time.deltaTime);
         UpdateErrorDiscovery();
@@ -316,8 +318,9 @@ public partial class PlayerMove : MonoBehaviour, ICombatDamageable
         UpdateGuardState();
         if (Keyboard.current.spaceKey.wasPressedThisFrame) TryBeginDash(moveDirection);
         bool dashHandled = UpdateDashMovement(Time.deltaTime);
+        HandleSideViewJumpInput();
         if (dashHandled) moveDirection = dashDirection;
-        bool isMoving = dashHandled || (moveDirection != Vector2.zero && !isGuarding && !isPlayingParry);
+        bool isMoving = dashHandled || (moveDirection != Vector2.zero && !isGuarding && !isPlayingParry && !(IsSideView && isAttacking));
 
         if (IsMovingObject)
         {
@@ -371,6 +374,7 @@ public partial class PlayerMove : MonoBehaviour, ICombatDamageable
         DestroyRunAfterimages();
         CloseErrorCodex();
         if (parryFeedbackCanvas != null) Destroy(parryFeedbackCanvas.gameObject);
+        if (IsSideView && editModeOverlay != null) Destroy(editModeOverlay.canvas.gameObject);
         Time.timeScale = 1f;
         Time.fixedDeltaTime = 0.02f;
     }
