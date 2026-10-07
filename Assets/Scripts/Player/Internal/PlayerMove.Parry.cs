@@ -7,6 +7,7 @@ public partial class PlayerMove
 {
     private int lastParryInputFrame = -1;
     private float parryDeadline;
+    private float parryInputTime = float.NegativeInfinity;
     private bool parryAvailable;
     private float parryFeedbackUntil;
     private GUIStyle parryFeedbackStyle;
@@ -178,15 +179,20 @@ public partial class PlayerMove
             lastParryInputFrame = Time.frameCount;
             // 성공 연출은 입력 쿨다운이 아닙니다. 새 우클릭이면 연속 공격도 다시 패링할 수 있습니다.
             parryAvailable = IsGuardRequested();
+            parryInputTime = Time.time;
             parryDeadline = Time.time + Mathf.Max(0.01f, parryWindow);
         }
         if (!IsGuardRequested()) parryAvailable = false;
     }
 
-    private bool TryConsumeParry()
+    private bool TryConsumeParry() => TryConsumeParryWithin(0f);
+
+    // 공격별 최소 허용 시간입니다. 플레이어 기본값은 변경하지 않아 다른 공격에 전파되지 않습니다.
+    private bool TryConsumeParryWithin(float minimumWindow)
     {
         RefreshParryInput();
-        if (!parryAvailable || !IsGuardRequested() || Time.time > parryDeadline) return false;
+        float deadline = Mathf.Max(parryDeadline, parryInputTime + Mathf.Max(0f, minimumWindow));
+        if (!parryAvailable || !IsGuardRequested() || Time.time > deadline) return false;
         parryAvailable = false;
         ShowSuccessfulParry();
         return true;
@@ -201,9 +207,13 @@ public partial class PlayerMove
 
     /// <summary>근접 공격 전용 진입점입니다. 반사 피해나 일반 피해를 근접 패링으로 잘못 처리하지 않습니다.</summary>
     public bool ReceiveMeleeAttack(float amount, GameObject attacker)
+        => ReceiveMeleeAttack(amount, attacker, 0f);
+
+    /// <summary>이 근접 공격에만 최소 패링 시간을 적용합니다. 가드 유지/행동 제한 및 1회 소비는 그대로입니다.</summary>
+    public bool ReceiveMeleeAttack(float amount, GameObject attacker, float minimumParryWindow)
     {
         if (amount <= 0f) return false;
-        if (attacker != null && TryConsumeParry())
+        if (attacker != null && TryConsumeParryWithin(minimumParryWindow))
         {
             NotifyMeleeParry(attacker);
             return true;

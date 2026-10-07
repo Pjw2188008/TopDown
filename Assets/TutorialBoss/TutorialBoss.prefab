@@ -71,17 +71,17 @@ BoxCollider2D:
   m_UsedByEffector: 0
   m_CompositeOperation: 0
   m_CompositeOrder: 0
-  m_Offset: {x: 0, y: 0}
+  m_Offset: {x: 0, y: 0.07207394}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 3.5, y: 3.6875}
-    newSize: {x: 1, y: 1}
+    oldSize: {x: 1.703125, y: 1.71875}
+    newSize: {x: 1.703125, y: 1.71875}
     adaptiveTilingThreshold: 0.5
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
-  m_Size: {x: 2.765625, y: 2.765625}
+  m_Size: {x: 1.7034874, y: 1.8324604}
   m_EdgeRadius: 0
 --- !u!50 &4525294112222428957
 Rigidbody2D:
@@ -124,15 +124,21 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   player: {fileID: 0}
   maxHealth: 40
-  engagementRange: 12
+  roomArea: {fileID: 0}
+  roomOffset: {x: -5.35, y: 0.37}
+  roomSize: {x: 14.4, y: 12.7}
+  chaseSpeed: 2
+  stoppingDistance: 1.8
   attackCooldown: 1.2
   blockingLayers:
     serializedVersion: 2
     m_Bits: 115
   meleeRange: 3.03
   slamWarningTime: 0.9
-  slamRadius: 1.1
+  meleeHitBoxOffset: {x: 0.81, y: 0.1}
+  meleeHitBoxSize: {x: 0.9, y: 1.35}
   slamDamage: 2
+  meleeParryWindow: 0.3
   shotWarningTime: 1
   projectileSpeed: 7
   projectileDamage: 1
@@ -147,14 +153,15 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   bossAnimator: {fileID: 2422552104331451204}
+  flipSpriteWithMovement: 1
+  moveSpriteFacesRight: 0
+  slamHitFrame: 11
   shotReleaseTime: 0.65
   bodyVisual: {fileID: 3021318808397080844}
   circleSprite: {fileID: -7553956601875612060, guid: 90053cb72a3a38d4d8713fd41bbbd890, type: 2}
   squareSprite: {fileID: -1040553959312980097, guid: 6ab59dc1d54f6c047b54d6b254e57b02, type: 2}
   projectileSprite: {fileID: 0}
   showStatus: 1
-  slamImpactSprite: {fileID: -1709135164719763461, guid: 895782ec0fdd4cf4ba9a699450995540, type: 3}
-  slamImpactDuration: 0.18
 --- !u!114 &3510002234945900211
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -216,12 +223,12 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 10
-  m_Sprite: {fileID: -6944297947918371051, guid: 2bf779da9f7d2374b9603e539ed6ac74, type: 3}
+  m_Sprite: {fileID: -97677994873270963, guid: 690e376480103a8478f4844fe3a2c21a, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
-  m_Size: {x: 1, y: 1}
+  m_Size: {x: 1.703125, y: 1.71875}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1

@@ -25,6 +25,7 @@ public sealed partial class TutorialBoss : MonoBehaviour, ICombatDamageable, ICo
     [SerializeField, InspectorName("Melee Hit Offset"), Tooltip("오른쪽을 바라볼 때 보스 중심 기준 공격 사각형 위치(X/Y, 월드 단위)입니다. 왼쪽을 바라보면 X만 자동 반전합니다. Y는 위/아래 위치이며 음수도 가능합니다.")] private Vector2 meleeHitBoxOffset = new Vector2(1.4f,0f);
     [SerializeField, InspectorName("Melee Hit Size"), Tooltip("실제 공격 사각형의 가로(X)/세로(Y) 크기입니다. 월드 단위이며 청록색 기즈모와 판정이 일치합니다. 보스 몸 콜라이더와 별개입니다.")] private Vector2 meleeHitBoxSize = new Vector2(2.2f,2.2f);
     [SerializeField, Min(.1f)] private float slamDamage = 2f;
+    [SerializeField, Min(.01f), Tooltip("이 보스의 근접 공격에만 적용하는 최소 패링 허용 시간입니다. 기본 0.3초: 타격 전 0.3초 안에 우클릭을 시작하고 유지하면 성공합니다. 일반 적/투사체의 패링 시간은 바꾸지 않으며 플레이어 기본값이 더 길면 그 값을 유지합니다.")] private float meleeParryWindow = .3f;
     [Header("원거리 공격")]
     [SerializeField, InspectorName("Shot Windup Time"), Min(.1f), Tooltip("방향을 고정한 뒤 투사체 발사까지 준비하는 시간입니다. 조준 경고선은 표시하지 않으며 발사 후 유도하지 않습니다.")] private float shotWarningTime = 1f;
     [SerializeField, Min(.1f)] private float projectileSpeed = 7f;
@@ -161,7 +162,7 @@ public sealed partial class TutorialBoss : MonoBehaviour, ICombatDamageable, ICo
     private void ResolveSlam()
     {
         if (player == null || !player.isActiveAndEnabled || !CanSee(player.transform.position)) return;
-        if (IsPlayerInSlamArea()) player.ReceiveMeleeAttack(Mathf.Max(.1f, slamDamage), gameObject);
+        if (IsPlayerInSlamArea()) player.ReceiveMeleeAttack(Mathf.Max(.1f, slamDamage), gameObject, Mathf.Max(.01f,meleeParryWindow));
     }
 
     private bool IsPlayerInSlamArea()

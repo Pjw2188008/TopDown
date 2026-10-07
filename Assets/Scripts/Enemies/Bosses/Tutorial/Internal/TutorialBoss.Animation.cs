@@ -6,7 +6,7 @@ public sealed partial class TutorialBoss
     [Header("보스 애니메이션")]
     [SerializeField, HideInInspector] private Animator bossAnimator;
     [SerializeField, Tooltip("이동/공격 시작 방향에 따라 SpriteRenderer를 좌우 반전합니다. 공격 시작 뒤와 경직 중에는 방향을 바꾸지 않습니다.")] private bool flipSpriteWithMovement = true;
-    [SerializeField, Tooltip("원본 스프라이트(Flip X를 끈 상태)가 오른쪽을 보면 켜고, 왼쪽을 보면 끄세요. 이동/공격 반전과 근접 사각형의 좌우 방향에 함께 적용합니다.")] private bool moveSpriteFacesRight = true;
+    [SerializeField, Tooltip("현재 튜토리얼 보스 원본은 왼쪽을 보므로 기본 OFF입니다. Flip X를 끈 원본이 오른쪽인 다른 에셋으로 교체할 때만 켜세요. 이동/공격 반전과 근접 사각형의 좌우 방향에 함께 적용합니다.")] private bool moveSpriteFacesRight = false;
     private int requestedBossState;
     [SerializeField, Min(2), Tooltip("Slam 애니메이션에서 실제 무기를 휘두르는 타격 프레임 번호입니다(첫 프레임=1, 지정은 2부터). 기본 11번째 프레임에 피해/패링을 한 번 판정합니다. 별도 근접 이펙트는 없습니다. 범위를 넘으면 마지막 프레임, 1프레임 클립은 종료 시 타격합니다.")] private int slamHitFrame = 11;
     [SerializeField, Range(.05f,.95f), Tooltip("Shoot 클립의 탄환 발사 지점입니다. Shot Windup Time에 이 지점에 도착하도록 재생 속도를 맞춥니다.")] private float shotReleaseTime = .65f;
