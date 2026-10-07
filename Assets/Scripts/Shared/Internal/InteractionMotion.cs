@@ -5,7 +5,7 @@ using UnityEngine;
 public static class InteractionMotion
 {
     public static float AllowedDistance(Transform root, Transform partner, Vector2 direction, float wanted,
-        LayerMask blockingLayers, List<RaycastHit2D> hits, Vector2 castOffset = default)
+        LayerMask blockingLayers, List<RaycastHit2D> hits, Vector2 castOffset = default, bool includeTriggerShapes = false)
     {
         float allowed = wanted;
         var colliders = UnityEngine.Pool.ListPool<Collider2D>.Get();
@@ -14,7 +14,7 @@ public static class InteractionMotion
             root.GetComponentsInChildren(false, colliders);
             foreach (Collider2D shape in colliders)
             {
-                if (!shape.enabled || shape.isTrigger || !shape.gameObject.activeInHierarchy) continue;
+                if (!shape.enabled || (shape.isTrigger && !includeTriggerShapes) || !shape.gameObject.activeInHierarchy) continue;
                 if (shape.attachedRigidbody != null && !shape.attachedRigidbody.simulated) continue;
                 var filter = new ContactFilter2D();
                 filter.SetLayerMask(blockingLayers.value & Physics2D.GetLayerCollisionMask(shape.gameObject.layer));

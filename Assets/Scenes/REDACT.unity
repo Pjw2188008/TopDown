@@ -522,14 +522,58 @@ PrefabInstance:
       propertyPath: m_Name
       value: TutorialBoss
       objectReference: {fileID: 0}
+    - target: {fileID: 3021318808397080844, guid: 5b99f2bb2da6a8545852dec2ef742414, type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: -97677994873270963, guid: 690e376480103a8478f4844fe3a2c21a, type: 3}
     - target: {fileID: 4866652785127809678, guid: 5b99f2bb2da6a8545852dec2ef742414, type: 3}
       propertyPath: meleeRange
       value: 3.03
       objectReference: {fileID: 0}
     - target: {fileID: 4866652785127809678, guid: 5b99f2bb2da6a8545852dec2ef742414, type: 3}
+      propertyPath: roomSize.x
+      value: 14.4
+      objectReference: {fileID: 0}
+    - target: {fileID: 4866652785127809678, guid: 5b99f2bb2da6a8545852dec2ef742414, type: 3}
+      propertyPath: roomSize.y
+      value: 12.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 4866652785127809678, guid: 5b99f2bb2da6a8545852dec2ef742414, type: 3}
+      propertyPath: slamRadius
+      value: 1.58
+      objectReference: {fileID: 0}
+    - target: {fileID: 4866652785127809678, guid: 5b99f2bb2da6a8545852dec2ef742414, type: 3}
+      propertyPath: roomOffset.x
+      value: -5.35
+      objectReference: {fileID: 0}
+    - target: {fileID: 4866652785127809678, guid: 5b99f2bb2da6a8545852dec2ef742414, type: 3}
+      propertyPath: roomOffset.y
+      value: 0.37
+      objectReference: {fileID: 0}
+    - target: {fileID: 4866652785127809678, guid: 5b99f2bb2da6a8545852dec2ef742414, type: 3}
+      propertyPath: meleeHitOffset
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4866652785127809678, guid: 5b99f2bb2da6a8545852dec2ef742414, type: 3}
       propertyPath: slamImpactSprite
       value: 
       objectReference: {fileID: -1709135164719763461, guid: 895782ec0fdd4cf4ba9a699450995540, type: 3}
+    - target: {fileID: 4866652785127809678, guid: 5b99f2bb2da6a8545852dec2ef742414, type: 3}
+      propertyPath: meleeHitBoxSize.x
+      value: 0.99
+      objectReference: {fileID: 0}
+    - target: {fileID: 4866652785127809678, guid: 5b99f2bb2da6a8545852dec2ef742414, type: 3}
+      propertyPath: meleeHitBoxSize.y
+      value: 0.58
+      objectReference: {fileID: 0}
+    - target: {fileID: 4866652785127809678, guid: 5b99f2bb2da6a8545852dec2ef742414, type: 3}
+      propertyPath: meleeHitBoxOffset.x
+      value: -0.46
+      objectReference: {fileID: 0}
+    - target: {fileID: 4866652785127809678, guid: 5b99f2bb2da6a8545852dec2ef742414, type: 3}
+      propertyPath: meleeHitBoxOffset.y
+      value: 0.25
+      objectReference: {fileID: 0}
     - target: {fileID: 5803268300746287336, guid: 5b99f2bb2da6a8545852dec2ef742414, type: 3}
       propertyPath: m_LocalScale.x
       value: 1
@@ -581,6 +625,30 @@ PrefabInstance:
     - target: {fileID: 5803268300746287336, guid: 5b99f2bb2da6a8545852dec2ef742414, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6402021180505596194, guid: 5b99f2bb2da6a8545852dec2ef742414, type: 3}
+      propertyPath: m_Size.x
+      value: 1.7034874
+      objectReference: {fileID: 0}
+    - target: {fileID: 6402021180505596194, guid: 5b99f2bb2da6a8545852dec2ef742414, type: 3}
+      propertyPath: m_Size.y
+      value: 1.8324604
+      objectReference: {fileID: 0}
+    - target: {fileID: 6402021180505596194, guid: 5b99f2bb2da6a8545852dec2ef742414, type: 3}
+      propertyPath: m_Offset.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6402021180505596194, guid: 5b99f2bb2da6a8545852dec2ef742414, type: 3}
+      propertyPath: m_Offset.y
+      value: 0.07207394
+      objectReference: {fileID: 0}
+    - target: {fileID: 6402021180505596194, guid: 5b99f2bb2da6a8545852dec2ef742414, type: 3}
+      propertyPath: m_SpriteTilingProperty.oldSize.x
+      value: 1.703125
+      objectReference: {fileID: 0}
+    - target: {fileID: 6402021180505596194, guid: 5b99f2bb2da6a8545852dec2ef742414, type: 3}
+      propertyPath: m_SpriteTilingProperty.oldSize.y
+      value: 1.71875
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -48337,6 +48405,7 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 4294967291
   navigation:
+    useTriggerBody: 0
     cellSize: 0.5
     searchRadius: 10
     repathInterval: 0.5
@@ -48524,6 +48593,7 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 4294967291
   navigation:
+    useTriggerBody: 0
     cellSize: 0.5
     searchRadius: 10
     repathInterval: 0.5

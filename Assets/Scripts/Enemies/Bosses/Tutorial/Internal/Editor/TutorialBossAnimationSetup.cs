@@ -23,6 +23,7 @@ public static class TutorialBossAnimationSetup
         var machine=controller.layers[0].stateMachine;
         var idleState=State(machine,"Idle",idle,new Vector3(200,100));State(machine,"Slam",slam,new Vector3(450,100));
         State(machine,"Shoot",shoot,new Vector3(450,240));State(machine,"Stagger",stagger,new Vector3(200,240));
+        ConfigureMovement();
         if(machine.defaultState==null)machine.defaultState=idleState;
         if(AssetDatabase.LoadAssetAtPath<GameObject>(TutorialBossSetup.PrefabPath)==null)return;
         var root=PrefabUtility.LoadPrefabContents(TutorialBossSetup.PrefabPath);
@@ -71,6 +72,25 @@ public static class TutorialBossAnimationSetup
         finally{PrefabUtility.UnloadPrefabContents(root);}
         AssetDatabase.SaveAssets();
     }
+    [MenuItem("Tools/Story/Tutorial Boss/Configure Movement Animation")]
+    public static void ConfigureMovement()
+    {
+        var controller=AssetDatabase.LoadAssetAtPath<AnimatorController>(Folder+"/TutorialBoss.controller");
+        if(controller==null){Debug.LogWarning("보스 Animator Controller가 없습니다. Configure Animator를 먼저 실행하세요.");return;}
+        var prefab=AssetDatabase.LoadAssetAtPath<GameObject>(TutorialBossSetup.PrefabPath);
+        var renderer=prefab!=null?prefab.GetComponent<SpriteRenderer>():null;
+        Sprite sprite=renderer!=null?renderer.sprite:null;
+        if(sprite==null)sprite=AssetDatabase.LoadAllAssetsAtPath(Folder+"/golem-upper-left-128.png").OfType<Sprite>().FirstOrDefault();
+        if(!AssetDatabase.IsValidFolder(Folder+"/Animations"))AssetDatabase.CreateFolder(Folder,"Animations");
+        // 이미 편집한 이동 클립과 기존 상태 Motion은 덮어쓰지 않습니다.
+        string path=Folder+"/Animations/Boss_Move.anim";
+        var move=AssetDatabase.LoadAssetAtPath<AnimationClip>(path);
+        if(move==null)move=Clip("Boss_Move",sprite,.8f,true);
+        var state=State(controller.layers[0].stateMachine,"Move",move,new Vector3(200,380));
+        if(state.motion==null){state.motion=move;EditorUtility.SetDirty(state);}
+        EditorUtility.SetDirty(controller);AssetDatabase.SaveAssets();
+    }
+
     private static AnimatorState State(AnimatorStateMachine machine,string name,AnimationClip clip,Vector3 position)
     {
         foreach(var state in machine.states)if(state.state.name==name)return state.state;

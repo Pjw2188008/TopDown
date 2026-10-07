@@ -7,6 +7,8 @@ using UnityEngine;
 [System.Serializable]
 public sealed class EnemyNavigation
 {
+    [Tooltip("Trigger 몸체도 이동 장애물 검사에 사용할지 여부입니다. 벽 등 목적지의 Trigger는 여전히 무시합니다. 일반 몬스터는 기본 false를 유지하세요.")]
+    public bool useTriggerBody;
     [Tooltip("길찾기 격자 간격(월드 단위). 작으면 좁은 길을 더 잘 찾지만 계산량이 증가합니다.")]
     [Min(.15f)] public float cellSize = .5f;
     [Tooltip("한 번에 탐색할 주변 반경입니다. 이보다 큰 복잡한 미로는 보장하지 않습니다.")]
@@ -44,7 +46,7 @@ public sealed class EnemyNavigation
         Vector2 delta = to - from; float length = delta.magnitude;
         if (length < .0001f) return true;
         return InteractionMotion.AllowedDistance(root, target, delta / length, length, mask, hits,
-            from - (Vector2)root.position) >= length - .001f;
+            from - (Vector2)root.position, useTriggerBody) >= length - .001f;
     }
 
     public Vector2 Step(Transform root, Transform target, Vector2 goal, float distance, LayerMask mask)

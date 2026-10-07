@@ -5,7 +5,10 @@ public sealed partial class TutorialBoss
 {
     [Header("보스 애니메이션")]
     [SerializeField, HideInInspector] private Animator bossAnimator;
-    [SerializeField, Min(2), Tooltip("Slam 애니메이션에서 실제 내려찍는 프레임 번호입니다(첫 프레임=1, 지정은 2부터). 기본 11번째 프레임에 피해/패링 판정과 이펙트를 함께 발생시킵니다. 클립의 Samples를 기준으로 계산하며 범위를 넘으면 마지막 프레임을 사용합니다. 1프레임 클립은 종료 시 타격합니다.")] private int slamHitFrame = 11;
+    [SerializeField, Tooltip("이동/공격 시작 방향에 따라 SpriteRenderer를 좌우 반전합니다. 공격 시작 뒤와 경직 중에는 방향을 바꾸지 않습니다.")] private bool flipSpriteWithMovement = true;
+    [SerializeField, Tooltip("원본 스프라이트(Flip X를 끈 상태)가 오른쪽을 보면 켜고, 왼쪽을 보면 끄세요. 이동/공격 반전과 근접 사각형의 좌우 방향에 함께 적용합니다.")] private bool moveSpriteFacesRight = true;
+    private int requestedBossState;
+    [SerializeField, Min(2), Tooltip("Slam 애니메이션에서 실제 무기를 휘두르는 타격 프레임 번호입니다(첫 프레임=1, 지정은 2부터). 기본 11번째 프레임에 피해/패링을 한 번 판정합니다. 별도 근접 이펙트는 없습니다. 범위를 넘으면 마지막 프레임, 1프레임 클립은 종료 시 타격합니다.")] private int slamHitFrame = 11;
     [SerializeField, Range(.05f,.95f), Tooltip("Shoot 클립의 탄환 발사 지점입니다. Shot Windup Time에 이 지점에 도착하도록 재생 속도를 맞춥니다.")] private float shotReleaseTime = .65f;
     private bool attackAnimationActive, attackAnimationHit;
     private Phase animatedPattern;
@@ -26,9 +29,28 @@ public sealed partial class TutorialBoss
         }
         else if (value == Phase.Recovery && !attackAnimationActive) PlayBossState("Idle");
     }
-    private void PlayBossState(string name)
+    private void PlayBossState(string name, bool restart = true)
     {
-        if (HasBossAnimator && bossAnimator.HasState(0,Animator.StringToHash(name))) bossAnimator.Play(name,0,0);
+        int hash = Animator.StringToHash(name);
+        if (!HasBossAnimator || !bossAnimator.HasState(0,hash)) return;
+        if (!restart && requestedBossState == hash) return;
+        requestedBossState = hash;
+        bossAnimator.Play(hash,0,0);
+    }
+
+    private void UpdateMovementAnimation(Vector2 displacement)
+    {
+        if (attackAnimationActive || (phase != Phase.Ready && phase != Phase.Recovery)) return;
+        bool moving = displacement.sqrMagnitude > .00000001f;
+        if (moving) FaceAttackDirection(displacement);
+        bool hasMove = HasBossAnimator && bossAnimator.HasState(0,Animator.StringToHash("Move"));
+        PlayBossState(moving && hasMove ? "Move" : "Idle", false);
+    }
+
+    private void FaceAttackDirection(Vector2 direction)
+    {
+        if (flipSpriteWithMovement && bodyVisual != null && Mathf.Abs(direction.x) > .0001f)
+            bodyVisual.flipX = moveSpriteFacesRight ^ (direction.x > 0f) ^ (transform.lossyScale.x < 0f);
     }
     private void BeginBossAttackAnimation()
     {
@@ -37,11 +59,12 @@ public sealed partial class TutorialBoss
         int hash = Animator.StringToHash(name);
         if (!bossAnimator.HasState(0,hash)) return;
         savedAnimationSpeed = bossAnimator.speed;
+        requestedBossState = hash;
         bossAnimator.Play(hash,0,0);bossAnimator.Update(0);
         var clips = bossAnimator.GetCurrentAnimatorClipInfo(0);
         if (clips.Length == 0 || clips[0].clip == null || clips[0].clip.length <= 0) return;
         animatedPattern = phase;activeAttackHash = hash;
-        // 실제 내려찍는 이미지에 판정/이펙트를 맞추고, 나머지 후딜 프레임도 끝까지 재생합니다.
+        // 실제 휘두르는 이미지에 판정을 맞추고, 나머지 후딜 프레임도 끝까지 재생합니다.
         animationImpact = phase == Phase.SlamWarning ? GetSlamHitProgress(clips[0].clip) : Mathf.Clamp(shotReleaseTime,.05f,.95f);
         attackAnimationActive = true;attackAnimationHit = false;
         // 준비 시간을 유지하면서 길이가 다른 클립에도 재생 속도를 맞춥니다.
@@ -61,6 +84,10 @@ public sealed partial class TutorialBoss
     private void UpdateBossAttackAnimation()
     {
         if (!attackAnimationActive || Time.deltaTime <= 0) return;
+        if (!IsPlayerInRoom())
+        {
+            StopAttackAnimation();SetPhase(Phase.Recovery,attackCooldown);return;
+        }
         if (!HasBossAnimator)
         {
             StopAttackAnimation();SetPhase(Phase.Recovery,attackCooldown);return;
