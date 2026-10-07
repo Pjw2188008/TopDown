@@ -1,15 +1,14 @@
 using UnityEngine;
 
-/// <summary>교체 가능한 보스/투사체 그림과 임시 HP/균형 게이지입니다. 근접 공격은 보스 애니메이션만 사용하며 별도 이펙트/경고를 생성하지 않습니다.</summary>
+/// <summary>보스/낙석 임시 그림과 HP/균형 게이지입니다. 근접 경고는 없으며 낙석은 전용 바닥 경고를 사용합니다.</summary>
 public sealed partial class TutorialBoss
 {
     [Header("교체 가능한 그림")]
     [SerializeField, HideInInspector] private SpriteRenderer bodyVisual;
     // 설정용 Sprite는 애니메이션 대상에서 제외해 프레임 드롭 시 SpriteRenderer만 선택되게 합니다.
     // 인스펙터에서 이미지 교체 및 기존 직렬화 참조는 그대로 유지합니다.
-    [SerializeField, UnityEngine.Animations.NotKeyable, Tooltip("탄환 이미지가 비었을 때 사용하는 원형 임시 이미지입니다.")] private Sprite circleSprite;
+    [SerializeField, UnityEngine.Animations.NotKeyable, Tooltip("낙석 바닥 경고에 사용할 원형 이미지입니다. 비우면 원형 도형을 생성합니다.")] private Sprite circleSprite;
     [SerializeField, UnityEngine.Animations.NotKeyable, Tooltip("보스 SpriteRenderer가 없을 때 사용하는 사각 임시 이미지입니다.")] private Sprite squareSprite;
-    [SerializeField, UnityEngine.Animations.NotKeyable, Tooltip("비우면 원형 도형 탄환을 사용합니다.")] private Sprite projectileSprite;
     [SerializeField, Tooltip("보스 머리 위 임시 체력/균형 UI를 표시합니다.")] private bool showStatus = true;
     private Sprite runtimeCircle, runtimeSquare;
     private Texture2D runtimeCircleTexture, runtimeSquareTexture;

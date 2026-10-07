@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
 
-/// <summary>방 안의 플레이어를 추적하고 거리별 근접 휘두르기/투사체를 사용합니다. 공격과 N회 패링 경직 중에는 멈춥니다.</summary>
+/// <summary>방 안에서 추적/근접 휘두르기와 거리 무관 낙석 맵 패턴을 사용합니다. 공격과 N회 패링 경직 중에는 멈춥니다.</summary>
 [DisallowMultipleComponent]
 [RequireComponent(typeof(BoxCollider2D), typeof(Rigidbody2D))]
 public sealed partial class TutorialBoss : MonoBehaviour, ICombatDamageable, ICombatParryReceiver
@@ -20,34 +20,26 @@ public sealed partial class TutorialBoss : MonoBehaviour, ICombatDamageable, ICo
     [SerializeField, Min(0f), Tooltip("다음 공격까지 쉬는 시간입니다.")] private float attackCooldown = 1.2f;
     [SerializeField, Tooltip("공격 시야를 막는 벽 레이어입니다. Trigger는 제외합니다.")] private LayerMask blockingLayers = Physics2D.DefaultRaycastLayers;
     [Header("근접 휘두르기")]
-    [SerializeField, Min(.1f), Tooltip("이 거리 이내면 근접 휘두르기, 바깥이면 원거리 패턴을 선택합니다.")] private float meleeRange = 2.5f;
+    [SerializeField, Min(.1f), Tooltip("이 거리 이내에서 근접 공격합니다. 바깥에서는 추적하며 낙석 맵 패턴은 거리와 무관한 주기로 발동합니다.")] private float meleeRange = 2.5f;
     [SerializeField, InspectorName("Slam Windup Time"), Min(.1f), Tooltip("근접 애니메이션 시작부터 Slam Hit Frame의 실제 타격까지 걸리는 시간입니다. 클립 재생 속도를 자동 조절하며 후딜 프레임도 끝까지 재생합니다.")] private float slamWarningTime = .9f;
     [SerializeField, InspectorName("Melee Hit Offset"), Tooltip("오른쪽을 바라볼 때 보스 중심 기준 공격 사각형 위치(X/Y, 월드 단위)입니다. 왼쪽을 바라보면 X만 자동 반전합니다. Y는 위/아래 위치이며 음수도 가능합니다.")] private Vector2 meleeHitBoxOffset = new Vector2(1.4f,0f);
     [SerializeField, InspectorName("Melee Hit Size"), Tooltip("실제 공격 사각형의 가로(X)/세로(Y) 크기입니다. 월드 단위이며 청록색 기즈모와 판정이 일치합니다. 보스 몸 콜라이더와 별개입니다.")] private Vector2 meleeHitBoxSize = new Vector2(2.2f,2.2f);
     [SerializeField, Min(.1f)] private float slamDamage = 2f;
     [SerializeField, Min(.01f), Tooltip("이 보스의 근접 공격에만 적용하는 최소 패링 허용 시간입니다. 기본 0.3초: 타격 전 0.3초 안에 우클릭을 시작하고 유지하면 성공합니다. 일반 적/투사체의 패링 시간은 바꾸지 않으며 플레이어 기본값이 더 길면 그 값을 유지합니다.")] private float meleeParryWindow = .3f;
-    [Header("원거리 공격")]
-    [SerializeField, InspectorName("Shot Windup Time"), Min(.1f), Tooltip("방향을 고정한 뒤 투사체 발사까지 준비하는 시간입니다. 조준 경고선은 표시하지 않으며 발사 후 유도하지 않습니다.")] private float shotWarningTime = 1f;
-    [SerializeField, Min(.1f)] private float projectileSpeed = 7f;
-    [SerializeField, Min(.1f)] private float projectileDamage = 1f;
-    [SerializeField, Min(.03f), Tooltip("탄환 그림과 충돌 반지름입니다.")] private float projectileRadius = .18f;
-    [SerializeField, Min(.1f)] private float projectileLifetime = 5f;
     [Header("패링 누적 경직")]
-    [SerializeField, Min(1), Tooltip("근접/투사체 패링을 합산합니다. N회 성공하면 경직되고 횟수가 초기화됩니다. 시간에 따른 자동 회복은 없습니다.")] private int parriesToStagger = 3;
+    [SerializeField, Min(1), Tooltip("근접 패링을 N회 성공하면 경직되고 횟수가 초기화됩니다. 낙석은 패링 대상이 아닙니다. 시간에 따른 자동 회복은 없습니다.")] private int parriesToStagger = 3;
     [SerializeField, Min(.1f), Tooltip("누적 패링 달성 시 공격하지 못하는 시간입니다.")] private float staggerDuration = 2.5f;
     [SerializeField] private UnityEvent onStaggered = new UnityEvent();
     [SerializeField] private UnityEvent onDefeated = new UnityEvent();
 
-    private enum Phase { Ready, SlamWarning, ShotWarning, Recovery, Staggered, Dead }
+    private enum Phase { Ready, SlamWarning, Rockfall, Recovery, Staggered, Dead }
     private Phase phase;
     private float phaseRemaining, phaseDuration, health, nextSearch;
     private int parryCount;
-    private Vector2 lockedPoint, shotDirection;
     private Vector2 roomOrigin;
     private Rigidbody2D movementBody;
     private readonly List<RaycastHit2D> movementHits = new List<RaycastHit2D>();
     private readonly EnemyNavigation sight = new EnemyNavigation();
-    private readonly List<ReflectProjectile> projectiles = new List<ReflectProjectile>();
     public float CurrentHealth => health;
     public int ParryCount => parryCount;
     public int ParriesToStagger => Mathf.Max(1, parriesToStagger);
@@ -63,6 +55,7 @@ public sealed partial class TutorialBoss : MonoBehaviour, ICombatDamageable, ICo
         int layer = LayerMask.NameToLayer("Enemy");if (layer >= 0 && gameObject.layer == 0) gameObject.layer = layer;
         PrepareVisuals();
         PrepareAnimation();
+        rockfallRemaining = Mathf.Max(0f,rockfallFirstDelay);
         SetPhase(Phase.Recovery, attackCooldown);
     }
 
@@ -82,6 +75,7 @@ public sealed partial class TutorialBoss : MonoBehaviour, ICombatDamageable, ICo
         { player = FindFirstObjectByType<PlayerMove>();nextSearch = Time.time + .5f; }
         if (player == null || !player.isActiveAndEnabled)
         {
+            StopAttackAnimation();ClearRockfall();rockfallRemaining = Mathf.Max(0f,rockfallFirstDelay);
             if (!IsStaggered) SetPhase(Phase.Ready, 0f);
             else { phaseRemaining -= dt;if (phaseRemaining <= 0) SetPhase(Phase.Recovery, attackCooldown); }
             return;
@@ -90,22 +84,23 @@ public sealed partial class TutorialBoss : MonoBehaviour, ICombatDamageable, ICo
         {
             // 방을 나가거나 리스폰한 대상에게 진행 중 공격을 계속 보내지 않습니다.
             StopAttackAnimation();
+            ClearRockfall();rockfallRemaining = Mathf.Max(0f,rockfallFirstDelay);
             if (!IsStaggered) SetPhase(Phase.Recovery, attackCooldown);
             else { phaseRemaining -= dt;if (phaseRemaining <= 0f) SetPhase(Phase.Recovery, attackCooldown); }
             return;
         }
-        if (attackAnimationActive) return; // Animator 평가 후 LateUpdate에서 타격과 후딜을 처리합니다.
+        if (phase == Phase.Rockfall) { TickRockfall(dt);return; }
+        if (!IsStaggered) rockfallRemaining = Mathf.Max(0f,rockfallRemaining-dt);
+        if (attackAnimationActive) return; // 근접 애니메이션/후딜을 맵 패턴이 중간에 끊지 않습니다.
         if (phase == Phase.Ready || phase == Phase.Recovery) ChasePlayer(dt);
         if (phase == Phase.Ready)
         {
+            // 근접 거리/시야와 별개로 먼저 검사하여 가까이 있어도 맵 패턴을 사용합니다.
+            if (rockfallRemaining <= 0f) { BeginRockfall();return; }
             float distance = Vector2.Distance(transform.position, player.transform.position);
-            if (!CanSee(player.transform.position)) return;
-            lockedPoint = player.transform.position;
-            Vector2 aim = lockedPoint - (Vector2)transform.position;
-            shotDirection = aim.sqrMagnitude > .0001f ? aim.normalized : Vector2.right;
-            FaceAttackDirection(shotDirection);
-            SetPhase(distance <= Mathf.Max(.1f, meleeRange) ? Phase.SlamWarning : Phase.ShotWarning,
-                distance <= Mathf.Max(.1f, meleeRange) ? slamWarningTime : shotWarningTime);
+            if (distance > Mathf.Max(.1f,meleeRange) || !CanSee(player.transform.position)) return;
+            FaceAttackDirection((Vector2)(player.transform.position-transform.position));
+            SetPhase(Phase.SlamWarning,slamWarningTime);
             BeginBossAttackAnimation();return;
         }
         phaseRemaining -= dt;
@@ -114,7 +109,6 @@ public sealed partial class TutorialBoss : MonoBehaviour, ICombatDamageable, ICo
         // 먼저 후딜로 전환하여 피해 콜백의 N번째 패링 경직을 덮어쓰지 않습니다.
         SetPhase(Phase.Recovery, attackCooldown);
         if (completed == Phase.SlamWarning) Slam();
-        else if (completed == Phase.ShotWarning) Fire();
         else if (completed == Phase.Recovery) SetPhase(Phase.Ready, 0);
     }
 
@@ -150,6 +144,8 @@ public sealed partial class TutorialBoss : MonoBehaviour, ICombatDamageable, ICo
     private bool CanSee(Vector2 point) => sight.HasSight(transform, player != null ? player.transform : null, point, blockingLayers);
     private void SetPhase(Phase value, float duration)
     {
+        if (value == Phase.Dead || value == Phase.Staggered)
+        { ClearRockfall();rockfallRemaining = Mathf.Max(.1f,rockfallInterval); }
         phase = value;phaseDuration = phaseRemaining = Mathf.Max(0f, duration);AnimatePhase(value);
     }
     private void Slam()
@@ -190,20 +186,6 @@ public sealed partial class TutorialBoss : MonoBehaviour, ICombatDamageable, ICo
         }
     }
 
-    private void Fire()
-    {
-        if (!IsPlayerInRoom()) return;
-        var shot = new GameObject("Tutorial Boss Projectile");shot.transform.position = transform.position;
-        var picture = new GameObject("Picture").AddComponent<SpriteRenderer>();picture.transform.SetParent(shot.transform,false);
-        picture.sprite = projectileSprite != null ? projectileSprite : circleSprite;
-        picture.color = new Color(1f,.35f,.1f);picture.sortingOrder = 30;
-        Fit(picture, Vector2.one * Mathf.Max(.03f, projectileRadius) * 2);
-        var shape = shot.AddComponent<CircleCollider2D>();shape.isTrigger = true;shape.radius = Mathf.Max(.03f, projectileRadius);
-        var projectile = shot.AddComponent<ReflectProjectile>();
-        projectile.Initialize(gameObject, shotDirection, projectileSpeed, projectileDamage, projectileRadius, projectileLifetime, 0, false);
-        projectiles.RemoveAll(item => item == null);projectiles.Add(projectile);
-    }
-
     public void ReceiveParry(PlayerMove parryingPlayer)
     {
         if (!isActiveAndEnabled || phase == Phase.Dead || IsStaggered || parryingPlayer == null) return;
@@ -228,12 +210,12 @@ public sealed partial class TutorialBoss : MonoBehaviour, ICombatDamageable, ICo
     private void OnDisable()
     {
         StopAttackAnimation();
-        foreach (var shot in projectiles) if (shot != null) Destroy(shot.gameObject);
-        projectiles.Clear();
+        ClearRockfall();rockfallRemaining = Mathf.Max(0f,rockfallFirstDelay);
         if (phase != Phase.Dead) SetPhase(Phase.Recovery, attackCooldown);
     }
     private void OnDestroy()
     {
+        ClearRockfall();
         if (runtimeCircle != null) Destroy(runtimeCircle);if (runtimeSquare != null) Destroy(runtimeSquare);
         if (runtimeCircleTexture != null) Destroy(runtimeCircleTexture);if (runtimeSquareTexture != null) Destroy(runtimeSquareTexture);
     }
@@ -251,5 +233,6 @@ public sealed partial class TutorialBoss : MonoBehaviour, ICombatDamageable, ICo
         }
         else Gizmos.DrawWireCube((Application.isPlaying ? roomOrigin : (Vector2)transform.position)+roomOffset,
             new Vector3(Mathf.Max(.1f,roomSize.x),Mathf.Max(.1f,roomSize.y),0f));
+        DrawRockfallAreaGizmo();
     }
 }
