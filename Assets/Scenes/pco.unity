@@ -92527,6 +92527,22 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 610001, guid: ea556634dbdf2da499ef6ceb59240a01, type: 3}
+      propertyPath: m_SpriteTilingProperty.pivot.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 610001, guid: ea556634dbdf2da499ef6ceb59240a01, type: 3}
+      propertyPath: m_SpriteTilingProperty.oldSize.x
+      value: 2.382857
+      objectReference: {fileID: 0}
+    - target: {fileID: 610001, guid: ea556634dbdf2da499ef6ceb59240a01, type: 3}
+      propertyPath: m_SpriteTilingProperty.oldSize.y
+      value: 2.0914285
+      objectReference: {fileID: 0}
+    - target: {fileID: 1140002, guid: ea556634dbdf2da499ef6ceb59240a01, type: 3}
+      propertyPath: moveSpeed
+      value: 1.8
+      objectReference: {fileID: 0}
     - target: {fileID: 1140002, guid: ea556634dbdf2da499ef6ceb59240a01, type: 3}
       propertyPath: attackReach
       value: 0.27
@@ -92545,7 +92561,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1140002, guid: ea556634dbdf2da499ef6ceb59240a01, type: 3}
       propertyPath: detectionRange
-      value: 2.23
+      value: 4.25
       objectReference: {fileID: 0}
     - target: {fileID: 1140002, guid: ea556634dbdf2da499ef6ceb59240a01, type: 3}
       propertyPath: hitNormalizedTime
@@ -92555,6 +92571,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Triangle
       objectReference: {fileID: 0}
+    - target: {fileID: 7415299422174585480, guid: ea556634dbdf2da499ef6ceb59240a01, type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: -3334229637867375164, guid: 90301cf0dad9f324e9be5bde8a92e5d8, type: 3}
     - target: {fileID: 8817194809529002674, guid: ea556634dbdf2da499ef6ceb59240a01, type: 3}
       propertyPath: m_LocalScale.x
       value: 0.5
