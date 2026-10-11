@@ -16,7 +16,7 @@ GameObject:
   - component: {fileID: 1140001}
   - component: {fileID: 1140002}
   m_Layer: 6
-  m_Name: Triangle
+  m_Name: mon_1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -220,7 +220,9 @@ MonoBehaviour:
   attackCooldown: 1.2
   attackReach: 0.75
   attackSize: {x: 1.2, y: 1}
+  attackTimingMode: 0
   hitNormalizedTime: 0.6
+  hitFrame: 4
   blockingLayers:
     serializedVersion: 2
     m_Bits: 115

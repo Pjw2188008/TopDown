@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace CheolO.Monsters
 {
-    /// <summary>Triangle 전용 4방향 근접 몬스터. 좌우 공용 상태는 Action, 위/아래는 Action_Up/Down입니다.</summary>
+    /// <summary>Triangle 전용 근접 몬스터. 모든 방향에서 공용 모션을 재생하고 좌우 반전합니다.</summary>
     [DisallowMultipleComponent]
     [RequireComponent(typeof(Animator), typeof(Rigidbody2D), typeof(BoxCollider2D))]
     [RequireComponent(typeof(EnemyStagger))]
@@ -24,9 +24,16 @@ namespace CheolO.Monsters
         [Header("공격 판정")]
         [Min(0)] public float attackReach = .75f;
         public Vector2 attackSize = new Vector2(1.2f, 1f);
-        [Tooltip("공격 클립의 이 비율에 도달하면 한 번 타격합니다. Animation Event는 필요 없습니다.")]
-        [Range(.01f, 1f)] public float hitNormalizedTime = .6f;
         public LayerMask blockingLayers = 115;
+
+        public enum AttackTimingMode { NormalizedTime, AnimationFrame }
+        [Header("공격 타격 타이밍")]
+        [Tooltip("Normalized Time: 클립 진행 비율로 지정. Animation Frame: 공격 클립의 프레임 번호로 지정합니다.")]
+        public AttackTimingMode attackTimingMode = AttackTimingMode.NormalizedTime;
+        [Tooltip("Normalized Time 모드의 타격 시점. 0 = 시작, 0.5 = 중간, 1 = 끝. 낮추면 빨리, 높이면 늦게 타격합니다. 클립이 없을 때도 이 값을 사용합니다.")]
+        [Range(0f, 1f)] public float hitNormalizedTime = .6f;
+        [Tooltip("Animation Frame 모드의 타격 프레임(0부터 시작). Animation 창의 프레임 번호를 입력하세요. 클립 끝을 넘으면 마지막에 타격합니다.")]
+        [Min(0)] public int hitFrame = 4;
         [Header("이미지 연결 전 / 누락된 클립의 임시 재생 시간")]
         [Min(.01f)] public float fallbackAttackDuration = .6f;
         [Min(.01f)] public float fallbackHitDuration = .25f;
@@ -38,6 +45,7 @@ namespace CheolO.Monsters
         private enum Direction { Down, Up, Left, Right }
         private Action action;
         private Direction facing = Direction.Down;
+        private bool facingLeft;
         private Animator animator;
         private SpriteRenderer bodyRenderer;
         private Rigidbody2D body;
@@ -47,17 +55,16 @@ namespace CheolO.Monsters
         private int stateHash;
         private readonly EnemyNavigation navigation = new EnemyNavigation();
         private readonly List<RaycastHit2D> moveHits = new List<RaycastHit2D>();
-        private static readonly int[,] States = BuildStates();
+        private readonly List<AnimatorClipInfo> attackClips = new List<AnimatorClipInfo>();
+        private static readonly int[] States = BuildStates();
         public float CurrentHealth => health;
         public bool IsDead => dead;
 
-        private static int[,] BuildStates()
+        private static int[] BuildStates()
         {
-            var result = new int[5,4];
-            for (int a = 0; a < 5; a++)
-                for (int d = 0; d < 4; d++)
-                    result[a,d] = Animator.StringToHash(((Action)a).ToString()
-                        + (d == (int)Direction.Down ? "_Down" : d == (int)Direction.Up ? "_Up" : ""));
+            var result = new int[5];
+            for (int a = 0; a < result.Length; a++)
+                result[a] = Animator.StringToHash(((Action)a).ToString());
             return result;
         }
 
@@ -129,7 +136,7 @@ namespace CheolO.Monsters
             elapsed += Time.deltaTime;
             if (action != Action.Attack && action != Action.Hit && action != Action.Death) return;
             float progress = Progress();
-            if (action == Action.Attack && !struck && progress >= hitNormalizedTime)
+            if (action == Action.Attack && !struck && progress >= AttackHitProgress())
             {
                 struck = true; // 패링/반사 콜백 전에 소비하여 중복 타격을 막습니다.
                 Strike();
@@ -147,6 +154,26 @@ namespace CheolO.Monsters
             Play(Action.Idle);
         }
 
+        private float AttackHitProgress()
+        {
+            if (attackTimingMode == AttackTimingMode.AnimationFrame
+                && animator != null && animator.isActiveAndEnabled && animator.runtimeAnimatorController != null
+                && animator.GetCurrentAnimatorStateInfo(0).shortNameHash == stateHash)
+            {
+                animator.GetCurrentAnimatorClipInfo(0, attackClips);
+                if (attackClips.Count > 0)
+                {
+                    AnimationClip clip = attackClips[0].clip;
+                    if (clip != null && clip.length > .0001f && clip.frameRate > 0)
+                    {
+                        // 클립의 프레임을 진행률로 변환하므로 재생 속도가 바뀌어도 같은 모션에서 타격합니다.
+                        return Mathf.Clamp01(Mathf.Max(0, hitFrame) / (clip.frameRate * clip.length));
+                    }
+                }
+            }
+            return Mathf.Clamp01(hitNormalizedTime);
+        }
+
         private float Progress()
         {
             if (animator != null && animator.isActiveAndEnabled && animator.runtimeAnimatorController != null)
@@ -162,9 +189,9 @@ namespace CheolO.Monsters
 
         private void Play(Action next, bool restart = false)
         {
-            // 좌우는 방향 접미사 없는 공용 클립을 공유합니다. 반전만 바꾸므로 이동 클립이 처음부터 재시작되지 않습니다.
-            if (bodyRenderer != null) bodyRenderer.flipX = facing == Direction.Left;
-            int hash = States[(int)next, (int)facing];
+            // 모든 방향에서 공용 클립을 사용합니다. 좌우 반전만으로 클립을 재시작하지 않습니다.
+            if (bodyRenderer != null) bodyRenderer.flipX = facingLeft;
+            int hash = States[(int)next];
             if (!restart && action == next && stateHash == hash) return;
             action = next; stateHash = hash; elapsed = 0;
             if (animator != null && animator.isActiveAndEnabled && animator.runtimeAnimatorController != null
@@ -174,6 +201,8 @@ namespace CheolO.Monsters
         private void Face(Vector2 delta)
         {
             if (delta.sqrMagnitude < .00001f) return;
+            // 수직 이동에서는 마지막 좌우 모습을 유지하고, 공격 판정 방향은 별도로 계산합니다.
+            if (Mathf.Abs(delta.x) > .001f) facingLeft = delta.x < 0;
             facing = Mathf.Abs(delta.x) >= Mathf.Abs(delta.y)
                 ? (delta.x < 0 ? Direction.Left : Direction.Right)
                 : (delta.y < 0 ? Direction.Down : Direction.Up);

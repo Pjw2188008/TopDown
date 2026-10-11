@@ -8,18 +8,18 @@ pco 씬의 Triangle에 설정이 필요하면 해당 오브젝트를 선택하�
 
 1. 이 폴더 안에 Sprites 폴더를 만들고 이미지를 넣습니다. Texture Type은 Sprite (2D and UI), 스프라이트 시트는 Sprite Mode를 Multiple로 설정하고 Sprite Editor에서 Slice/Apply합니다.
 2. Triangle을 선택하고 Window > Animation > Animation을 엽니다.
-3. 아래 클립을 선택하고 기존 임시 Sprite 키 2개를 삭제한 뒤, 해당 방향의 스프라이트들을 순서대로 타임라인에 드래그합니다. SpriteRenderer.Sprite 트랙만 편집하면 됩니다.
+3. 아래 클립을 선택하고 기존 임시 Sprite 키 2개를 삭제한 뒤, 공용 스프라이트들을 순서대로 타임라인에 드래그합니다. SpriteRenderer.Sprite 트랙만 편집하면 됩니다.
 4. Samples(FPS)로 재생 속도를 맞춥니다. Idle/Move는 Loop Time ON, Attack/Hit/Death는 OFF로 유지합니다.
 
-| 동작 | 좌우 공용 | 위 | 아래 |
-|---|---|---|---|
-| 대기 | Idle | Idle_Up | Idle_Down |
-| 이동 | Move | Move_Up | Move_Down |
-| 공격 | Attack | Attack_Up | Attack_Down |
-| 피격 | Hit | Hit_Up | Hit_Down |
-| 죽음 | Death | Death_Up | Death_Down |
+| 동작 | 공용 모션 |
+|---|---|
+| 대기 | Idle |
+| 이동 | Move |
+| 공격 | Attack |
+| 피격 | Hit |
+| 죽음 | Death |
 
-모든 클립은 Animations 폴더에 있고, 현재는 삼각형 이미지 두 키만 들어 있는 자리표시자입니다. 실제 걷기/공격/죽음 그림은 아직 없습니다. 좌우는 방향 접미사 없는 클립(Idle, Move, Attack, Hit, Death)을 공유합니다. 오른쪽을 바라보는 이미지를 공용 클립에 넣으면 왼쪽은 SpriteRenderer.flipX로 자동 반전됩니다. 좌우 전환만으로 재생이 처음부터 시작되지 않습니다. 위/아래로 향할 때는 반전이 해제됩니다. 공격 판정은 실제로 향하는 좌우 방향을 따릅니다.
+모든 클립은 Animations 폴더에 있고, 현재는 삼각형 이미지 두 키만 들어 있는 자리표시자입니다. 실제 걷기/공격/죽음 그림은 아직 없습니다. 모든 방향은 방향 접미사 없는 클립(Idle, Move, Attack, Hit, Death)을 공유합니다. 오른쪽을 바라보는 이미지를 공용 클립에 넣으면 왼쪽은 SpriteRenderer.flipX로 자동 반전됩니다. 좌우 전환만으로 재생이 처음부터 시작되지 않습니다. 위/아래 전용 모션은 사용하지 않으며, 수직 이동 시 마지막 좌우 반전을 유지합니다. 공격 판정은 기존처럼 상하좌우 방향을 따릅니다.
 
 Animator 전이는 스크립트에서 직접 선택합니다. 상태 이름을 변경하거나 별도의 자동 전이를 추가하지 마세요. 정지할 때 마지막 방향을 유지하고 공격 중에는 방향을 고정합니다. Hit는 공격을 중단하며 Death가 최우선입니다.
 
@@ -30,7 +30,11 @@ Animator 전이는 스크립트에서 직접 선택합니다. 상태 이름을 �
 - Stop Distance: 플레이어 중심까지 접근한 뒤 멈추는 거리(기본 0.8)입니다. 작게 하면 더 가까이 접근합니다. 실제 공격 박스가 플레이어 Collider에 닿지 않으면 더 접근합니다.
 - Triangle을 선택하고 Scene의 Gizmos를 켜면 청록색 원은 정지 거리, 노란 원은 감지 거리, 빨간 사각형은 실제 공격 범위입니다.
 - Attack Reach / Attack Size: 실제 타격 중심과 범위입니다. 공격 준비 중 플레이어가 범위 밖으로 피하면 빗나갈 수 있습니다.
-- Hit Normalized Time: 공격 클립에서 피해가 발생할 비율(기본 0.6). 애니메이션 이벤트를 넣을 필요가 없습니다. 공격당 한 번만 피해를 줍니다.
+- Attack Timing Mode: NormalizedTime(기본)은 진행 비율, AnimationFrame은 공격 클립 프레임 번호로 타격 시점을 정합니다. Inspector의 **공격 타격 타이밍**에서 선택합니다.
+- Hit Normalized Time: 0은 시작, 0.5는 중간, 1은 끝입니다(기본 0.6). 타격이 늦으면 낮추고, 빠르면 높이세요. 클립이 누락된 경우에도 이 비율을 사용합니다.
+- Hit Frame: AnimationFrame 모드에서 사용합니다. Animation 창에서 Attack 클립의 타격 자세가 나오는 프레임 번호를 입력하세요(0부터 시작). 예를 들어 12 FPS 클립의 3번 프레임은 클립 시간 0.25초입니다. 클립 끝을 넘는 값은 끝 시점으로 제한합니다. 재생 속도를 바꿔도 지정한 프레임에 맞춰 판정합니다.
+- 두 방식 모두 공격당 한 번만 판정하고, 타격 전에 피격/사망하면 공격이 취소됩니다. Animation Event는 필요 없습니다. Attack Cooldown은 다음 공격까지의 간격이며 타격 프레임 설정과는 별개입니다.
+- 플레이 중 Inspector에서 조절한 값은 플레이 종료 시 되돌아갑니다. 값을 기억한 뒤 플레이를 종료하고 mon_1 프리팹에 저장하세요.
 - Blocking Layers: 벽/장애물 검사 레이어입니다. 기존 EnemyNavigation/InteractionMotion을 사용합니다.
 - Destroy After Death: 켜면 사망 클립이 끝난 뒤 제거하고, 끄면 마지막 프레임을 유지합니다. 사망 즉시 충돌과 공격은 중단합니다.
 - Fallback Duration: Animator나 클립이 누락되었을 때만 쓰는 임시 시간입니다. 정상 연결된 클립은 실제 재생 진행률로 판단합니다.
