@@ -77,6 +77,7 @@ public partial class EnemyController : MonoBehaviour, ICombatDamageable
         ResolvePlayer(); RefreshBodyCollisions();
         float dt = Time.deltaTime;
         if (dt <= 0f) return;
+        navigation.ApplyGravity(transform,player,dt,meleeBlockingLayers);
         attackTimer = Mathf.Max(0f, attackTimer - dt);
         if (stagger.IsStunned) { CancelAttack(); attackTimer = Mathf.Max(.01f, attackCooldown); return; }
         if (target == null || !target.isActiveAndEnabled) { CancelAttack(); return; }

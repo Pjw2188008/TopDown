@@ -98,9 +98,9 @@ CapsuleCollider2D:
   m_UsedByEffector: 0
   m_CompositeOperation: 0
   m_CompositeOrder: 0
-  m_Offset: {x: -0.060807467, y: -0.25401768}
-  m_Size: {x: 0.3585639, y: 0.18}
-  m_Direction: 1
+  m_Offset: {x: -0.060807467, y: -0.00401768}
+  m_Size: {x: 0.3585639, y: 0.68}
+  m_Direction: 0
 --- !u!95 &6463530775594750694
 Animator:
   serializedVersion: 7
@@ -215,7 +215,7 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 4294967291
   sideViewMode: 1
-  sideViewDepthMovement: 1
+  sideViewDepthMovement: 0
   sideViewGravity: 30
   sideViewMaxFallSpeed: 20
   sideViewJumpHeight: 2

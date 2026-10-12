@@ -108,6 +108,7 @@ public sealed partial class RangedEnemy : MonoBehaviour, ICombatDamageable, IAcc
         if (dead || deltaTime <= 0f) return;
 
         FindTarget();
+        navigation.ApplyGravity(transform,target,deltaTime,movementBlockingLayers);
         RefreshPlayerCollisions();
         if (stagger.IsStunned || target == null || !target.gameObject.activeInHierarchy)
         {

@@ -45,7 +45,7 @@ public sealed partial class TutorialBoss
         {
             activePatternError.originalScale = transform.localScale;
             activePatternError.scaledBody = true;
-            transform.localScale *= activePatternError.multiplier;
+            SetPatternBodyScale(transform.localScale * activePatternError.multiplier);
         }
     }
 
@@ -129,7 +129,7 @@ public sealed partial class TutorialBoss
     private void RestorePatternBody(PatternError pattern)
     {
         if (pattern == null || !pattern.scaledBody) return;
-        transform.localScale = pattern.originalScale;
+        SetPatternBodyScale(pattern.originalScale);
         pattern.scaledBody = false;
     }
 

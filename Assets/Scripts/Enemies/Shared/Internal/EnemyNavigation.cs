@@ -7,6 +7,9 @@ using UnityEngine;
 [System.Serializable]
 public sealed class EnemyNavigation
 {
+    public EnemySideView sideView = new EnemySideView();
+    public bool IsSideView(Transform root,Transform target) => sideView.IsActive(root,target);
+    public void ApplyGravity(Transform root,Transform target,float dt,LayerMask mask) => sideView.TickGravity(root,target,dt,mask);
     [Tooltip("Trigger 몸체도 이동 장애물 검사에 사용할지 여부입니다. 벽 등 목적지의 Trigger는 여전히 무시합니다. 일반 몬스터는 기본 false를 유지하세요.")]
     public bool useTriggerBody;
     [Tooltip("길찾기 격자 간격(월드 단위). 작으면 좁은 길을 더 잘 찾지만 계산량이 증가합니다.")]
@@ -54,6 +57,12 @@ public sealed class EnemyNavigation
         if (distance <= 0f) return Vector2.zero;
         Physics2D.SyncTransforms();
         Vector2 start = root.position;
+        if (IsSideView(root,target))
+        {
+            path.Clear();waypoint = 0;
+            float x = Mathf.Clamp(goal.x-start.x,-distance,distance);
+            return sideView.ConstrainStep(root,target,new Vector2(x,0f),mask);
+        }
         if (Clear(root, target, start, goal, mask))
         {
             path.Clear(); waypoint = 0;

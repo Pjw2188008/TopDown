@@ -27,6 +27,8 @@ public sealed partial class TutorialBoss
         public float radius, baseRadius, delay, elapsed, fallProgress, impactElapsed;
         public PatternError pattern;
         public bool impacted;
+        public bool sideView;
+        public float surfaceY;
         public GameObject root;
         public SpriteRenderer warning, picture;
     }
@@ -47,9 +49,14 @@ public sealed partial class TutorialBoss
         for (int i=0;i<count;i++)
         {
             Vector2 point = player.transform.position;
-            bool found = i == 0 && rockfallTargetPlayer && IsRockPointValid(point,radius);
+            bool side = IsSideViewBattle;
+            bool found = i == 0 && rockfallTargetPlayer && (side
+                ? TrySideViewRockPoint(point.x,radius,true,out point) : IsRockPointValid(point,radius));
             for (int attempt=0;!found && attempt<60;attempt++)
-            { point = RandomRockPoint();found = IsRockPointValid(point,radius); }
+            {
+                point = RandomRockPoint();
+                found = side ? TrySideViewRockPoint(point.x,radius,false,out point) : IsRockPointValid(point,radius);
+            }
             if (!found) continue; // 좁은 방에서도 무한 탐색하거나 경고를 강제로 겹치지 않습니다.
             fallingRocks.Add(CreateRock(point,radius,fallingRocks.Count*Mathf.Max(0f,rockfallStagger)));
         }
@@ -107,8 +114,11 @@ public sealed partial class TutorialBoss
         picture.color = rockfallSprite != null ? Color.white : new Color(.4f,.38f,.35f);
         picture.sortingLayerID = layer;picture.sortingOrder = rockfallSortingOrder+1;
         Fit(picture,Vector2.one*radius*1.5f);picture.enabled = false;
-        return new FallingRock { point=point,radius=radius,baseRadius=Mathf.Max(.1f,rockfallRadius),
+        var rock = new FallingRock { point=point,radius=radius,baseRadius=Mathf.Max(.1f,rockfallRadius),
+            sideView=IsSideViewBattle,surfaceY=point.y-radius-.02f,
             pattern=rockfallPatternError,delay=delay,root=root,warning=warning,picture=picture };
+        FitRockVisuals(rock);
+        return rock;
     }
 
     private void NormalizeRockfallError(PatternError pattern)
@@ -117,8 +127,7 @@ public sealed partial class TutorialBoss
         {
             if (rock.pattern != pattern) continue;
             rock.radius = rock.baseRadius;
-            if (rock.warning != null) Fit(rock.warning,Vector2.one*rock.radius*2f);
-            if (rock.picture != null) Fit(rock.picture,Vector2.one*rock.radius*1.5f);
+            FitRockVisuals(rock);
             // fallProgress는 유지합니다. 속도가 정상화돼도 이미 내려온 돌이 위로 순간 이동하지 않습니다.
         }
     }

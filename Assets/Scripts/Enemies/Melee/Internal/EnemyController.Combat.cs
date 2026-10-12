@@ -14,6 +14,7 @@ public partial class EnemyController
     {
         if (target == null || dead || stagger.IsStunned) return;
         Vector2 delta = target.transform.position - transform.position;
+        if (navigation.IsSideView(transform,player)) delta.y = 0f;
         swingDirection = delta.sqrMagnitude < .0001f ? Vector2.right
             : Mathf.Abs(delta.x) >= Mathf.Abs(delta.y) ? new Vector2(Mathf.Sign(delta.x), 0f)
             : new Vector2(0f, Mathf.Sign(delta.y));

@@ -27,6 +27,7 @@ public sealed partial class RangedEnemy
 
     private void MoveTowardsTarget(Vector2 difference, float distance, float deltaTime)
     {
+        if (navigation.IsSideView(transform,target)) distance = Mathf.Abs(difference.x);
         float desiredDistance = CanSeeTarget() ? Mathf.Min(Mathf.Max(0f, stoppingDistance), Mathf.Max(.1f, attackRange)) : 0f;
         Vector2 displacement = distance > desiredDistance && distance > .0001f
             ? navigation.Step(transform, target, target.position, Mathf.Min(CurrentMoveSpeed * deltaTime, distance - desiredDistance), movementBlockingLayers)

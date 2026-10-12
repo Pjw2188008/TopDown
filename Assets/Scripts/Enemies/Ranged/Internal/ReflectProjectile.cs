@@ -21,6 +21,8 @@ public sealed class ReflectProjectile : MonoBehaviour
     public float HitRadius => radius;
     /// <summary>충격파처럼 귀환을 끝까지 보여 줄 투사체만 켭니다. 일반 탄환은 기존 수명을 유지합니다.</summary>
     public bool PreserveParryReturnLifetime { get; set; }
+    /// <summary>사이드뷰 보스 충격파만 사용합니다. 패링/표면 반사 후에도 수평을 유지합니다.</summary>
+    public bool HorizontalOnly { get; set; }
     public event System.Action<PlayerMove> Parried;
     /// <summary>발사 회차가 필요한 보스만 지정합니다. 미지정 시 기존 공격자 패링 알림을 사용합니다.</summary>
     public System.Action<PlayerMove> ParryReceiver { get; set; }
@@ -60,6 +62,7 @@ public sealed class ReflectProjectile : MonoBehaviour
         patternWallReflection = false;
         ParryReceiver = null;
         wasParried = false;
+        HorizontalOnly = false;
         direction = launchDirection.sqrMagnitude > 0f ? launchDirection.normalized : Vector2.right;
         speed = Mathf.Max(0f, moveSpeed);
         damage = Mathf.Max(0f, projectileDamage);
@@ -101,6 +104,8 @@ public sealed class ReflectProjectile : MonoBehaviour
             // 실제 투사체를 돌려보냅니다. 발사자를 새 목표로, 패링한 플레이어를 새 소유자로 설정합니다.
             Vector2 returnDirection = owner != null
                 ? (Vector2)owner.transform.position - closestHit.centroid : -direction;
+            if (HorizontalOnly)
+                returnDirection = Mathf.Abs(returnDirection.x) > .0001f ? new Vector2(returnDirection.x,0f) : -direction;
             direction = returnDirection.sqrMagnitude > 0.0001f ? returnDirection.normalized : -direction;
             owner = player.gameObject;
             wasParried = true;
@@ -138,7 +143,7 @@ public sealed class ReflectProjectile : MonoBehaviour
             ? closestHit.normal.normalized
             : -direction;
 
-        direction = Vector2.Reflect(direction, normal).normalized;
+        direction = HorizontalOnly ? -direction : Vector2.Reflect(direction, normal).normalized;
         remainingBounces--;
         transform.position = closestHit.centroid + normal * 0.02f;
     }

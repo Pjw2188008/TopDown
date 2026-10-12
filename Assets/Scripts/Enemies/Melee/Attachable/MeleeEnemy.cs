@@ -26,10 +26,13 @@ public sealed class MeleeEnemy : MonoBehaviour, ICombatDamageable
     private bool windingUp;
     private float hitTime;
     private float nextAttackTime;
+    private readonly EnemyNavigation navigation = new EnemyNavigation();
 
     private void Awake() { stagger = GetComponent<EnemyStagger>(); health = maxHealth; }
     private void Update()
     {
+        if (GetComponent<MovingEnemy>() == null)
+            navigation.ApplyGravity(transform,target != null ? target.transform : null,Time.deltaTime,Physics2D.DefaultRaycastLayers);
         if (stagger.IsStunned)
         {
             windingUp = false;

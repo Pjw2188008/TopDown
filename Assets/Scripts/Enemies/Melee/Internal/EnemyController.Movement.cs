@@ -20,6 +20,7 @@ public partial class EnemyController
         patrolCenter = transform.position; // 기존 순찰처럼 현재 위치에서 다음 목적지를 정합니다.
         targetPatrolPoint = patrolCenter + new Vector2(Random.Range(-Mathf.Abs(patrolAreaSize.x)/2f, Mathf.Abs(patrolAreaSize.x)/2f),
             Random.Range(-Mathf.Abs(patrolAreaSize.y)/2f, Mathf.Abs(patrolAreaSize.y)/2f));
+        if (navigation.IsSideView(transform,player)) targetPatrolPoint.y = patrolCenter.y;
     }
 
     private void MoveTowards(Vector2 point)
@@ -36,7 +37,9 @@ public partial class EnemyController
     {
         if (IsInsideBox(player.position, patrolAreaSize)) { currentState = State.Chase; return; }
         MoveTowards(targetPatrolPoint);
-        if (Vector2.Distance(transform.position, targetPatrolPoint) < .1f) SetNewPatrolPoint();
+        float remaining = navigation.IsSideView(transform,player) ? Mathf.Abs(transform.position.x-targetPatrolPoint.x)
+            : Vector2.Distance(transform.position,targetPatrolPoint);
+        if (remaining < .1f) SetNewPatrolPoint();
     }
 
     private void ChaseLogic()

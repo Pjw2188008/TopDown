@@ -160,6 +160,7 @@ public partial class EnemyController
 
     private void MoveMeleeStep(Vector2 displacement)
     {
+        displacement = navigation.sideView.ConstrainStep(transform,player,displacement,meleeBlockingLayers);
         float wanted = displacement.magnitude;
         if (wanted <= .00001f) return;
         Physics2D.SyncTransforms();

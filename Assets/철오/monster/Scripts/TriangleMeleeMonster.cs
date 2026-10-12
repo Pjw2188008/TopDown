@@ -85,6 +85,7 @@ namespace CheolO.Monsters
         private void Update()
         {
             if (dead || Time.deltaTime <= 0) return;
+            navigation.ApplyGravity(transform,player != null ? player.transform : null,Time.deltaTime,blockingLayers);
             cooldown = Mathf.Max(0, cooldown - Time.deltaTime);
             if (stagger.IsStunned)
             {
@@ -200,6 +201,12 @@ namespace CheolO.Monsters
 
         private void Face(Vector2 delta)
         {
+            if (navigation.IsSideView(transform,player != null ? player.transform : null))
+            {
+                if (Mathf.Abs(delta.x) > .001f) facingLeft = delta.x < 0;
+                facing = facingLeft ? Direction.Left : Direction.Right;
+                return;
+            }
             if (delta.sqrMagnitude < .00001f) return;
             // 수직 이동에서는 마지막 좌우 모습을 유지하고, 공격 판정 방향은 별도로 계산합니다.
             if (Mathf.Abs(delta.x) > .001f) facingLeft = delta.x < 0;

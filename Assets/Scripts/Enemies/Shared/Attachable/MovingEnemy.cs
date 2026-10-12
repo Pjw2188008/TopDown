@@ -36,8 +36,12 @@ public sealed class MovingEnemy : MonoBehaviour, IAccelerationTarget
 
     private void Update()
     {
+        navigation.ApplyGravity(transform,null,Time.deltaTime,movementBlockingLayers);
         if (TryGetComponent<EnemyStagger>(out var stagger) && stagger.IsStunned) return;
+        bool side = navigation.IsSideView(transform,null);
+        if (side) patrolDirection = Vector3.right;
         Vector3 targetPosition = startPosition + patrolDirection * patrolDistance * directionSign;
+        if (side) targetPosition.y = transform.position.y;
         Vector2 step = navigation.Step(transform, null, targetPosition, CurrentSpeed * Time.deltaTime, movementBlockingLayers);
         Vector3 next = transform.position + (Vector3)step;
         if (TryGetComponent<Rigidbody2D>(out var body)) body.position = next;

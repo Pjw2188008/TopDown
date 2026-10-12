@@ -74,6 +74,7 @@ public sealed partial class TutorialBoss : MonoBehaviour, ICombatDamageable, ICo
         if (dt <= 0 || phase == Phase.Dead) return;
         if (player == null && Time.time >= nextSearch)
         { player = FindFirstObjectByType<PlayerMove>();nextSearch = Time.time + .5f; }
+        sight.ApplyGravity(transform,player != null ? player.transform : null,dt,blockingLayers);
         if (player == null || !player.isActiveAndEnabled || player.IsInstantlyDead)
         {
             ClearAllPatternErrors();
@@ -158,6 +159,7 @@ public sealed partial class TutorialBoss : MonoBehaviour, ICombatDamageable, ICo
     private void ChasePlayer(float dt)
     {
         float distance = Vector2.Distance(transform.position,player.transform.position);
+        if (IsSideViewBattle) distance = Mathf.Abs(transform.position.x-player.transform.position.x);
         float stop = CanSee(player.transform.position) ? Mathf.Min(Mathf.Max(0f,stoppingDistance),Mathf.Max(.1f,meleeRange)*.9f) : 0f;
         float wanted = Mathf.Min(Mathf.Max(0f,chaseSpeed)*dt,Mathf.Max(0f,distance-stop));
         Vector2 step = sight.Step(transform,player.transform,player.transform.position,wanted,blockingLayers);
