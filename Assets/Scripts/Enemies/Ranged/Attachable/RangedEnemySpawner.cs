@@ -19,6 +19,23 @@ public sealed class RangedEnemySpawner : MonoBehaviour
     private GameObject spawnedEnemy;
     private bool hasSpawned, wasInside;
     private float nextPlayerSearch;
+    private bool combatAreaCleared;
+    public bool CanSpawnWave => IsSupportedPrefab(PrefabRoot);
+
+    /// <summary>구역이 소유하는 웨이브 생성입니다. Spawn Once와 기존 생존 개체를 무시하고 한 마리를 추가합니다.</summary>
+    public GameObject SpawnForCombatWave(Transform target, Vector3? position = null)
+    {
+        if (target == null || !CanSpawnWave) return null;
+        player = target;
+        var previous = spawnedEnemy;
+        SpawnEnemy();
+        if (spawnedEnemy == previous || spawnedEnemy == null) return null;
+        if (position.HasValue) spawnedEnemy.transform.position = position.Value;
+        return spawnedEnemy;
+    }
+
+    /// <summary>웨이브 구역 클리어 후 재입장해도 자동 생성하지 않습니다. 씬 재시작 시 초기화됩니다.</summary>
+    public void MarkCombatAreaCleared() => combatAreaCleared = true;
     public GameObject SpawnedEnemy => IsDefeated(spawnedEnemy) ? null : spawnedEnemy;
     public bool HasSpawned => hasSpawned;
 
@@ -38,7 +55,7 @@ public sealed class RangedEnemySpawner : MonoBehaviour
 
     private void Update()
     {
-        if (Time.timeScale <= 0f) return;
+        if (Time.timeScale <= 0f || combatAreaCleared || CombatAreaLock.IsWaveManaged(this)) return;
 
         FindPlayer();
         if (player == null || !player.gameObject.activeInHierarchy)

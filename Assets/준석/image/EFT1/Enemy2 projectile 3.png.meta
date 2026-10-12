@@ -1,10 +1,16 @@
 fileFormatVersion: 2
-guid: 0a177872c86a09d4280d99710962b824
+guid: a831e2eb9f2d4cc4198ca27950a49841
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 1970012864467254194
-    second: Gemini_Generated_Image_376yjc376yjc376y-Photoroom-5_0
+      213: -2336096979905966294
+    second: Gemini_Generated_Image_376yjc376yjc376y-Photoroom-3_0
+  - first:
+      213: -5554829189826494533
+    second: Gemini_Generated_Image_376yjc376yjc376y-Photoroom-3_1
+  - first:
+      213: 21300003
+    second: Projectile_Full_3
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -152,13 +158,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Gemini_Generated_Image_376yjc376yjc376y-Photoroom-5_0
+      name: Gemini_Generated_Image_376yjc376yjc376y-Photoroom-3_0
       rect:
         serializedVersion: 2
-        x: 29
-        y: 24
-        width: 637
-        height: 485
+        x: 55
+        y: 21
+        width: 14
+        height: 17
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -167,8 +173,52 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 2bb358d3344e65b10800000000000000
-      internalID: 1970012864467254194
+      spriteID: a2f87d78c24849fd0800000000000000
+      internalID: -2336096979905966294
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Gemini_Generated_Image_376yjc376yjc376y-Photoroom-3_1
+      rect:
+        serializedVersion: 2
+        x: 71
+        y: 19
+        width: 727
+        height: 571
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: bbfbb68584849e2b0800000000000000
+      internalID: -5554829189826494533
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Projectile_Full_3
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 0
+        width: 828
+        height: 729
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 000000000000000000000000abcde003
+      internalID: 21300003
       vertices: []
       indices: 
       edges: []
@@ -187,7 +237,9 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      Gemini_Generated_Image_376yjc376yjc376y-Photoroom-5_0: 1970012864467254194
+      Gemini_Generated_Image_376yjc376yjc376y-Photoroom-3_0: -2336096979905966294
+      Gemini_Generated_Image_376yjc376yjc376y-Photoroom-3_1: -5554829189826494533
+      Projectile_Full_3: 21300003
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

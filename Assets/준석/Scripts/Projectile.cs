@@ -9,12 +9,16 @@ public class Projectile : MonoBehaviour
     public float lifeTime = 3f;
     [Min(.01f), Tooltip("월드 단위 타격 반지름. 기존 BoxCollider 대신 연속 CircleCast로 판정합니다.")]
     public float hitRadius = .12f;
+    [Header("Visual Size")]
+    [Min(.01f), Tooltip("Transform Scale이 1일 때 이미지의 긴 변 크기(월드 단위)입니다. 프레임마다 원본 해상도가 달라도 크기를 맞춥니다. 타격 판정은 Hit Radius로 별도 조절하세요.")]
+    public float visualSize = .8f;
     [Tooltip("원본 그림의 진행 방향. 오른쪽=0, 위=90, 왼쪽=180도입니다.")]
     public float spriteForwardAngle;
     [Tooltip("패링 성공 시 적용할 색상입니다.")]
     public Color parriedColor = new Color(.25f, 1f, 1f, 1f);
     private ReflectProjectile projectile;
     private SpriteRenderer visual;
+    private float appliedVisualScale = 1f;
 
     // 기존 호출 호환용입니다. 발사자를 지정해야 해당 적을 향해 패링 반환합니다.
     public void Initialize(Vector2 direction, float speed, float dmg)
@@ -34,10 +38,29 @@ public class Projectile : MonoBehaviour
         foreach (var body in GetComponentsInChildren<Rigidbody2D>(true)) body.simulated = false;
         foreach (var shape in GetComponentsInChildren<Collider2D>(true)) shape.enabled = false;
         visual = GetComponent<SpriteRenderer>();
+        RefreshVisualSize();
         RefreshDirection();
     }
 
-    private void LateUpdate() => RefreshDirection();
+    private void LateUpdate()
+    {
+        RefreshDirection();
+        RefreshVisualSize();
+    }
+
+    private void RefreshVisualSize()
+    {
+        if (visual == null) visual = GetComponent<SpriteRenderer>();
+        if (visual == null || visual.sprite == null) return;
+        Vector3 bounds = visual.sprite.bounds.size;
+        float longestSide = Mathf.Max(bounds.x, bounds.y);
+        if (longestSide <= .0001f) return;
+        float nextScale = Mathf.Max(.01f, visualSize) / longestSide;
+        // 이전 프레임 보정만 되돌려 적용하므로 누적 확대되지 않습니다.
+        // 사용자가 지정한 Transform Scale 및 외부 오류 배율은 유지합니다.
+        transform.localScale *= nextScale / appliedVisualScale;
+        appliedVisualScale = nextScale;
+    }
     private void OnParried(PlayerMove player)
     {
         if (visual != null) visual.color = parriedColor;

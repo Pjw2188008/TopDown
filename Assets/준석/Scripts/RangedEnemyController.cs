@@ -41,6 +41,16 @@ public class RangedEnemyController : MonoBehaviour, ICombatDamageable
     [Min(.05f), Tooltip("Death 클립이 아직 비어 있거나 Animator가 없을 때만 사용하는 사망 대기 시간입니다.")]
     public float fallbackDeathDuration = .75f;
 
+    [Header("Facing")]
+    [Tooltip("반전할 SpriteRenderer입니다. 비우면 같은 오브젝트에서 찾습니다. Transform/콜라이더는 반전하지 않습니다.")]
+    public SpriteRenderer facingRenderer;
+    [Tooltip("Flip X가 꺼진 원본 이미지가 왼쪽을 향하면 켜세요. 오른쪽을 향하면 끄세요.")]
+    public bool spriteFacesLeft = true;
+    [Tooltip("자식 Fire Point를 현재 바라보는 좌우 방향으로 맞춰 발사합니다. 원래 Transform 위치는 변경하지 않습니다.")]
+    public bool mirrorFirePoint = true;
+
+    private bool facingLeft;
+
     private float currentHealth;
     private float attackTimer;
     private Vector2 patrolCenter;
@@ -62,6 +72,10 @@ public class RangedEnemyController : MonoBehaviour, ICombatDamageable
     void Awake()
     {
         if (animator == null) animator = GetComponent<Animator>();
+        if (facingRenderer == null) facingRenderer = GetComponent<SpriteRenderer>();
+        bool initiallyFlipped = facingRenderer != null && facingRenderer.flipX;
+        bool transformMirrored = facingRenderer != null && facingRenderer.transform.TransformVector(Vector3.right).x < 0f;
+        facingLeft = spriteFacesLeft ^ initiallyFlipped ^ transformMirrored;
         currentHealth = Mathf.Max(1f, maxHealth);
         int enemyLayer = LayerMask.NameToLayer("Enemy");
         if (gameObject.layer == 0 && enemyLayer >= 0) gameObject.layer = enemyLayer;
@@ -124,6 +138,40 @@ public class RangedEnemyController : MonoBehaviour, ICombatDamageable
                 break;
         }
         SetMoving((transform.position - previousPosition).sqrMagnitude > .000001f);
+        FaceDirection(currentState == State.Patrol
+            ? transform.position.x - previousPosition.x
+            : player.position.x - transform.position.x);
+    }
+
+    private void FaceDirection(float horizontalDirection)
+    {
+        // 수직 이동 또는 거의 같은 X 위치에서는 마지막 방향을 유지합니다.
+        if (Mathf.Abs(horizontalDirection) > .001f) facingLeft = horizontalDirection < 0f;
+        ApplyFacing();
+    }
+
+    private void ApplyFacing()
+    {
+        if (facingRenderer == null) return;
+        bool transformMirrored = facingRenderer.transform.TransformVector(Vector3.right).x < 0f;
+        facingRenderer.flipX = (facingLeft != spriteFacesLeft) ^ transformMirrored;
+    }
+
+    private void LateUpdate()
+    {
+        // 애니메이션에 Flip X 키가 있어도 AI가 정한 방향을 유지합니다. 사망 시에는 마지막 방향을 유지합니다.
+        ApplyFacing();
+    }
+
+    private Vector2 GetProjectileSpawnPosition()
+    {
+        if (firePoint == null) return transform.position;
+        if (!mirrorFirePoint || !firePoint.IsChildOf(transform)) return firePoint.position;
+
+        Vector3 offset = transform.InverseTransformPoint(firePoint.position);
+        bool rootMirrored = transform.TransformVector(Vector3.right).x < 0f;
+        offset.x = Mathf.Abs(offset.x) * ((facingLeft ^ rootMirrored) ? -1f : 1f);
+        return transform.TransformPoint(offset);
     }
 
     //1. 순찰 로직
@@ -196,9 +244,10 @@ public class RangedEnemyController : MonoBehaviour, ICombatDamageable
     void FireProjectile()
     {
         if (dead || projectilePrefab == null || player == null) return;
+        FaceDirection(player.position.x - transform.position.x);
         if (HasAnimator) animator.SetTrigger(AttackHash);
 
-        Vector2 spawnPos = firePoint != null ? firePoint.position : transform.position;
+        Vector2 spawnPos = GetProjectileSpawnPosition();
         Vector2 directionToPlayer = (player.position - (Vector3)spawnPos).normalized;
 
         switch (attackPattern)
