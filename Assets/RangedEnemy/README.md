@@ -2,6 +2,8 @@
 
 ## 씬에 배치
 
+스포너의 **Enemy Prefab**에는 기존 `Assets/RangedEnemy/RangedEnemy.prefab`뿐 아니라 `Assets/준석/prefab/RangedEnemy.prefab` 또는 `RangedEnemy 1.prefab`도 넣을 수 있습니다. 루트에 활성 `RangedEnemy` 또는 `RangedEnemyController`가 하나만 있어야 합니다. 다른 종류의 AI는 해당 종류의 스포너를 사용하세요. 기존 씬/프리팹 연결은 자동 이전하며, 새 프리팹에 플레이어를 자동 전달합니다. 준석 몬스터의 사망 애니메이션이 남아 있어도 처치로 판정해 전투 구역이 열립니다. 살아 있는 적을 단순 비활성화한 경우에는 클리어하지 않습니다.
+
 `RangedEnemySpawner.prefab`을 Hierarchy로 끌어 넣고 위치를 정합니다. 또는 `Tools > Story > Ranged Enemy > Create Spawner In Scene` 메뉴를 사용합니다. 기존 씬에는 자동으로 추가하지 않습니다.
 
 - 플레이어 중심이 청록색 감지 사각형 안에 들어오면 한 마리를 생성합니다. `Activation Size`의 X는 전체 가로, Y는 전체 세로 크기이며 기본은 14 × 14 월드 단위입니다. 기존 반지름 7의 좌우/상하 도달 거리를 유지하면서 모서리 영역도 감지합니다.

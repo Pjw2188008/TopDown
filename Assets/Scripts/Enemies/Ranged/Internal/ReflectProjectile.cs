@@ -16,6 +16,8 @@ public sealed class ReflectProjectile : MonoBehaviour
     private int remainingBounces;
     private bool inheritsReflection;
     private bool wasParried;
+    // 발사자가 죽거나 파괴되어도 진영은 유지합니다. 표면 반사는 진영을 바꾸지 않습니다.
+    private bool playerOwned;
     public Vector2 TravelDirection => direction;
     /// <summary>오류 배율까지 반영된 실제 원형 판정 반지름. 충격파 그림 크기 동기화에 사용합니다.</summary>
     public float HitRadius => radius;
@@ -58,6 +60,7 @@ public sealed class ReflectProjectile : MonoBehaviour
         bool reflectFromOrdinarySurfaces)
     {
         owner = projectileOwner;
+        playerOwned = owner != null && owner.GetComponentInParent<PlayerMove>() != null;
         patternSize = patternSpeed = 1f;
         patternWallReflection = false;
         ParryReceiver = null;
@@ -108,6 +111,7 @@ public sealed class ReflectProjectile : MonoBehaviour
                 returnDirection = Mathf.Abs(returnDirection.x) > .0001f ? new Vector2(returnDirection.x,0f) : -direction;
             direction = returnDirection.sqrMagnitude > 0.0001f ? returnDirection.normalized : -direction;
             owner = player.gameObject;
+            playerOwned = true;
             wasParried = true;
             if (PreserveParryReturnLifetime)
                 remainingLifetime = Mathf.Max(remainingLifetime, returnDirection.magnitude / Mathf.Max(.1f, speed) + .25f);
@@ -159,6 +163,7 @@ public sealed class ReflectProjectile : MonoBehaviour
             if (hit.collider == null
                 || hit.collider.GetComponentInParent<ReflectProjectile>() != null
                 || IsOwnerCollider(hit.collider)
+                || IsFriendlyCombatant(hit.collider)
                 || IsDetectionTrigger(hit.collider))
             {
                 continue;
@@ -171,6 +176,16 @@ public sealed class ReflectProjectile : MonoBehaviour
             }
         }
         return foundHit;
+    }
+
+    // 현재 공통 피해 수신자는 플레이어와 적/보스/훈련용 적입니다.
+    // 적 탄환은 다른 적을 충돌 단계부터 제외해야 피해 없이 사라지거나 방패가 되는 일도 없습니다.
+    // 벽·상자·반사 표면처럼 피해 수신자가 없는 환경은 기존 충돌 규칙을 유지합니다.
+    private bool IsFriendlyCombatant(Collider2D collider)
+    {
+        if (playerOwned) return false;
+        return CombatDamageUtility.TryFindReceiver(collider.gameObject, out var receiver)
+            && !(receiver is PlayerMove);
     }
 
     // 입장/튜토리얼 감지 영역은 벽이 아닙니다. 생성 위치를 감싸는 Trigger에

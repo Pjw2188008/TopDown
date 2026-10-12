@@ -81,7 +81,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Sprite: {fileID: 7482667652216324306, guid: aba911739c9f4ed4ebb6e4a6eeaff35b, type: 3}
+  m_Sprite: {fileID: 6209978585022412254, guid: a5c96c08f7a77ad49b227dbffab6f58c, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -171,21 +171,21 @@ BoxCollider2D:
   m_CallbackLayers:
     serializedVersion: 2
     m_Bits: 4294967295
-  m_IsTrigger: 0
+  m_IsTrigger: 1
   m_UsedByEffector: 0
   m_CompositeOperation: 0
   m_CompositeOrder: 0
-  m_Offset: {x: 0, y: 0}
+  m_Offset: {x: 0.017542481, y: 1.0876343}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
-    pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 0.31, y: 1.06}
+    pivot: {x: 0.5, y: 0}
+    oldSize: {x: 2.3888888, y: 2.1111112}
     newSize: {x: 1, y: 1}
     adaptiveTilingThreshold: 0.5
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
-  m_Size: {x: 0.7, y: 0.8}
+  m_Size: {x: 2.3840787, y: 2.1332288}
   m_EdgeRadius: 0
 --- !u!114 &1140001
 MonoBehaviour:
@@ -215,17 +215,27 @@ MonoBehaviour:
   maxHealth: 5
   moveSpeed: 2
   detectionRange: 8
-  stopDistance: 0.8
+  stopDistance: 2.87
+  attackAreaOffset: {x: -0.15, y: 0.95}
+  attackAreaSize: {x: 5.74, y: 5.74}
   attackDamage: 1
   attackCooldown: 1.2
-  attackReach: 0.75
+  attackReach: 0
   attackSize: {x: 1.2, y: 1}
-  attackTimingMode: 0
-  hitNormalizedTime: 0.6
-  hitFrame: 4
   blockingLayers:
     serializedVersion: 2
     m_Bits: 115
+  releaseAfterAnimation: 1
+  attackTimingMode: 0
+  hitNormalizedTime: 0.6
+  hitFrame: 4
+  shockwaveEffectPrefab: {fileID: 2721361235803897857, guid: 73cba3a8b3cf3d044b99e1c3933a25b0, type: 3}
+  shockwaveOriginOffset: {x: 0, y: 0.5}
+  shockwaveSpeed: 5
+  shockwaveDistance: 8
+  shockwaveRadius: 0.94
+  shockwaveColor: {r: 1, g: 1, b: 1, a: 1}
+  shockwaveSortingOrder: 30
   fallbackAttackDuration: 0.6
   fallbackHitDuration: 0.25
   fallbackDeathDuration: 0.75

@@ -534,6 +534,10 @@ PrefabInstance:
       propertyPath: shockwaveVisualScale
       value: 2
       objectReference: {fileID: 0}
+    - target: {fileID: 4866652785127809678, guid: 5b99f2bb2da6a8545852dec2ef742414, type: 3}
+      propertyPath: sideViewGroundLayers.m_Bits
+      value: 115
+      objectReference: {fileID: 0}
     - target: {fileID: 5803268300746287336, guid: 5b99f2bb2da6a8545852dec2ef742414, type: 3}
       propertyPath: m_LocalPosition.x
       value: 20.45
@@ -48422,6 +48426,11 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 4294967291
   navigation:
+    sideView:
+      followPlayerMode: 1
+      gravity: 30
+      maxFallSpeed: 20
+      stopAtLedges: 1
     useTriggerBody: 0
     cellSize: 0.5
     searchRadius: 10
@@ -48610,6 +48619,11 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 4294967291
   navigation:
+    sideView:
+      followPlayerMode: 1
+      gravity: 30
+      maxFallSpeed: 20
+      stopAtLedges: 1
     useTriggerBody: 0
     cellSize: 0.5
     searchRadius: 10

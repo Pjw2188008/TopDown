@@ -1,11 +1,13 @@
 using UnityEngine;
 
-/// <summary>플레이어가 감지 사각형에 들어오면 원거리 적 한 마리를 생성합니다. RangedEnemySpawner 프리팹에 부착합니다.</summary>
+/// <summary>감지 사각형 진입 시 RangedEnemy 또는 RangedEnemyController 프리팹 한 마리를 생성합니다.</summary>
 [DisallowMultipleComponent]
 public sealed class RangedEnemySpawner : MonoBehaviour
 {
-    [Tooltip("생성할 원거리 몬스터 프리팹입니다. 씬의 몬스터가 아닌 Project 창 프리팹을 넣으세요.")]
-    [SerializeField] private RangedEnemy enemyPrefab;
+    // 기존 Component 참조를 보존해 GameObject 프리팹 항목으로 이전합니다.
+    [SerializeField, HideInInspector] private RangedEnemy enemyPrefab;
+    [SerializeField, InspectorName("Enemy Prefab"), Tooltip("Project 창의 원거리 몬스터 프리팹을 넣으세요. 루트에 활성 RangedEnemy 또는 RangedEnemyController 중 하나가 있어야 합니다. 기존 프리팹 연결은 자동 보존됩니다.")]
+    private GameObject monsterPrefab;
     [Tooltip("감지할 플레이어입니다. 비어 있으면 PlayerMove를 자동 검색합니다.")]
     [SerializeField] private Transform player;
     [Tooltip("스포너를 중심으로 하는 감지 사각형의 전체 가로(X)·세로(Y) 크기입니다. 월드 단위이며 회전과 Scale의 영향을 받지 않습니다. 플레이어 중심이 테두리 안에 들어오면 생성합니다.")]
@@ -14,24 +16,25 @@ public sealed class RangedEnemySpawner : MonoBehaviour
     [SerializeField] private Transform spawnPoint;
     [Tooltip("기본값은 한 번만 생성입니다. 끄면 처치 후 플레이어가 감지 범위를 나갔다 다시 들어올 때 새로 생성합니다.")]
     [SerializeField] private bool spawnOnce = true;
-    private RangedEnemy spawnedEnemy;
+    private GameObject spawnedEnemy;
     private bool hasSpawned, wasInside;
     private float nextPlayerSearch;
-    public RangedEnemy SpawnedEnemy => spawnedEnemy;
+    public GameObject SpawnedEnemy => IsDefeated(spawnedEnemy) ? null : spawnedEnemy;
     public bool HasSpawned => hasSpawned;
 
     /// <summary>전투 구역 입장 시 감지 범위와 무관하게 한 번 생성합니다. 기존 적/Spawn Once 설정은 유지합니다.</summary>
-    public RangedEnemy SpawnForCombatArea(Transform target)
+    public GameObject SpawnForCombatArea(Transform target)
     {
-        if (spawnedEnemy != null) return spawnedEnemy;
+        if (SpawnedEnemy != null) return SpawnedEnemy;
         if (spawnOnce && hasSpawned) return null;
-        if (target == null || enemyPrefab == null) return null;
+        if (target == null || !IsSupportedPrefab(PrefabRoot)) return null;
         player = target;
         SpawnEnemy();
-        return spawnedEnemy;
+        return SpawnedEnemy;
     }
 
-    public bool CanSpawnForCombatArea => enemyPrefab != null || spawnedEnemy != null || (spawnOnce && hasSpawned);
+    public bool CanSpawnForCombatArea => IsSupportedPrefab(PrefabRoot) || SpawnedEnemy != null || (spawnOnce && hasSpawned);
+    private GameObject PrefabRoot => monsterPrefab != null ? monsterPrefab : enemyPrefab != null ? enemyPrefab.gameObject : null;
 
     private void Update()
     {
@@ -45,7 +48,7 @@ public sealed class RangedEnemySpawner : MonoBehaviour
         }
 
         bool inside = IsInsideActivationArea(player.position);
-        if (inside && !wasInside && spawnedEnemy == null && (!spawnOnce || !hasSpawned))
+        if (inside && !wasInside && SpawnedEnemy == null && (!spawnOnce || !hasSpawned))
         {
             SpawnEnemy();
         }
@@ -61,7 +64,14 @@ public sealed class RangedEnemySpawner : MonoBehaviour
         return Mathf.Abs(offset.x) <= halfSize.x && Mathf.Abs(offset.y) <= halfSize.y;
     }
 
-    private void OnValidate() => activationSize = ActivationSize;
+    private void Awake() => MigrateLegacyPrefab();
+    private void OnValidate() { activationSize = ActivationSize; MigrateLegacyPrefab(); }
+
+    private void MigrateLegacyPrefab()
+    {
+        if (monsterPrefab == null && enemyPrefab != null) monsterPrefab = enemyPrefab.gameObject;
+        if (monsterPrefab != null) enemyPrefab = null;
+    }
 
     private void FindPlayer()
     {
@@ -74,16 +84,35 @@ public sealed class RangedEnemySpawner : MonoBehaviour
 
     private void SpawnEnemy()
     {
-        if (enemyPrefab == null)
+        if (!IsSupportedPrefab(PrefabRoot))
         {
-            Debug.LogWarning("원거리 몬스터 프리팹을 지정하세요.", this);
+            Debug.LogWarning("Enemy Prefab 루트에 활성 RangedEnemy 또는 RangedEnemyController 중 하나가 필요합니다. Project 창의 원거리 프리팹을 넣으세요.", this);
             return;
         }
 
         Transform point = spawnPoint != null ? spawnPoint : transform;
-        spawnedEnemy = Instantiate(enemyPrefab, point.position, Quaternion.identity);
-        spawnedEnemy.SetTarget(player);
+        spawnedEnemy = Instantiate(PrefabRoot, point.position, Quaternion.identity);
+        spawnedEnemy.SetActive(true);
+        if (spawnedEnemy.TryGetComponent<RangedEnemy>(out var original)) original.SetTarget(player);
+        if (spawnedEnemy.TryGetComponent<RangedEnemyController>(out var other)) other.player = player;
         hasSpawned = true;
+    }
+
+    private static bool IsSupportedPrefab(GameObject prefab)
+    {
+        if (prefab == null) return false;
+        var original = prefab.GetComponent<RangedEnemy>();
+        var other = prefab.GetComponent<RangedEnemyController>();
+        return original != null && original.enabled && other == null
+            || other != null && other.enabled && original == null;
+    }
+
+    /// <summary>사망 애니메이션 중에도 처치로 인정합니다. 살아 있는 적의 비활성화는 처치가 아닙니다.</summary>
+    public static bool IsDefeated(GameObject enemy)
+    {
+        if (enemy == null) return true;
+        if (enemy.TryGetComponent<RangedEnemy>(out var original)) return original.IsDead;
+        return enemy.TryGetComponent<RangedEnemyController>(out var other) && other.IsDead;
     }
 
     private void OnDrawGizmosSelected()

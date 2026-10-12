@@ -65,6 +65,7 @@ public sealed partial class RangedEnemy : MonoBehaviour, ICombatDamageable, IAcc
     private bool dead;
 
     public float CurrentHealth => health;
+    public bool IsDead => dead;
     public bool IsAttacking => attacking;
     public float CurrentMoveSpeed => Mathf.Max(0f, moveSpeed) * speedMultiplier;
 

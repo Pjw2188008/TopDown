@@ -1,6 +1,7 @@
 using UnityEngine;
 
-public class RangedEnemyController : MonoBehaviour
+/// <summary>준석 원거리 적의 순찰/단발·산탄 공격과 공통 플레이어 피해 연동을 담당합니다.</summary>
+public class RangedEnemyController : MonoBehaviour, ICombatDamageable
 {
     [Header("Stats Settings")]
     [Tooltip("적의 최대 체력")] public float maxHealth = 100f;
@@ -10,7 +11,7 @@ public class RangedEnemyController : MonoBehaviour
     [Tooltip("적의 공격력 (투사체 데미지)")] public float attackDamage = 10f;
     [Tooltip("공격 쿨타임 (초)")] public float attackCooldown = 1.5f;
     [Tooltip("투사체 발사 시 이동 속도")] public float projectileSpeed = 8f;
-    [Tooltip("투사체 프리팹 (반드시 Projectile 스크립트가 붙어있어야 함)")] 
+    [Tooltip("Projectile 투사체 프리팹. 생성 시 공통 패링/피해 판정을 자동 연결합니다.")]
     public GameObject projectilePrefab;
     [Tooltip("투사체가 발사되는 위치 (빈 오브젝트 할당, 없으면 적 중심에서 발사)")] 
     public Transform firePoint;
@@ -31,35 +32,80 @@ public class RangedEnemyController : MonoBehaviour
     public Vector2 attackAreaSize = new Vector2(8f, 8f);
 
     [Header("References")]
-    [Tooltip("플레이어 오브젝트 (Player 태그가 있어야 함)")] 
+    [Tooltip("씬의 플레이어입니다. 비우거나 프리팹 에셋이 연결되면 활성 PlayerMove를 자동 검색합니다.")]
     public Transform player;
+
+    [Header("Animation Playback")]
+    [Tooltip("프리팹 루트의 Animator입니다. 비우면 같은 오브젝트에서 찾기만 합니다. Controller/클립/전이는 코드로 생성하거나 변경하지 않습니다.")]
+    public Animator animator;
+    [Min(.05f), Tooltip("Death 클립이 아직 비어 있거나 Animator가 없을 때만 사용하는 사망 대기 시간입니다.")]
+    public float fallbackDeathDuration = .75f;
 
     private float currentHealth;
     private float attackTimer;
     private Vector2 patrolCenter;
     private Vector2 targetPatrolPoint;
+    private bool dead;
+    private float nextPlayerSearch;
+    private float deathElapsed;
+    private static readonly int IsMovingHash = Animator.StringToHash("IsMoving");
+    private static readonly int AttackHash = Animator.StringToHash("Attack");
+    private static readonly int HitHash = Animator.StringToHash("Hit");
+    private static readonly int IsDeadHash = Animator.StringToHash("IsDead");
+    private bool HasAnimator => animator != null && animator.isActiveAndEnabled && animator.runtimeAnimatorController != null;
+    public float CurrentHealth => currentHealth;
+    public bool IsDead => dead;
     
     private enum State { Patrol, Chase, Attack }
     private State currentState;
 
+    void Awake()
+    {
+        if (animator == null) animator = GetComponent<Animator>();
+        currentHealth = Mathf.Max(1f, maxHealth);
+        int enemyLayer = LayerMask.NameToLayer("Enemy");
+        if (gameObject.layer == 0 && enemyLayer >= 0) gameObject.layer = enemyLayer;
+        // 예전 씬에도 피격 판정이 필요합니다. 이미 배치한 Collider는 유지합니다.
+        if (GetComponentInChildren<Collider2D>(true) == null)
+        {
+            var shape = gameObject.AddComponent<BoxCollider2D>();
+            shape.isTrigger = true;
+            shape.size = Vector2.one;
+            var visual = GetComponent<SpriteRenderer>();
+            if (visual != null && visual.sprite != null)
+            {
+                shape.size = visual.sprite.bounds.size;
+                shape.offset = visual.sprite.bounds.center;
+            }
+        }
+    }
+
     void Start()
     {
-        currentHealth = maxHealth;
         patrolCenter = transform.position; //시작 위치를 순찰 중심점으로 고정
         SetNewPatrolPoint();
         currentState = State.Patrol;
 
-        //플레이어 자동 찾기 (인스펙터 할당을 깜빡했을 경우 대비)
-        if (player == null)
-        {
-            GameObject p = GameObject.FindGameObjectWithTag("Player");
-            if (p != null) player = p.transform;
-        }
+        ResolvePlayer();
+    }
+
+    private void ResolvePlayer()
+    {
+        if (player != null && player.gameObject.scene.IsValid() && player.gameObject.activeInHierarchy) return;
+        player = null;
+        if (Time.time < nextPlayerSearch) return;
+        nextPlayerSearch = Time.time + 1f;
+        var activePlayer = FindFirstObjectByType<PlayerMove>();
+        if (activePlayer != null) player = activePlayer.transform;
     }
 
     void Update()
     {
-        if (currentHealth <= 0 || player == null) return;
+        if (dead) { UpdateDeathAnimation(); return; }
+        ResolvePlayer();
+        if (player == null) { SetMoving(false); return; }
+
+        Vector3 previousPosition = transform.position;
 
         //공격 쿨타임 감소
         if (attackTimer > 0) attackTimer -= Time.deltaTime;
@@ -77,6 +123,7 @@ public class RangedEnemyController : MonoBehaviour
                 AttackLogic();
                 break;
         }
+        SetMoving((transform.position - previousPosition).sqrMagnitude > .000001f);
     }
 
     //1. 순찰 로직
@@ -148,7 +195,8 @@ public class RangedEnemyController : MonoBehaviour
     //투사체 발사 처리 (패턴 분기)
     void FireProjectile()
     {
-        if (projectilePrefab == null) return;
+        if (dead || projectilePrefab == null || player == null) return;
+        if (HasAnimator) animator.SetTrigger(AttackHash);
 
         Vector2 spawnPos = firePoint != null ? firePoint.position : transform.position;
         Vector2 directionToPlayer = (player.position - (Vector3)spawnPos).normalized;
@@ -177,11 +225,9 @@ public class RangedEnemyController : MonoBehaviour
     {
         GameObject projObj = Instantiate(projectilePrefab, pos, Quaternion.identity);
         Projectile projScript = projObj.GetComponent<Projectile>();
-        if (projScript != null)
-        {
-            //투사체가 날아갈 방향, 속도, 데미지 전달
-            projScript.Initialize(direction, projectileSpeed, attackDamage);
-        }
+        if (projScript == null) projScript = projObj.AddComponent<Projectile>();
+        projScript.Initialize(gameObject, direction, projectileSpeed, attackDamage);
+        projObj.SetActive(true);
     }
 
     //AABB 사각형 범위 체크 헬퍼
@@ -194,9 +240,13 @@ public class RangedEnemyController : MonoBehaviour
 
     //피격 처리 (Player 등 외부 공격에 의해 호출됨)
     //플레이어의 무기나 스킬이 OnTriggerEnter2D 등을 통해 이 함수를 호출해야 함
-    public void TakeDamage(float damage)
+    public void TakeDamage(float damage) => ReceiveDamage(damage, null, true);
+
+    public bool ReceiveDamage(float damage, GameObject source, bool canReflect)
     {
-        currentHealth -= damage;
+        if (dead || !isActiveAndEnabled || damage <= 0f) return false;
+        currentHealth = Mathf.Max(0f, currentHealth - damage);
+        DamageBlink.Play(gameObject);
         Debug.Log($"적 피격! 현재 체력: {currentHealth}");
 
         //데미지를 받으면 무조건 플레이어를 추적하도록 상태 변경 (선택 사항)
@@ -206,12 +256,48 @@ public class RangedEnemyController : MonoBehaviour
         {
             Die();
         }
+        else if (HasAnimator)
+        {
+            animator.ResetTrigger(AttackHash);
+            animator.SetTrigger(HitHash);
+        }
+        return true;
     }
 
     void Die()
     {
+        if (dead) return;
+        dead = true;
+        foreach (var shape in GetComponentsInChildren<Collider2D>()) shape.enabled = false;
         Debug.Log("원거리 적 사망!");
-        Destroy(gameObject);
+        deathElapsed = 0f;
+        if (HasAnimator)
+        {
+            animator.SetBool(IsMovingHash, false);
+            animator.ResetTrigger(AttackHash);
+            animator.ResetTrigger(HitHash);
+            animator.SetBool(IsDeadHash, true);
+        }
+    }
+
+    private void SetMoving(bool moving)
+    {
+        if (HasAnimator) animator.SetBool(IsMovingHash, moving);
+    }
+
+    private void UpdateDeathAnimation()
+    {
+        deathElapsed += Time.deltaTime;
+        if (HasAnimator)
+        {
+            var state = animator.GetCurrentAnimatorStateInfo(0);
+            if (state.IsName("Death") && state.length > .0001f)
+            {
+                if (state.normalizedTime >= 1f) Destroy(gameObject);
+                return;
+            }
+        }
+        if (deathElapsed >= Mathf.Max(.05f, fallbackDeathDuration)) Destroy(gameObject);
     }
 
     //기즈모 그리기 (인스펙터 선택 시에만 보이게 하려면 OnDrawGizmosSelected 사용 권장)

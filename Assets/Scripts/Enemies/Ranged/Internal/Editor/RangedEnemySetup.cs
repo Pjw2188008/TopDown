@@ -66,7 +66,7 @@ public static class RangedEnemySetup
             {
                 var spawnPoint = new GameObject("SpawnPoint"); spawnPoint.transform.SetParent(go.transform, false);
                 var serialized = new SerializedObject(go.AddComponent<RangedEnemySpawner>());
-                serialized.FindProperty("enemyPrefab").objectReferenceValue = enemyPrefab.GetComponent<RangedEnemy>();
+                serialized.FindProperty("monsterPrefab").objectReferenceValue = enemyPrefab;
                 serialized.FindProperty("spawnPoint").objectReferenceValue = spawnPoint.transform;
                 serialized.ApplyModifiedPropertiesWithoutUndo(); PrefabUtility.SaveAsPrefabAsset(go, spawnerPath);
             }

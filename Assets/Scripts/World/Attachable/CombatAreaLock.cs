@@ -18,7 +18,7 @@ public sealed class CombatAreaLock : MonoBehaviour
     [Header("전투 대상")]
     [Tooltip("켜면 입장 시 범위 안의 근접/원거리 적과 활성 근접/원거리 스포너를 한 번 수집합니다. 이후 범위 밖으로 나간 적도 처치 대상으로 유지합니다.")]
     [SerializeField] private bool collectEnemiesInArea = true;
-    [Tooltip("추가로 추적할 적의 루트입니다. 제거된 적 또는 IsDead가 된 TriangleMeleeMonster를 처치로 인식합니다. 단순 비활성화는 처치가 아닙니다.")]
+    [Tooltip("추가로 추적할 적의 루트입니다. 제거된 적 또는 IsDead가 된 Triangle/원거리 적을 처치로 인식합니다. 단순 비활성화는 처치가 아닙니다.")]
     [SerializeField] private GameObject[] enemies = new GameObject[0];
     [Tooltip("입장 시 즉시 생성시킬 원거리 스포너입니다. 전투 중 자동 재생성은 잠시 중지하고 종료 시 원래 enabled 상태로 복원합니다. 여러 전투 구역이 같은 스포너를 공유하지 마세요.")]
     [SerializeField] private RangedEnemySpawner[] spawners = new RangedEnemySpawner[0];
@@ -56,7 +56,7 @@ public sealed class CombatAreaLock : MonoBehaviour
         bool inside = player != null && player.gameObject.activeInHierarchy && entryArea.OverlapPoint(player.transform.position);
         if (IsLocked)
         {
-            remaining.RemoveWhere(MeleeEnemySpawner.IsDefeated);
+            remaining.RemoveWhere(IsDefeated);
             if (remaining.Count == 0) { CompleteEncounter(); return; }
             // 즉사 후 시작점 복귀/외부 텔레포트로 전투 지역에 갇히지 않게 문을 열고 재입장을 허용합니다.
             if (!inside) CancelEncounter();
@@ -92,13 +92,13 @@ public sealed class CombatAreaLock : MonoBehaviour
         remaining.Clear();
         var sources = new HashSet<RangedEnemySpawner>();
         var meleeSources = new HashSet<MeleeEnemySpawner>();
-        foreach (var enemy in enemies) if (!MeleeEnemySpawner.IsDefeated(enemy)) remaining.Add(enemy);
+        foreach (var enemy in enemies) if (!IsDefeated(enemy)) remaining.Add(enemy);
         foreach (var source in spawners) if (source != null) sources.Add(source);
         foreach (var source in meleeSpawners) if (source != null) meleeSources.Add(source);
         if (collectEnemiesInArea)
         {
             Collect<EnemyController>(); Collect<MeleeEnemy>(); Collect<RangedEnemy>(); Collect<TutorialBoss>();
-            Collect<TriangleMeleeMonster>();
+            Collect<TriangleMeleeMonster>(); Collect<RangedEnemyController>();
             foreach (var source in FindObjectsByType<RangedEnemySpawner>(FindObjectsSortMode.None))
                 if (source.enabled && entryArea.OverlapPoint(source.transform.position)) sources.Add(source);
             foreach (var source in FindObjectsByType<MeleeEnemySpawner>(FindObjectsSortMode.None))
@@ -126,7 +126,7 @@ public sealed class CombatAreaLock : MonoBehaviour
             controlledSpawners.Add(source, source.enabled);
             source.enabled = false;
             var enemy = source.SpawnForCombatArea(player.transform);
-            if (enemy != null) remaining.Add(enemy.gameObject);
+            if (enemy != null) remaining.Add(enemy);
         }
         foreach (var source in meleeSources)
         {
@@ -144,8 +144,11 @@ public sealed class CombatAreaLock : MonoBehaviour
     private void Collect<T>() where T : Component
     {
         foreach (var enemy in FindObjectsByType<T>(FindObjectsSortMode.None))
-            if (entryArea.OverlapPoint(enemy.transform.position) && !MeleeEnemySpawner.IsDefeated(enemy.gameObject)) remaining.Add(enemy.gameObject);
+            if (entryArea.OverlapPoint(enemy.transform.position) && !IsDefeated(enemy.gameObject)) remaining.Add(enemy.gameObject);
     }
+
+    private static bool IsDefeated(GameObject enemy)
+        => MeleeEnemySpawner.IsDefeated(enemy) || RangedEnemySpawner.IsDefeated(enemy);
 
     private bool HasSafeBarriers()
     {
