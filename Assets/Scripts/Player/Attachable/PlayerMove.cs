@@ -280,7 +280,8 @@ public partial class PlayerMove : MonoBehaviour, ICombatDamageable
         if (HandleErrorCodexInput()) return;
         if (IsSideView && (!guardHasFocus || Time.timeScale <= 0f)) return;
         UpdateSideViewGravity(Time.deltaTime);
-        bool interactionInputConsumed = HandleInteractionInput();
+        bool bossRewardInputConsumed = HandleBossErrorRewardInput();
+        bool interactionInputConsumed = bossRewardInputConsumed || HandleInteractionInput();
         UpdateDashStamina(Time.deltaTime);
         UpdateErrorDiscovery();
         RefreshParryInput();
@@ -296,7 +297,7 @@ public partial class PlayerMove : MonoBehaviour, ICombatDamageable
             ToggleEditMode();
         }
 
-        bool replacementInputConsumed = !isDashing && HandleStoredErrorReplacementInput();
+        bool replacementInputConsumed = bossRewardInputConsumed || (!isDashing && HandleStoredErrorReplacementInput());
         if (!IsMovingObject && !interactionInputConsumed && !replacementInputConsumed && !isDashing)
         {
             HandleStoredErrorSelectionInput();

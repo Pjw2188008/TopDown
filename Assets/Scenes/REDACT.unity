@@ -522,6 +522,18 @@ PrefabInstance:
       propertyPath: m_Name
       value: TutorialBoss
       objectReference: {fileID: 0}
+    - target: {fileID: 4866652785127809678, guid: 5b99f2bb2da6a8545852dec2ef742414, type: 3}
+      propertyPath: rockfallCount
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 4866652785127809678, guid: 5b99f2bb2da6a8545852dec2ef742414, type: 3}
+      propertyPath: patternErrorChance
+      value: 0.705
+      objectReference: {fileID: 0}
+    - target: {fileID: 4866652785127809678, guid: 5b99f2bb2da6a8545852dec2ef742414, type: 3}
+      propertyPath: shockwaveVisualScale
+      value: 2
+      objectReference: {fileID: 0}
     - target: {fileID: 5803268300746287336, guid: 5b99f2bb2da6a8545852dec2ef742414, type: 3}
       propertyPath: m_LocalPosition.x
       value: 20.45
@@ -6768,6 +6780,10 @@ PrefabInstance:
     - target: {fileID: 5270496586637443449, guid: 29335a155cf87ad4aaaadf2320905a6f, type: 3}
       propertyPath: m_Name
       value: MeleeEnemySpawner
+      objectReference: {fileID: 0}
+    - target: {fileID: 7701595741744607337, guid: 29335a155cf87ad4aaaadf2320905a6f, type: 3}
+      propertyPath: enemyPrefab
+      value: 
       objectReference: {fileID: 0}
     - target: {fileID: 7701595741744607337, guid: 29335a155cf87ad4aaaadf2320905a6f, type: 3}
       propertyPath: activationSize.x
@@ -22525,6 +22541,7 @@ MonoBehaviour:
     onEntered:
       m_PersistentCalls:
         m_Calls: []
+    restartPoint: {fileID: 0}
   - completionCondition: 1
     minimumDisplaySeconds: 1
     message: "E \uD0A4\uB97C \uB20C\uB7EC \uD3B8\uC9D1 \uBAA8\uB4DC\uB97C \uCF1C\uC138\uC694.\n\uD3B8\uC9D1
@@ -22542,6 +22559,7 @@ MonoBehaviour:
     onEntered:
       m_PersistentCalls:
         m_Calls: []
+    restartPoint: {fileID: 0}
   - completionCondition: 2
     minimumDisplaySeconds: 0.5
     message: "\uC624\uB958 \uC6D0\uBCF8\uC744 \uAC00\uAE4C\uC774\uC5D0\uC11C \uC870\uC900\uD558\uC138\uC694.\n\uD3B8\uC9D1
@@ -22559,6 +22577,7 @@ MonoBehaviour:
     onEntered:
       m_PersistentCalls:
         m_Calls: []
+    restartPoint: {fileID: 0}
   - completionCondition: 4
     minimumDisplaySeconds: 2
     message: "{error} \uC624\uB958\uAC00 \uBCF4\uAD00\uD568\uC5D0 \uC800\uC7A5\uB410\uC5B4\uC694.\nCut\uD558\uBA74
@@ -22577,6 +22596,7 @@ MonoBehaviour:
     onEntered:
       m_PersistentCalls:
         m_Calls: []
+    restartPoint: {fileID: 0}
   - completionCondition: 5
     minimumDisplaySeconds: 0.5
     message: "\uD3B8\uC9D1 \uBAA8\uB4DC(E)\uC5D0\uC11C \uC9C4\uD589\uD558\uC138\uC694.\n{error}
@@ -22595,6 +22615,7 @@ MonoBehaviour:
     onEntered:
       m_PersistentCalls:
         m_Calls: []
+    restartPoint: {fileID: 0}
   - completionCondition: 4
     minimumDisplaySeconds: 2
     message: "\uAC70\uB300\uD654\uAC00 \uC801\uC6A9\uB418\uC5B4 \uBB3C\uCCB4\uAC00
@@ -22614,6 +22635,7 @@ MonoBehaviour:
     onEntered:
       m_PersistentCalls:
         m_Calls: []
+    restartPoint: {fileID: 0}
   - completionCondition: 0
     minimumDisplaySeconds: 0
     message: "\uACF5\uACA9\uACFC \uD328\uB9C1\uC744 \uC5F0\uC2B5\uD574 \uBCFC\uAE4C\uC694?\n\uD45C\uC2DC\uB41C
@@ -22631,6 +22653,7 @@ MonoBehaviour:
     onEntered:
       m_PersistentCalls:
         m_Calls: []
+    restartPoint: {fileID: 0}
   - completionCondition: 6
     minimumDisplaySeconds: 0.5
     message: "\uD3B8\uC9D1 \uBAA8\uB4DC\uB77C\uBA74 E\uB85C \uD574\uC81C\uD558\uC138\uC694.\n\uD5C8\uC218\uC544\uBE44
@@ -22649,6 +22672,7 @@ MonoBehaviour:
     onEntered:
       m_PersistentCalls:
         m_Calls: []
+    restartPoint: {fileID: 0}
   - completionCondition: 7
     minimumDisplaySeconds: 0.5
     message: "\uD22C\uC0AC\uCCB4\uAC00 \uB2FF\uAE30 \uC9C1\uC804\uC5D0 \uC6B0\uD074\uB9AD!\n\uB193\uC558\uB2E4
@@ -22667,6 +22691,7 @@ MonoBehaviour:
     onEntered:
       m_PersistentCalls:
         m_Calls: []
+    restartPoint: {fileID: 0}
   - completionCondition: 4
     minimumDisplaySeconds: 2
     message: "\uCCA8\uC0AD \uC131\uACF5! \uD22C\uC0AC\uCCB4\uB97C \uD295\uACA8\uB0C8\uC5B4\uC694.\n\uC6B0\uD074\uB9AD
@@ -22685,9 +22710,12 @@ MonoBehaviour:
     onEntered:
       m_PersistentCalls:
         m_Calls: []
+    restartPoint: {fileID: 0}
   onCompleted:
     m_PersistentCalls:
       m_Calls: []
+  restartSectionOnInstantDeath: 1
+  additionalCheckpointObjects: []
   showDestinationOutline: 1
   destinationOutlineColor: {r: 0.2, g: 1, b: 0.65, a: 0.9}
   destinationOutlineWidth: 0.05
@@ -27256,6 +27284,83 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
+--- !u!1001 &1140940141
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 5270496586637443449, guid: 29335a155cf87ad4aaaadf2320905a6f, type: 3}
+      propertyPath: m_Name
+      value: MeleeEnemySpawner (1)
+      objectReference: {fileID: 0}
+    - target: {fileID: 7701595741744607337, guid: 29335a155cf87ad4aaaadf2320905a6f, type: 3}
+      propertyPath: monsterPrefab
+      value: 
+      objectReference: {fileID: 3809326024534140586, guid: ea556634dbdf2da499ef6ceb59240a01, type: 3}
+    - target: {fileID: 7701595741744607337, guid: 29335a155cf87ad4aaaadf2320905a6f, type: 3}
+      propertyPath: activationSize.x
+      value: 12.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 7701595741744607337, guid: 29335a155cf87ad4aaaadf2320905a6f, type: 3}
+      propertyPath: activationSize.y
+      value: 10.9
+      objectReference: {fileID: 0}
+    - target: {fileID: 8374332022749749640, guid: 29335a155cf87ad4aaaadf2320905a6f, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -0.13
+      objectReference: {fileID: 0}
+    - target: {fileID: 8374332022749749640, guid: 29335a155cf87ad4aaaadf2320905a6f, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: -14.92
+      objectReference: {fileID: 0}
+    - target: {fileID: 8374332022749749640, guid: 29335a155cf87ad4aaaadf2320905a6f, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8374332022749749640, guid: 29335a155cf87ad4aaaadf2320905a6f, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8374332022749749640, guid: 29335a155cf87ad4aaaadf2320905a6f, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8374332022749749640, guid: 29335a155cf87ad4aaaadf2320905a6f, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8374332022749749640, guid: 29335a155cf87ad4aaaadf2320905a6f, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8374332022749749640, guid: 29335a155cf87ad4aaaadf2320905a6f, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8374332022749749640, guid: 29335a155cf87ad4aaaadf2320905a6f, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8374332022749749640, guid: 29335a155cf87ad4aaaadf2320905a6f, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8375665502795201520, guid: 29335a155cf87ad4aaaadf2320905a6f, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 1.73
+      objectReference: {fileID: 0}
+    - target: {fileID: 8375665502795201520, guid: 29335a155cf87ad4aaaadf2320905a6f, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: -2.19
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 29335a155cf87ad4aaaadf2320905a6f, type: 3}
 --- !u!1001 &1142635868
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -50427,4 +50532,5 @@ SceneRoots:
   - {fileID: 927463227}
   - {fileID: 700000000014128364}
   - {fileID: 389790434}
+  - {fileID: 1140940141}
   - {fileID: 20569709}

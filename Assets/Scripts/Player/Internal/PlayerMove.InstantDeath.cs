@@ -4,7 +4,7 @@ using UnityEngine;
 public partial class PlayerMove
 {
     [Header("즉사 기믹 / 재시작")]
-    [Tooltip("선택적 재시작 지점입니다. 비우면 플레이어가 처음 생성된 위치를 사용합니다. 레이저 밖의 안전한 위치에 두세요.")]
+    [Tooltip("선택적 재시작 지점입니다. 비우면 최초 생성 위치를 사용합니다. 진행 중인 튜토리얼 체크포인트가 있으면 그 구간 시작 위치가 우선합니다. 레이저 밖의 안전한 위치에 두세요.")]
     [SerializeField] private Transform instantDeathRespawnPoint;
     private Vector3 initialRespawnPosition;
     private bool respawnPositionCaptured;
@@ -26,6 +26,7 @@ public partial class PlayerMove
         CaptureRespawnPosition();
         lastInstantDeathFrame = Time.frameCount;
         currentHealth = 0f;
+        ClearBossErrorRewards();
         ResetSideViewJumpHeight();
         ReleaseInteraction();
         CancelDash();
@@ -51,6 +52,8 @@ public partial class PlayerMove
         }
 
         Vector3 destination = instantDeathRespawnPoint != null ? instantDeathRespawnPoint.position : initialRespawnPosition;
+        bool tutorialRestarted = TutorialSequence.TryRestoreCheckpoint(this, out Vector3 tutorialPosition);
+        if (tutorialRestarted) destination = tutorialPosition;
         if (playerBody != null)
         {
             playerBody.linearVelocity = Vector2.zero;
@@ -61,7 +64,8 @@ public partial class PlayerMove
         Physics2D.SyncTransforms();
         currentHealth = Mathf.Max(1f, maxHealth);
         DamageBlink.Play(gameObject);
-        Debug.Log("레이저 즉사: 시작 위치로 돌아가 HP를 회복했습니다.", this);
+        Debug.Log(tutorialRestarted ? "레이저 즉사: 현재 튜토리얼 구간을 복구하고 HP를 회복했습니다."
+            : "레이저 즉사: 시작 위치로 돌아가 HP를 회복했습니다.", this);
         return true;
     }
 

@@ -1,6 +1,6 @@
 using UnityEngine;
 
-/// <summary>보스 Animator 재생과 근접 클립 진행률에 맞춘 타격입니다. 낙석은 별도 시간표로 처리하며 직접 부착하지 않습니다.</summary>
+/// <summary>근접 타격/충격파 발사를 각각의 클립 프레임에 맞춥니다. 낙석은 별도 시간표로 처리하며 직접 부착하지 않습니다.</summary>
 public sealed partial class TutorialBoss
 {
     [Header("보스 애니메이션")]
@@ -10,6 +10,7 @@ public sealed partial class TutorialBoss
     private int requestedBossState;
     [SerializeField, Min(2), Tooltip("Slam 애니메이션에서 실제 무기를 휘두르는 타격 프레임 번호입니다(첫 프레임=1, 지정은 2부터). 기본 11번째 프레임에 피해/패링을 한 번 판정합니다. 별도 근접 이펙트는 없습니다. 범위를 넘으면 마지막 프레임, 1프레임 클립은 종료 시 타격합니다.")] private int slamHitFrame = 11;
     private bool attackAnimationActive, attackAnimationHit;
+    private bool attackAnimationIsShockwave;
     private int activeAttackHash;
     private float animationImpact, savedAnimationSpeed = 1f;
     private bool HasBossAnimator => bossAnimator != null && bossAnimator.isActiveAndEnabled && bossAnimator.runtimeAnimatorController != null;
@@ -25,7 +26,6 @@ public sealed partial class TutorialBoss
             StopAttackAnimation();
             PlayBossState(value == Phase.Staggered ? "Stagger" : "Idle");
         }
-        else if (value == Phase.Rockfall) { StopAttackAnimation();PlayBossState("Idle"); }
         else if (value == Phase.Recovery && !attackAnimationActive) PlayBossState("Idle");
     }
     private void PlayBossState(string name, bool restart = true)
@@ -53,8 +53,9 @@ public sealed partial class TutorialBoss
     }
     private void BeginBossAttackAnimation()
     {
-        if (!HasBossAnimator || phase != Phase.SlamWarning) return;
-        string name = "Slam";
+        if (!HasBossAnimator || (phase != Phase.SlamWarning && phase != Phase.Shockwave)) return;
+        attackAnimationIsShockwave = phase == Phase.Shockwave;
+        string name = attackAnimationIsShockwave ? "Shockwave" : "Slam";
         int hash = Animator.StringToHash(name);
         if (!bossAnimator.HasState(0,hash)) return;
         savedAnimationSpeed = bossAnimator.speed;
@@ -64,7 +65,8 @@ public sealed partial class TutorialBoss
         if (clips.Length == 0 || clips[0].clip == null || clips[0].clip.length <= 0) return;
         activeAttackHash = hash;
         // 실제 휘두르는 이미지에 판정을 맞추고, 나머지 후딜 프레임도 끝까지 재생합니다.
-        animationImpact = GetSlamHitProgress(clips[0].clip);
+        animationImpact = attackAnimationIsShockwave ? GetAttackFrameProgress(clips[0].clip, shockwaveReleaseFrame)
+            : GetSlamHitProgress(clips[0].clip);
         attackAnimationActive = true;attackAnimationHit = false;
         // 준비 시간을 유지하면서 길이가 다른 클립에도 재생 속도를 맞춥니다.
         var state = bossAnimator.GetCurrentAnimatorStateInfo(0);
@@ -73,11 +75,14 @@ public sealed partial class TutorialBoss
     }
 
     private float GetSlamHitProgress(AnimationClip clip)
+        => GetAttackFrameProgress(clip, slamHitFrame);
+
+    private static float GetAttackFrameProgress(AnimationClip clip, int hitFrame)
     {
         float samples = Mathf.Max(1f, clip.length * clip.frameRate);
         int lastFrameIndex = Mathf.Max(0, Mathf.CeilToInt(samples - .0001f) - 1);
         if (lastFrameIndex == 0) return 1f;
-        int frameIndex = Mathf.Clamp(slamHitFrame - 1, 1, lastFrameIndex);
+        int frameIndex = Mathf.Clamp(hitFrame - 1, 1, lastFrameIndex);
         return Mathf.Clamp01(frameIndex / samples);
     }
     private void UpdateBossAttackAnimation()
@@ -105,7 +110,8 @@ public sealed partial class TutorialBoss
             {
                 attackAnimationHit = true;
                 SetPhase(Phase.Recovery,attackCooldown);
-                Slam();
+                if (attackAnimationIsShockwave) ReleaseShockwaves();
+                else Slam();
                 if (!attackAnimationActive) return; // N번째 패링/사망 콜백이 공격을 취소했을 수 있습니다.
             }
         }
@@ -119,5 +125,6 @@ public sealed partial class TutorialBoss
     {
         if (attackAnimationActive && bossAnimator != null) bossAnimator.speed = savedAnimationSpeed;
         attackAnimationActive = false;
+        EndActivePatternError();
     }
 }

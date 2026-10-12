@@ -50,6 +50,8 @@ public sealed partial class TutorialSequence : MonoBehaviour
         [Min(1)] public int requiredCombatSuccesses = 1;
         [Tooltip("이 단계가 시작될 때 한 번 호출됩니다. 다음 튜토리얼 오브젝트 활성화 등에 연결할 수 있습니다. 이 이벤트 안에서 단계 전환을 재호출하지 마세요.")]
         public UnityEvent onEntered = new UnityEvent();
+        [Tooltip("선택 사항: 이 연습 구간에서 즉사했을 때 돌아갈 안전한 지점입니다. 비우면 구간 시작 당시 플레이어 위치를 사용합니다. 레이저나 도착 영역 안은 피하세요.")]
+        public Transform restartPoint;
     }
 
     [Header("진행")]
@@ -138,6 +140,7 @@ public sealed partial class TutorialSequence : MonoBehaviour
     public void BeginTutorial()
     {
         if (transitioning) return;
+        checkpoint = null;
         EndCombatPractice(true);
         running = steps != null && steps.Length > 0;
         currentStepIndex = running ? 0 : -1;
@@ -192,7 +195,7 @@ public sealed partial class TutorialSequence : MonoBehaviour
         }
     }
 
-    private void EnterCurrentStep(bool preserveCutBaseline = false)
+    private void EnterCurrentStep(bool preserveCutBaseline = false, bool restarting = false)
     {
         stepDisplayTime = 0f;
         if (player == null) player = FindFirstObjectByType<PlayerMove>();
@@ -226,7 +229,12 @@ public sealed partial class TutorialSequence : MonoBehaviour
             capturedTargetName = targetStep != null ? GetCutTargetName(targetStep) : string.Empty;
         }
         transitioning = true;
-        try { CurrentStep?.onEntered?.Invoke(); } finally { transitioning = false; RefreshTutorialUI(); }
+        try { if (!restarting) CurrentStep?.onEntered?.Invoke(); }
+        finally { transitioning = false; RefreshTutorialUI(); }
+        if (!restarting) CaptureSectionCheckpoint();
+        if (CurrentStep?.completionCondition == CompletionCondition.EnvironmentPasteSucceeded
+            && checkpoint != null && checkpoint.StepIndex == currentStepIndex)
+            pasteVersionAtEntry = checkpoint.PasteVersion;
     }
 
     private void LateUpdate()
@@ -240,6 +248,7 @@ public sealed partial class TutorialSequence : MonoBehaviour
         if (trackedPlayer != player) { trackedPlayer = player; hasPreviousPosition = false; }
         if (player == null || !player.isActiveAndEnabled || Time.timeScale <= 0f || player.IsInstantlyDead)
         { hasPreviousPosition = false; return; }
+        if (checkpoint == null || checkpoint.Player != player) CaptureSectionCheckpoint();
         if (cutObservedPlayer != player)
         {
             cutObservedPlayer = player;

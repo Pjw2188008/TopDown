@@ -73,6 +73,7 @@ public partial class PlayerMove
             DrawPlayerHud();
             DrawParryFeedback();
             DrawInteractionPrompt();
+            DrawBossErrorReward();
         }
     }
 }

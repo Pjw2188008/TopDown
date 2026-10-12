@@ -12,6 +12,24 @@ public sealed class ErrorInventory
     public int Capacity { get; }
     public int Count { get; private set; }
 
+    /// <summary>빈 슬롯 위치까지 보존하는 독립 복사본입니다. 튜토리얼 구간 재시작에 사용합니다.</summary>
+    public ErrorInventory Copy()
+    {
+        var copy = new ErrorInventory(Capacity);
+        copy.RestoreFrom(this);
+        return copy;
+    }
+
+    public void RestoreFrom(ErrorInventory snapshot)
+    {
+        if (snapshot == null || snapshot.Capacity != Capacity)
+            throw new ArgumentException("Inventory checkpoint capacity must match.", nameof(snapshot));
+        Array.Copy(snapshot.occupied, occupied, occupied.Length);
+        Array.Copy(snapshot.multipliers, multipliers, multipliers.Length);
+        Array.Copy(snapshot.slots, slots, slots.Length);
+        Count = snapshot.Count;
+    }
+
     public ErrorInventory(int capacity = 2)
     {
         if (capacity < 1 || capacity > 3) throw new ArgumentOutOfRangeException(nameof(capacity));

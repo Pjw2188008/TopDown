@@ -1,0 +1,598 @@
+fileFormatVersion: 2
+guid: 6d1936ae71ccf4f4eabe8034090d1337
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -4495872515383751813
+    second: charge-burst-16_0
+  - first:
+      213: 1398053480532802200
+    second: charge-burst-16_1
+  - first:
+      213: 5725107307486584214
+    second: charge-burst-16_2
+  - first:
+      213: 110517380037139338
+    second: charge-burst-16_3
+  - first:
+      213: 373324463809466810
+    second: charge-burst-16_4
+  - first:
+      213: 2892931318836862749
+    second: charge-burst-16_5
+  - first:
+      213: 4918780469610512214
+    second: charge-burst-16_6
+  - first:
+      213: -4954332345379329285
+    second: charge-burst-16_7
+  - first:
+      213: -2893765852100173533
+    second: charge-burst-16_8
+  - first:
+      213: 5152694243693551288
+    second: charge-burst-16_9
+  - first:
+      213: 791062506282961656
+    second: charge-burst-16_10
+  - first:
+      213: -2247452687057076593
+    second: charge-burst-16_11
+  - first:
+      213: -1422932274949600455
+    second: charge-burst-16_12
+  - first:
+      213: 1002990169539112590
+    second: charge-burst-16_13
+  - first:
+      213: -70357378518090522
+    second: charge-burst-16_14
+  - first:
+      213: 4002985434909963182
+    second: charge-burst-16_15
+  - first:
+      213: -7443673527394716297
+    second: charge-burst-16_16
+  - first:
+      213: -6106979345213725188
+    second: charge-burst-16_17
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 0
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 1
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 64
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 0
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Android
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: charge-burst-16_0
+      rect:
+        serializedVersion: 2
+        x: 54
+        y: 151
+        width: 25
+        height: 25
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b7b0c1574c37b91c0800000000000000
+      internalID: -4495872515383751813
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: charge-burst-16_1
+      rect:
+        serializedVersion: 2
+        x: 76
+        y: 166
+        width: 9
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 89af72cbb32e66310800000000000000
+      internalID: 1398053480532802200
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: charge-burst-16_2
+      rect:
+        serializedVersion: 2
+        x: 85
+        y: 180
+        width: 9
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 69d1bb363caa37f40800000000000000
+      internalID: 5725107307486584214
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: charge-burst-16_3
+      rect:
+        serializedVersion: 2
+        x: 104
+        y: 173
+        width: 17
+        height: 33
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a8bde9ab8f2a88100800000000000000
+      internalID: 110517380037139338
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: charge-burst-16_4
+      rect:
+        serializedVersion: 2
+        x: 141
+        y: 173
+        width: 10
+        height: 38
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ab193533f905e2500800000000000000
+      internalID: 373324463809466810
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: charge-burst-16_5
+      rect:
+        serializedVersion: 2
+        x: 170
+        y: 170
+        width: 18
+        height: 22
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d1f9fd205b1c52820800000000000000
+      internalID: 2892931318836862749
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: charge-burst-16_6
+      rect:
+        serializedVersion: 2
+        x: 84
+        y: 37
+        width: 114
+        height: 116
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 65f734bb6c4034440800000000000000
+      internalID: 4918780469610512214
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: charge-burst-16_7
+      rect:
+        serializedVersion: 2
+        x: 158
+        y: 149
+        width: 17
+        height: 18
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: bfaef662bfcae3bb0800000000000000
+      internalID: -4954332345379329285
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: charge-burst-16_8
+      rect:
+        serializedVersion: 2
+        x: 189
+        y: 151
+        width: 8
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 321e9621a4747d7d0800000000000000
+      internalID: -2893765852100173533
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: charge-burst-16_9
+      rect:
+        serializedVersion: 2
+        x: 53
+        y: 113
+        width: 21
+        height: 17
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8bedd8f4d1c028740800000000000000
+      internalID: 5152694243693551288
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: charge-burst-16_10
+      rect:
+        serializedVersion: 2
+        x: 197
+        y: 129
+        width: 16
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8fa4022882b6afa00800000000000000
+      internalID: 791062506282961656
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: charge-burst-16_11
+      rect:
+        serializedVersion: 2
+        x: 76
+        y: 116
+        width: 7
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f8e377a40b17fc0e0800000000000000
+      internalID: -2247452687057076593
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: charge-burst-16_12
+      rect:
+        serializedVersion: 2
+        x: 204
+        y: 112
+        width: 13
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 93bc03c82aab04ce0800000000000000
+      internalID: -1422932274949600455
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: charge-burst-16_13
+      rect:
+        serializedVersion: 2
+        x: 63
+        y: 96
+        width: 8
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e8e6690ce365bed00800000000000000
+      internalID: 1002990169539112590
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: charge-burst-16_14
+      rect:
+        serializedVersion: 2
+        x: 197
+        y: 91
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6ecf916465a060ff0800000000000000
+      internalID: -70357378518090522
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: charge-burst-16_15
+      rect:
+        serializedVersion: 2
+        x: 61
+        y: 48
+        width: 25
+        height: 27
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ea3fed85b067d8730800000000000000
+      internalID: 4002985434909963182
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: charge-burst-16_16
+      rect:
+        serializedVersion: 2
+        x: 198
+        y: 59
+        width: 13
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 775b8a77d52c2b890800000000000000
+      internalID: -7443673527394716297
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: charge-burst-16_17
+      rect:
+        serializedVersion: 2
+        x: 106
+        y: 45
+        width: 7
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: cf563e544a6af3ba0800000000000000
+      internalID: -6106979345213725188
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 5e97eb03825dee720800000000000000
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      charge-burst-16_0: -4495872515383751813
+      charge-burst-16_1: 1398053480532802200
+      charge-burst-16_10: 791062506282961656
+      charge-burst-16_11: -2247452687057076593
+      charge-burst-16_12: -1422932274949600455
+      charge-burst-16_13: 1002990169539112590
+      charge-burst-16_14: -70357378518090522
+      charge-burst-16_15: 4002985434909963182
+      charge-burst-16_16: -7443673527394716297
+      charge-burst-16_17: -6106979345213725188
+      charge-burst-16_2: 5725107307486584214
+      charge-burst-16_3: 110517380037139338
+      charge-burst-16_4: 373324463809466810
+      charge-burst-16_5: 2892931318836862749
+      charge-burst-16_6: 4918780469610512214
+      charge-burst-16_7: -4954332345379329285
+      charge-burst-16_8: -2893765852100173533
+      charge-burst-16_9: 5152694243693551288
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

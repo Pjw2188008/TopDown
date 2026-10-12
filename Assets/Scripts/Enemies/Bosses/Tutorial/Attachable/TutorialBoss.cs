@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
 
-/// <summary>방 안에서 추적/근접 휘두르기와 거리 무관 낙석 맵 패턴을 사용합니다. 공격과 N회 패링 경직 중에는 멈춥니다.</summary>
+/// <summary>추적/근접/충격파와 독립적인 낙석 시간표를 사용합니다. 자신의 공격 동작과 N회 패링 경직 중에만 멈춥니다.</summary>
 [DisallowMultipleComponent]
 [RequireComponent(typeof(BoxCollider2D), typeof(Rigidbody2D))]
 public sealed partial class TutorialBoss : MonoBehaviour, ICombatDamageable, ICombatParryReceiver
@@ -27,12 +27,12 @@ public sealed partial class TutorialBoss : MonoBehaviour, ICombatDamageable, ICo
     [SerializeField, Min(.1f)] private float slamDamage = 2f;
     [SerializeField, Min(.01f), Tooltip("이 보스의 근접 공격에만 적용하는 최소 패링 허용 시간입니다. 기본 0.3초: 타격 전 0.3초 안에 우클릭을 시작하고 유지하면 성공합니다. 일반 적/투사체의 패링 시간은 바꾸지 않으며 플레이어 기본값이 더 길면 그 값을 유지합니다.")] private float meleeParryWindow = .3f;
     [Header("패링 누적 경직")]
-    [SerializeField, Min(1), Tooltip("근접 패링을 N회 성공하면 경직되고 횟수가 초기화됩니다. 낙석은 패링 대상이 아닙니다. 시간에 따른 자동 회복은 없습니다.")] private int parriesToStagger = 3;
+    [SerializeField, Min(1), Tooltip("근접/낙석/충격파 패링을 합쳐 N회 성공하면 경직되고 횟수가 초기화됩니다. 시간에 따른 자동 회복은 없습니다.")] private int parriesToStagger = 3;
     [SerializeField, Min(.1f), Tooltip("누적 패링 달성 시 공격하지 못하는 시간입니다.")] private float staggerDuration = 2.5f;
     [SerializeField] private UnityEvent onStaggered = new UnityEvent();
     [SerializeField] private UnityEvent onDefeated = new UnityEvent();
 
-    private enum Phase { Ready, SlamWarning, Rockfall, Recovery, Staggered, Dead }
+    private enum Phase { Ready = 0, SlamWarning = 1, Recovery = 3, Staggered = 4, Dead = 5, Shockwave = 6 }
     private Phase phase;
     private float phaseRemaining, phaseDuration, health, nextSearch;
     private int parryCount;
@@ -56,6 +56,7 @@ public sealed partial class TutorialBoss : MonoBehaviour, ICombatDamageable, ICo
         PrepareVisuals();
         PrepareAnimation();
         rockfallRemaining = Mathf.Max(0f,rockfallFirstDelay);
+        shockwaveRemaining = Mathf.Max(0f,shockwaveFirstDelay);
         SetPhase(Phase.Recovery, attackCooldown);
     }
 
@@ -73,8 +74,10 @@ public sealed partial class TutorialBoss : MonoBehaviour, ICombatDamageable, ICo
         if (dt <= 0 || phase == Phase.Dead) return;
         if (player == null && Time.time >= nextSearch)
         { player = FindFirstObjectByType<PlayerMove>();nextSearch = Time.time + .5f; }
-        if (player == null || !player.isActiveAndEnabled)
+        if (player == null || !player.isActiveAndEnabled || player.IsInstantlyDead)
         {
+            ClearAllPatternErrors();
+            ResetShockwaveAttack();
             StopAttackAnimation();ClearRockfall();rockfallRemaining = Mathf.Max(0f,rockfallFirstDelay);
             if (!IsStaggered) SetPhase(Phase.Ready, 0f);
             else { phaseRemaining -= dt;if (phaseRemaining <= 0) SetPhase(Phase.Recovery, attackCooldown); }
@@ -82,6 +85,8 @@ public sealed partial class TutorialBoss : MonoBehaviour, ICombatDamageable, ICo
         }
         if (!IsPlayerInRoom())
         {
+            ClearAllPatternErrors();
+            ResetShockwaveAttack();
             // 방을 나가거나 리스폰한 대상에게 진행 중 공격을 계속 보내지 않습니다.
             StopAttackAnimation();
             ClearRockfall();rockfallRemaining = Mathf.Max(0f,rockfallFirstDelay);
@@ -89,18 +94,42 @@ public sealed partial class TutorialBoss : MonoBehaviour, ICombatDamageable, ICo
             else { phaseRemaining -= dt;if (phaseRemaining <= 0f) SetPhase(Phase.Recovery, attackCooldown); }
             return;
         }
-        if (phase == Phase.Rockfall) { TickRockfall(dt);return; }
-        if (!IsStaggered) rockfallRemaining = Mathf.Max(0f,rockfallRemaining-dt);
-        if (attackAnimationActive) return; // 근접 애니메이션/후딜을 맵 패턴이 중간에 끊지 않습니다.
+        TickPatternErrors(dt);
+        UpdateShockwaveShots();
+        if (!IsStaggered) shockwaveRemaining = Mathf.Max(0f,shockwaveRemaining-dt);
+        // 낙석은 보스의 동작 상태를 점유하지 않습니다. 공격/후딜 중에도 시작하고 진행합니다.
+        if (!IsStaggered)
+        {
+            if (fallingRocks.Count > 0)
+            {
+                TickRockfall(dt);
+                if (IsStaggered) return; // 이번 착지에서 발생한 경직은 다음 프레임부터 시간을 셉니다.
+            }
+            else
+            {
+                rockfallRemaining = Mathf.Max(0f,rockfallRemaining-dt);
+                if (rockfallRemaining <= 0f) BeginRockfall();
+            }
+        }
+        // 착지 피해/패링 콜백으로 사망하거나 대상이 리스폰했을 수 있습니다.
+        if (phase == Phase.Dead) return;
+        if (player == null || !player.isActiveAndEnabled || player.IsInstantlyDead || !IsPlayerInRoom())
+        {
+            ClearAllPatternErrors();ResetShockwaveAttack();StopAttackAnimation();ClearRockfall();
+            rockfallRemaining = Mathf.Max(0f,rockfallFirstDelay);
+            if (!IsStaggered) SetPhase(Phase.Recovery,attackCooldown);
+            return;
+        }
+        if (attackAnimationActive) return; // 낙석이 진행 중인 근접/충격파 애니메이션을 끊지 않습니다.
         if (phase == Phase.Ready || phase == Phase.Recovery) ChasePlayer(dt);
         if (phase == Phase.Ready)
         {
-            // 근접 거리/시야와 별개로 먼저 검사하여 가까이 있어도 맵 패턴을 사용합니다.
-            if (rockfallRemaining <= 0f) { BeginRockfall();return; }
+            if (enableShockwave && shockwaveRemaining <= 0f) { BeginShockwave();return; }
             float distance = Vector2.Distance(transform.position, player.transform.position);
             if (distance > Mathf.Max(.1f,meleeRange) || !CanSee(player.transform.position)) return;
             FaceAttackDirection((Vector2)(player.transform.position-transform.position));
-            SetPhase(Phase.SlamWarning,slamWarningTime);
+            BeginPatternError(PatternKind.Melee);
+            SetPhase(Phase.SlamWarning,Mathf.Max(.1f,slamWarningTime) / PatternSpeed);
             BeginBossAttackAnimation();return;
         }
         phaseRemaining -= dt;
@@ -109,7 +138,9 @@ public sealed partial class TutorialBoss : MonoBehaviour, ICombatDamageable, ICo
         // 먼저 후딜로 전환하여 피해 콜백의 N번째 패링 경직을 덮어쓰지 않습니다.
         SetPhase(Phase.Recovery, attackCooldown);
         if (completed == Phase.SlamWarning) Slam();
+        else if (completed == Phase.Shockwave) ReleaseShockwaves();
         else if (completed == Phase.Recovery) SetPhase(Phase.Ready, 0);
+        if (!attackAnimationActive && (completed == Phase.SlamWarning || completed == Phase.Shockwave)) EndActivePatternError();
     }
 
     private bool IsInsideRoom(Vector2 point)
@@ -145,7 +176,13 @@ public sealed partial class TutorialBoss : MonoBehaviour, ICombatDamageable, ICo
     private void SetPhase(Phase value, float duration)
     {
         if (value == Phase.Dead || value == Phase.Staggered)
-        { ClearRockfall();rockfallRemaining = Mathf.Max(.1f,rockfallInterval); }
+        {
+            ClearAllPatternErrors();
+            ClearRockfall();rockfallRemaining = Mathf.Max(.1f,rockfallInterval);
+            if (value == Phase.Staggered) ClearHostileShockwaves();
+            else ClearShockwaves();
+            shockwaveRemaining = Mathf.Max(.1f,shockwaveInterval);
+        }
         phase = value;phaseDuration = phaseRemaining = Mathf.Max(0f, duration);AnimatePhase(value);
     }
     private void Slam()
@@ -158,7 +195,10 @@ public sealed partial class TutorialBoss : MonoBehaviour, ICombatDamageable, ICo
     private void ResolveSlam()
     {
         if (player == null || !player.isActiveAndEnabled || !CanSee(player.transform.position)) return;
-        if (IsPlayerInSlamArea()) player.ReceiveMeleeAttack(Mathf.Max(.1f, slamDamage), gameObject, Mathf.Max(.01f,meleeParryWindow));
+        if (!IsPlayerInSlamArea()) return;
+        resolvingContactError = activePatternError;
+        try { player.ReceiveMeleeAttack(Mathf.Max(.1f, slamDamage), gameObject, Mathf.Max(.01f,meleeParryWindow)); }
+        finally { resolvingContactError = null; }
     }
 
     private bool IsPlayerInSlamArea()
@@ -173,8 +213,8 @@ public sealed partial class TutorialBoss : MonoBehaviour, ICombatDamageable, ICo
     // 실제 그림의 좌우 반전 상태를 사용하여 편집/재생 모드의 기즈모와 타격이 같은 쪽을 향합니다.
     // 사각형은 회전하지 않으며, 위/아래 위치는 사용자가 지정한 Y 오프셋을 유지합니다.
     private Vector2 MeleeHitCenter => (Vector2)transform.position
-        + new Vector2(meleeHitBoxOffset.x * MeleeFacingSign, meleeHitBoxOffset.y);
-    private Vector2 MeleeHitSize => new Vector2(Mathf.Max(.01f,meleeHitBoxSize.x),Mathf.Max(.01f,meleeHitBoxSize.y));
+        + new Vector2(meleeHitBoxOffset.x * MeleeFacingSign, meleeHitBoxOffset.y) * PatternSize;
+    private Vector2 MeleeHitSize => new Vector2(Mathf.Max(.01f,meleeHitBoxSize.x),Mathf.Max(.01f,meleeHitBoxSize.y)) * PatternSize;
     private float MeleeFacingSign
     {
         get
@@ -189,6 +229,8 @@ public sealed partial class TutorialBoss : MonoBehaviour, ICombatDamageable, ICo
     public void ReceiveParry(PlayerMove parryingPlayer)
     {
         if (!isActiveAndEnabled || phase == Phase.Dead || IsStaggered || parryingPlayer == null) return;
+        RemovePatternError(resolvingContactError, parryingPlayer);
+        if (resolvingRock != null && resolvingRock.picture != null) resolvingRock.picture.color = Color.cyan;
         parryCount++;
         if (parryCount < ParriesToStagger) return;
         parryCount = 0;
@@ -198,6 +240,7 @@ public sealed partial class TutorialBoss : MonoBehaviour, ICombatDamageable, ICo
     public bool ReceiveDamage(float amount, GameObject source, bool canReflect)
     {
         if (!isActiveAndEnabled || phase == Phase.Dead || amount <= 0) return false;
+        ReflectPatternDamage(amount, source, canReflect);
         health = Mathf.Max(0, health - amount);DamageBlink.Play(gameObject);
         if (health <= 0)
         {
@@ -209,12 +252,15 @@ public sealed partial class TutorialBoss : MonoBehaviour, ICombatDamageable, ICo
 
     private void OnDisable()
     {
+        ClearAllPatternErrors();
+        ResetShockwaveAttack();
         StopAttackAnimation();
         ClearRockfall();rockfallRemaining = Mathf.Max(0f,rockfallFirstDelay);
         if (phase != Phase.Dead) SetPhase(Phase.Recovery, attackCooldown);
     }
     private void OnDestroy()
     {
+        ClearShockwaves();
         ClearRockfall();
         if (runtimeCircle != null) Destroy(runtimeCircle);if (runtimeSquare != null) Destroy(runtimeSquare);
         if (runtimeCircleTexture != null) Destroy(runtimeCircleTexture);if (runtimeSquareTexture != null) Destroy(runtimeSquareTexture);
@@ -234,5 +280,6 @@ public sealed partial class TutorialBoss : MonoBehaviour, ICombatDamageable, ICo
         else Gizmos.DrawWireCube((Application.isPlaying ? roomOrigin : (Vector2)transform.position)+roomOffset,
             new Vector3(Mathf.Max(.1f,roomSize.x),Mathf.Max(.1f,roomSize.y),0f));
         DrawRockfallAreaGizmo();
+        DrawShockwaveGizmo();
     }
 }

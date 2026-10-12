@@ -24,6 +24,7 @@ public static class TutorialBossAnimationSetup
         var idleState=State(machine,"Idle",idle,new Vector3(200,100));State(machine,"Slam",slam,new Vector3(450,100));
         State(machine,"Shoot",shoot,new Vector3(450,240));State(machine,"Stagger",stagger,new Vector3(200,240));
         ConfigureMovement();
+        ConfigureShockwave();
         if(machine.defaultState==null)machine.defaultState=idleState;
         if(AssetDatabase.LoadAssetAtPath<GameObject>(TutorialBossSetup.PrefabPath)==null)return;
         var root=PrefabUtility.LoadPrefabContents(TutorialBossSetup.PrefabPath);
@@ -89,6 +90,23 @@ public static class TutorialBossAnimationSetup
         var state=State(controller.layers[0].stateMachine,"Move",move,new Vector3(200,380));
         if(state.motion==null){state.motion=move;EditorUtility.SetDirty(state);}
         EditorUtility.SetDirty(controller);AssetDatabase.SaveAssets();
+    }
+
+    [MenuItem("Tools/Story/Tutorial Boss/Configure Shockwave Animation")]
+    public static void ConfigureShockwave()
+    {
+        var controller = AssetDatabase.LoadAssetAtPath<AnimatorController>(Folder+"/TutorialBoss.controller");
+        if (controller == null) { Debug.LogWarning("보스 Animator Controller를 먼저 준비하세요."); return; }
+        if (!AssetDatabase.IsValidFolder(Folder+"/Animations")) AssetDatabase.CreateFolder(Folder,"Animations");
+        var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(TutorialBossSetup.PrefabPath);
+        var renderer = prefab != null ? prefab.GetComponent<SpriteRenderer>() : null;
+        Sprite sprite = renderer != null ? renderer.sprite : null;
+        if (sprite == null) sprite = AssetDatabase.LoadAllAssetsAtPath(Folder+"/golem-upper-left-128.png").OfType<Sprite>().FirstOrDefault();
+        var clip = AssetDatabase.LoadAssetAtPath<AnimationClip>(Folder+"/Animations/Boss_Shockwave.anim");
+        if (clip == null) clip = Clip("Boss_Shockwave",sprite,1.25f,false);
+        var state = State(controller.layers[0].stateMachine,"Shockwave",clip,new Vector3(450,380));
+        if (state.motion == null) { state.motion = clip; EditorUtility.SetDirty(state); }
+        EditorUtility.SetDirty(controller); AssetDatabase.SaveAssets();
     }
 
     private static AnimatorState State(AnimatorStateMachine machine,string name,AnimationClip clip,Vector3 position)

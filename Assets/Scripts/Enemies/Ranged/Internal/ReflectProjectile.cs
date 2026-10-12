@@ -16,6 +16,28 @@ public sealed class ReflectProjectile : MonoBehaviour
     private int remainingBounces;
     private bool inheritsReflection;
     private bool wasParried;
+    public Vector2 TravelDirection => direction;
+    /// <summary>오류 배율까지 반영된 실제 원형 판정 반지름. 충격파 그림 크기 동기화에 사용합니다.</summary>
+    public float HitRadius => radius;
+    /// <summary>충격파처럼 귀환을 끝까지 보여 줄 투사체만 켭니다. 일반 탄환은 기존 수명을 유지합니다.</summary>
+    public bool PreserveParryReturnLifetime { get; set; }
+    public event System.Action<PlayerMove> Parried;
+    /// <summary>발사 회차가 필요한 보스만 지정합니다. 미지정 시 기존 공격자 패링 알림을 사용합니다.</summary>
+    public System.Action<PlayerMove> ParryReceiver { get; set; }
+    private float patternSize = 1f, patternSpeed = 1f;
+    private bool patternWallReflection;
+
+    /// <summary>비행 중 오류만 변경합니다. 방향/소유권/패링 상태와 남은 비행 거리는 보존합니다.</summary>
+    public void SetPatternModifiers(float sizeMultiplier, float speedMultiplier, bool reflectWalls, int bounces)
+    {
+        float nextSize = Mathf.Max(.01f, sizeMultiplier), nextSpeed = Mathf.Max(.01f, speedMultiplier);
+        radius *= nextSize / patternSize;
+        transform.localScale *= nextSize / patternSize;
+        speed *= nextSpeed / patternSpeed;
+        remainingLifetime *= patternSpeed / nextSpeed;
+        if (reflectWalls && !patternWallReflection) remainingBounces = Mathf.Max(1, bounces);
+        patternSize = nextSize; patternSpeed = nextSpeed; patternWallReflection = reflectWalls;
+    }
 
     /// <summary>실제 패링으로 해당 플레이어에게 소유권이 넘어간 탄환인지 확인합니다. 표면 반사는 포함하지 않습니다.</summary>
     public bool WasParriedBy(PlayerMove player) => wasParried && player != null && owner == player.gameObject;
@@ -34,6 +56,9 @@ public sealed class ReflectProjectile : MonoBehaviour
         bool reflectFromOrdinarySurfaces)
     {
         owner = projectileOwner;
+        patternSize = patternSpeed = 1f;
+        patternWallReflection = false;
+        ParryReceiver = null;
         wasParried = false;
         direction = launchDirection.sqrMagnitude > 0f ? launchDirection.normalized : Vector2.right;
         speed = Mathf.Max(0f, moveSpeed);
@@ -69,7 +94,7 @@ public sealed class ReflectProjectile : MonoBehaviour
         PlayerMove player = hitObject.GetComponentInParent<PlayerMove>();
         if (damage > 0f && player != null && player.TryParryProjectile())
         {
-            CombatParry.Notify(owner, player); // 소유권 변경 전 발사자의 패링 누적 규칙을 처리합니다.
+            GameObject originalOwner = owner;
             // 발사자 소유권이 플레이어로 바뀌기 전에 해당 연습 허수아비의 성공만 기록합니다.
             var dummy = owner != null ? owner.GetComponent<TutorialTrainingDummy>() : null;
             if (dummy != null) dummy.RecordParry(player);
@@ -79,6 +104,8 @@ public sealed class ReflectProjectile : MonoBehaviour
             direction = returnDirection.sqrMagnitude > 0.0001f ? returnDirection.normalized : -direction;
             owner = player.gameObject;
             wasParried = true;
+            if (PreserveParryReturnLifetime)
+                remainingLifetime = Mathf.Max(remainingLifetime, returnDirection.magnitude / Mathf.Max(.1f, speed) + .25f);
             if (dummy != null)
             {
                 dummy.ShowReturnedProjectile(this);
@@ -86,6 +113,10 @@ public sealed class ReflectProjectile : MonoBehaviour
                 remainingLifetime = Mathf.Max(remainingLifetime, returnDirection.magnitude / Mathf.Max(.1f, speed) + .25f);
             }
             transform.position = closestHit.centroid + direction * (radius + 0.02f);
+            // 먼저 반환 상태로 바꿔야 N번째 패링 경직에서도 이 탄환을 적대 탄환과 구별할 수 있습니다.
+            if (ParryReceiver != null) ParryReceiver(player);
+            else CombatParry.Notify(originalOwner, player);
+            Parried?.Invoke(player);
             return;
         }
 
@@ -149,6 +180,7 @@ public sealed class ReflectProjectile : MonoBehaviour
 
     private bool CanReflectFrom(Collider2D hitCollider)
     {
+        if (patternWallReflection && !hitCollider.isTrigger) return true;
         PasteTarget pasteTarget = hitCollider.GetComponentInParent<PasteTarget>();
         if (pasteTarget == null
             || (pasteTarget.TargetType != PasteTargetType.Object

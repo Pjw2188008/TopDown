@@ -5,7 +5,7 @@ using UnityEngine;
 public sealed partial class TutorialBoss
 {
     [Header("맵 패턴 1 / 낙석")]
-    [SerializeField, Min(0f), Tooltip("방 입장 후 첫 낙석까지의 게임 시간입니다. 진행 중인 근접 공격과 후딜은 끝까지 기다립니다.")] private float rockfallFirstDelay = 3f;
+    [SerializeField, Min(0f), Tooltip("방 입장 후 첫 낙석까지의 게임 시간입니다. 추적/근접/충격파와 독립적으로 시작하며 보스 동작을 끊지 않습니다.")] private float rockfallFirstDelay = 3f;
     [SerializeField, Min(.1f), Tooltip("낙석 패턴이 끝난 후 다음 낙석까지의 최소 간격입니다. 거리에 관계없이 발동합니다.")] private float rockfallInterval = 6f;
     [SerializeField, Range(1,16), Tooltip("한 패턴의 최대 낙석 수입니다. 안전한 배치 공간이 부족하면 줄어듭니다.")] private int rockfallCount = 5;
     [SerializeField, Tooltip("낙석 전용 BoxCollider2D 범위입니다(Is Trigger 권장). 비우면 Room Area 또는 Room Size를 사용합니다. 반드시 보스 방 안에 배치하세요.")] private BoxCollider2D rockfallArea;
@@ -15,7 +15,8 @@ public sealed partial class TutorialBoss
     [SerializeField, Min(0f), Tooltip("각 돌의 낙하 시작 간격입니다. 0이면 동시에 떨어집니다. 모든 위치는 패턴 시작 시 미리 표시됩니다.")] private float rockfallStagger = .15f;
     [SerializeField, Min(.1f), Tooltip("낙하 연출의 시작 높이입니다. 판정은 고정된 바닥 위치에만 있습니다.")] private float rockfallHeight = 4f;
     [SerializeField, Min(.1f), Tooltip("바닥 경고 원과 실제 타격 반지름입니다(월드 단위). 위치끼리는 겹치지 않도록 선택합니다.")] private float rockfallRadius = .65f;
-    [SerializeField, Min(0f), Tooltip("돌 1개당 착지 피해입니다. 패링 횟수에는 포함되지 않으며 일반 가드/반사 오류의 피해 처리는 유지합니다.")] private float rockfallDamage = 2f;
+    [SerializeField, Min(0f), Tooltip("돌 1개당 착지 피해입니다. 착지 직전 우클릭 패링으로 막을 수 있고 성공 시 보스 패링 횟수에 포함합니다. 0이면 피해/패링을 판정하지 않습니다.")] private float rockfallDamage = 2f;
+    [SerializeField, Min(.01f), Tooltip("착지 직전 우클릭을 시작하고 유지했을 때 패링으로 인정하는 최소 시간입니다. 기본 0.3초. 너무 일찍 누르면 일반 가드입니다.")] private float rockfallParryWindow = .3f;
     [SerializeField, UnityEngine.Animations.NotKeyable, Tooltip("나중에 넣을 돌 이미지입니다. 비우면 회색 사각형으로 표시합니다. 중앙 피벗 이미지를 권장합니다.")] private Sprite rockfallSprite;
     [SerializeField, Tooltip("경고와 돌의 Sorting Layer 이름입니다. 비우면 보스 SpriteRenderer의 레이어를 사용합니다.")] private string rockfallSortingLayer = "";
     [SerializeField, Tooltip("바닥 경고의 정렬 순서입니다. 돌은 이 값보다 1 높게 그립니다. 맵에 가려지면 올리세요.")] private int rockfallSortingOrder = 25;
@@ -23,21 +24,26 @@ public sealed partial class TutorialBoss
     private sealed class FallingRock
     {
         public Vector2 point;
-        public float radius, delay, elapsed;
+        public float radius, baseRadius, delay, elapsed, fallProgress, impactElapsed;
+        public PatternError pattern;
         public bool impacted;
         public GameObject root;
         public SpriteRenderer warning, picture;
     }
     private readonly List<FallingRock> fallingRocks = new List<FallingRock>();
+    private PatternError rockfallPatternError;
     private float rockfallRemaining;
     private const float RockImpactHold = .18f;
 
     private void BeginRockfall()
     {
-        ClearRockfall();
+        if (fallingRocks.Count > 0 || player == null) return;
+        // 현재 동작의 오류/애니메이션과 낙석 회차의 오류를 각각 보관합니다.
+        rockfallPatternError = CreatePatternError(PatternKind.Rockfall);
         Physics2D.SyncTransforms();
         int count = Mathf.Clamp(rockfallCount,1,16);
         float radius = Mathf.Max(.1f,rockfallRadius);
+        if (rockfallPatternError.type == StoredErrorType.Giant) radius *= rockfallPatternError.multiplier;
         for (int i=0;i<count;i++)
         {
             Vector2 point = player.transform.position;
@@ -49,10 +55,10 @@ public sealed partial class TutorialBoss
         }
         if (fallingRocks.Count == 0)
         {
+            DeactivatePatternError(rockfallPatternError);
+            ClearRockfall();
             rockfallRemaining = Mathf.Max(.1f,rockfallInterval);
-            SetPhase(Phase.Recovery,attackCooldown);return;
         }
-        SetPhase(Phase.Rockfall,0f);
     }
 
     private Vector2 RandomRockPoint()
@@ -101,41 +107,64 @@ public sealed partial class TutorialBoss
         picture.color = rockfallSprite != null ? Color.white : new Color(.4f,.38f,.35f);
         picture.sortingLayerID = layer;picture.sortingOrder = rockfallSortingOrder+1;
         Fit(picture,Vector2.one*radius*1.5f);picture.enabled = false;
-        return new FallingRock { point=point,radius=radius,delay=delay,root=root,warning=warning,picture=picture };
+        return new FallingRock { point=point,radius=radius,baseRadius=Mathf.Max(.1f,rockfallRadius),
+            pattern=rockfallPatternError,delay=delay,root=root,warning=warning,picture=picture };
+    }
+
+    private void NormalizeRockfallError(PatternError pattern)
+    {
+        foreach (var rock in fallingRocks)
+        {
+            if (rock.pattern != pattern) continue;
+            rock.radius = rock.baseRadius;
+            if (rock.warning != null) Fit(rock.warning,Vector2.one*rock.radius*2f);
+            if (rock.picture != null) Fit(rock.picture,Vector2.one*rock.radius*1.5f);
+            // fallProgress는 유지합니다. 속도가 정상화돼도 이미 내려온 돌이 위로 순간 이동하지 않습니다.
+        }
     }
 
     private void TickRockfall(float dt)
     {
+        if (dt <= 0f || fallingRocks.Count == 0) return;
+        var batch = rockfallPatternError;
         bool finished = true;
-        float warningTime = Mathf.Max(.1f,rockfallWarningTime),fallTime = Mathf.Max(.05f,rockfallFallTime);
+        float warningTime = Mathf.Max(.1f,rockfallWarningTime);
         foreach (var rock in fallingRocks)
         {
+            float previousElapsed = rock.elapsed;
             rock.elapsed += dt;
-            float fallProgress = (rock.elapsed-rock.delay-warningTime)/fallTime;
+            float start = rock.delay + warningTime;
+            float speed = rock.pattern != null && !rock.pattern.removed && rock.pattern.type == StoredErrorType.Acceleration
+                ? rock.pattern.multiplier : 1f;
+            float fallTime = Mathf.Max(.05f,rockfallFallTime) / speed;
+            float fallingDelta = Mathf.Max(0f,rock.elapsed-start)-Mathf.Max(0f,previousElapsed-start);
+            float previousProgress = rock.fallProgress;
+            if (!rock.impacted) rock.fallProgress += fallingDelta/fallTime;
+            else rock.impactElapsed += dt;
             if (rock.warning != null)
                 rock.warning.color = new Color(1f,.35f,.05f,Mathf.Lerp(.35f,.7f,Mathf.Clamp01((rock.elapsed-rock.delay)/warningTime)));
-            if (fallProgress >= 0f && rock.picture != null)
+            if (rock.elapsed >= start && rock.picture != null)
             {
                 rock.picture.enabled = true;
-                float t = Mathf.Clamp01(fallProgress);
+                float t = Mathf.Clamp01(rock.fallProgress);
                 rock.picture.transform.localPosition = Vector3.up * (Mathf.Max(.1f,rockfallHeight)*(1f-t*t));
             }
-            if (!rock.impacted && fallProgress >= 1f)
+            if (!rock.impacted && rock.fallProgress >= 1f)
             {
                 rock.impacted = true; // 피해 콜백에서 상태가 바뀌더라도 중복 타격하지 않습니다.
+                rock.impactElapsed = Mathf.Max(0f,fallingDelta-(1f-previousProgress)*fallTime);
                 if (rock.warning != null) rock.warning.enabled = false;
                 ApplyRockDamage(rock);
                 // 반사 피해로 보스가 죽거나 경직되어 목록을 정리했다면 바로 종료합니다.
-                if (phase != Phase.Rockfall) return;
-                if (!IsPlayerInRoom()) { ClearRockfall();SetPhase(Phase.Recovery,attackCooldown);return; }
+                if (rockfallPatternError != batch || phase == Phase.Dead || IsStaggered) return;
+                if (!IsPlayerInRoom() || player.IsInstantlyDead) { ClearRockfall();return; }
             }
-            bool done = rock.elapsed >= rock.delay+warningTime+fallTime+RockImpactHold;
+            bool done = rock.impacted && rock.impactElapsed >= RockImpactHold;
             if (done && rock.root != null) rock.root.SetActive(false);
             finished &= done;
         }
         if (!finished) return;
         ClearRockfall();rockfallRemaining = Mathf.Max(.1f,rockfallInterval);
-        SetPhase(Phase.Recovery,attackCooldown);
     }
 
     private void ApplyRockDamage(FallingRock rock)
@@ -145,7 +174,11 @@ public sealed partial class TutorialBoss
         foreach (var hit in Physics2D.OverlapCircleAll(rock.point,rock.radius))
         {
             if (!hit.enabled || hit.isTrigger || hit.GetComponentInParent<PlayerMove>() != player) continue;
-            player.ReceiveDamage(Mathf.Max(0f,rockfallDamage),gameObject,true);
+            // 근접과 같은 '타격 순간 패링' 경로를 사용하되 낙석 회차와 별도 허용 시간을 전달합니다.
+            resolvingContactError = rock.pattern;
+            resolvingRock = rock;
+            try { player.ReceiveMeleeAttack(Mathf.Max(0f,rockfallDamage),gameObject,Mathf.Max(.01f,rockfallParryWindow)); }
+            finally { resolvingContactError = null;resolvingRock = null; }
             break; // 플레이어 Collider가 여러 개여도 돌 하나당 피해는 한 번입니다.
         }
     }
@@ -155,6 +188,8 @@ public sealed partial class TutorialBoss
         foreach (var rock in fallingRocks)
             if (rock.root != null) { rock.root.SetActive(false);Destroy(rock.root); }
         fallingRocks.Clear();
+        rockfallPatternError = null;
+        PrunePatternErrors();
     }
 
     private void DrawRockfallAreaGizmo()

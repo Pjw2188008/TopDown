@@ -22,6 +22,7 @@ public class GiantErrorEffect : MonoBehaviour, IErrorSource
     private Vector3 baseScale;
     private bool isGrowing;
     private float growthProgress;
+    private bool awakeCompleted;
 
     public float CurrentMultiplier => targetMultiplier;
     private ErrorEffectState state;
@@ -37,6 +38,7 @@ public class GiantErrorEffect : MonoBehaviour, IErrorSource
     private void Awake()
     {
         baseScale = transform.localScale;
+        awakeCompleted = true;
 
         if (triggerOnStart)
         {
@@ -70,6 +72,30 @@ public class GiantErrorEffect : MonoBehaviour, IErrorSource
         state.Deactivate();
         isGrowing = false;
         growthProgress = 0f;
+    }
+
+    /// <summary>크기 변화 도중에도 원본/Paste 출처와 진행도를 복구합니다. 직접 호출할 필요 없습니다.</summary>
+    internal System.Action CaptureTutorialState()
+    {
+        Vector3 savedBase = awakeCompleted ? baseScale : transform.localScale;
+        var savedState = state;
+        bool savedGrowing = isGrowing;
+        float savedProgress = growthProgress;
+        float savedMultiplier = targetMultiplier;
+        if (!awakeCompleted && triggerOnStart)
+        {
+            savedState.ActivateOriginal();
+            savedGrowing = true;
+        }
+        return () =>
+        {
+            if (this == null) return;
+            baseScale = savedBase;
+            state = savedState;
+            isGrowing = savedGrowing;
+            growthProgress = savedProgress;
+            targetMultiplier = savedMultiplier;
+        };
     }
 
     private void Update()

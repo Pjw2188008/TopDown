@@ -139,11 +139,6 @@ MonoBehaviour:
   meleeHitBoxSize: {x: 0.9, y: 1.35}
   slamDamage: 2
   meleeParryWindow: 0.3
-  shotWarningTime: 1
-  projectileSpeed: 7
-  projectileDamage: 1
-  projectileRadius: 0.18
-  projectileLifetime: 5
   parriesToStagger: 3
   staggerDuration: 2.5
   onStaggered:
@@ -156,12 +151,50 @@ MonoBehaviour:
   flipSpriteWithMovement: 1
   moveSpriteFacesRight: 0
   slamHitFrame: 11
-  shotReleaseTime: 0.65
+  enablePatternErrors: 1
+  patternErrorChance: 0.705
+  allowGiantPattern: 1
+  allowAccelerationPattern: 1
+  allowReflectionPattern: 1
+  patternReflectionDuration: 5
+  patternGiantMultiplier: 1.5
+  patternAccelerationMultiplier: 1.5
+  patternReflectionMultiplier: 1
   bodyVisual: {fileID: 3021318808397080844}
   circleSprite: {fileID: -7553956601875612060, guid: 90053cb72a3a38d4d8713fd41bbbd890, type: 2}
   squareSprite: {fileID: -1040553959312980097, guid: 6ab59dc1d54f6c047b54d6b254e57b02, type: 2}
-  projectileSprite: {fileID: 0}
   showStatus: 1
+  rockfallFirstDelay: 3
+  rockfallInterval: 6
+  rockfallCount: 10
+  rockfallArea: {fileID: 0}
+  rockfallTargetPlayer: 1
+  rockfallWarningTime: 1
+  rockfallFallTime: 0.35
+  rockfallStagger: 0.15
+  rockfallHeight: 4
+  rockfallRadius: 0.65
+  rockfallDamage: 2
+  rockfallParryWindow: 0.3
+  rockfallSprite: {fileID: 4039728069410385077, guid: d73c3c8a32bcfad489a3d42fa46cd1cd, type: 3}
+  rockfallSortingLayer: 
+  rockfallSortingOrder: 25
+  enableShockwave: 1
+  shockwaveFirstDelay: 5
+  shockwaveInterval: 9
+  shockwaveWindupTime: 1
+  shockwaveReleaseFrame: 9
+  shockwaveOriginOffset: {x: 0, y: 0}
+  shockwaveAngle: 0
+  shockwaveSpeed: 5
+  shockwaveDistance: 10
+  shockwaveRadius: 0.35
+  shockwaveDamage: 2
+  shockwaveSprite: {fileID: 0}
+  shockwaveColor: {r: 1, g: 1, b: 1, a: 1}
+  shockwaveSortingOrder: 30
+  shockwaveEffectPrefab: {fileID: 2927701738001319926, guid: 31ae2438c8202464f9a9f148c5c0b900, type: 3}
+  shockwaveVisualScale: 2
 --- !u!114 &3510002234945900211
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -50,11 +50,31 @@ public sealed partial class TutorialBoss
         Color old=GUI.color;
         using(GameUIFont.UseIMGUI())
         {
-            GUI.Box(new Rect(x-5,y-5,220,76),GUIContent.none);
+            var reflecting = FindReflectingPattern();
+            bool rocksActive = fallingRocks.Count > 0;
+            GUI.Box(new Rect(x-5,y-5,220,98 + (rocksActive ? 22 : 0) + (reflecting != null ? 22 : 0)),GUIContent.none);
             GUI.Label(new Rect(x,y,210,22),"튜토리얼 보스  HP "+Mathf.CeilToInt(health)+" / "+Mathf.CeilToInt(maxHealth));
             GUI.color=Color.red;GUI.DrawTexture(new Rect(x,y+23,210*Mathf.Clamp01(health/Mathf.Max(1,maxHealth)),5),Texture2D.whiteTexture);
             GUI.color=old;GUI.Label(new Rect(x,y+30,210,22),IsStaggered ? "균형 붕괴 · 경직!" : "패링 "+parryCount+" / "+ParriesToStagger);
             GUI.color=Color.cyan;GUI.DrawTexture(new Rect(x,y+55,210*(IsStaggered?0:1f-(float)parryCount/ParriesToStagger),8),Texture2D.whiteTexture);
+            var pattern = activePatternError;
+            bool hasError = pattern != null && !pattern.removed && pattern.type != StoredErrorType.None;
+            GUI.color = hasError ? PatternColor(pattern.type) : old;
+            GUI.Label(new Rect(x,y+68,210,22), hasError ? "패턴 오류 " + ErrorRules.DisplayName(pattern.type) : "패턴 오류 없음");
+            float nextLine = y+90;
+            if (rocksActive)
+            {
+                var mapError = rockfallPatternError;
+                bool hasMapError = mapError != null && !mapError.removed && mapError.type != StoredErrorType.None;
+                GUI.color = hasMapError ? PatternColor(mapError.type) : old;
+                GUI.Label(new Rect(x,nextLine,210,22), "낙석 · " + (hasMapError ? ErrorRules.DisplayName(mapError.type) : "오류 없음"));
+                nextLine += 22;
+            }
+            if (reflecting != null)
+            {
+                GUI.color = PatternColor(StoredErrorType.Reflection);
+                GUI.Label(new Rect(x,nextLine,210,22), "피해 반사 " + reflecting.reflectionRemaining.ToString("0.0") + "초");
+            }
         }
         GUI.color=old;
     }

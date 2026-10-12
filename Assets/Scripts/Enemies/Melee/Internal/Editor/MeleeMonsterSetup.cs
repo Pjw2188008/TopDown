@@ -82,7 +82,7 @@ public static class MeleeMonsterSetup
                 var point = new GameObject("SpawnPoint").transform;
                 point.SetParent(go.transform, false);
                 var data = new SerializedObject(go.AddComponent<MeleeEnemySpawner>());
-                data.FindProperty("enemyPrefab").objectReferenceValue = AssetDatabase.LoadAssetAtPath<GameObject>(PrefabPath).GetComponent<EnemyController>();
+                data.FindProperty("monsterPrefab").objectReferenceValue = AssetDatabase.LoadAssetAtPath<GameObject>(PrefabPath);
                 data.FindProperty("spawnPoint").objectReferenceValue = point;
                 data.ApplyModifiedPropertiesWithoutUndo();
                 PrefabUtility.SaveAsPrefabAsset(go, SpawnerPath);

@@ -16,6 +16,7 @@ public sealed class ReflectionErrorEffect : MonoBehaviour, IErrorSource
 
     private SpriteRenderer targetRenderer;
     private Color baseColor = Color.white;
+    private bool awakeCompleted;
 
     private ErrorEffectState state;
     public bool IsActive => state.IsActive;
@@ -29,6 +30,7 @@ public sealed class ReflectionErrorEffect : MonoBehaviour, IErrorSource
 
     private void Awake()
     {
+        awakeCompleted = true;
         targetRenderer = GetComponent<SpriteRenderer>();
 
         if (targetRenderer != null)
@@ -66,6 +68,19 @@ public sealed class ReflectionErrorEffect : MonoBehaviour, IErrorSource
     {
         Trigger();
         state.MarkPasted();
+    }
+
+    internal System.Action CaptureTutorialState()
+    {
+        var savedState = state;
+        if (!awakeCompleted && triggerOnStart) savedState.ActivateOriginal();
+        Color savedBase = awakeCompleted ? baseColor : SpriteTint.GetColor(GetComponent<SpriteRenderer>());
+        return () =>
+        {
+            if (this == null) return;
+            state = savedState;
+            baseColor = savedBase;
+        };
     }
 
     public void ResetReflection()

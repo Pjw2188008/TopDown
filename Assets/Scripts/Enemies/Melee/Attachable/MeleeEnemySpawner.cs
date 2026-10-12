@@ -1,11 +1,14 @@
 using UnityEngine;
+using CheolO.Monsters;
 
-/// <summary>사각 감지 범위 진입 시 EnemyController 근접 몬스터 한 마리를 생성합니다. 빈 스포너 오브젝트에 부착하세요.</summary>
+/// <summary>사각 범위 진입 시 EnemyController 또는 TriangleMeleeMonster 프리팹 하나를 생성합니다. 빈 스포너에 부착하세요.</summary>
 [DisallowMultipleComponent]
 public sealed class MeleeEnemySpawner : MonoBehaviour
 {
-    [Tooltip("생성할 근접 몬스터 프리팹입니다. Project의 MeleeMonster 프리팹을 넣으세요.")]
-    [SerializeField] private EnemyController enemyPrefab;
+    // 기존 씬/프리팹의 Component 참조를 유지한 채 새 GameObject 항목으로 이전합니다.
+    [SerializeField, HideInInspector] private EnemyController enemyPrefab;
+    [SerializeField, InspectorName("Enemy Prefab"), Tooltip("Project의 MeleeMonster 또는 mon_1 프리팹을 넣으세요. 루트에 EnemyController / TriangleMeleeMonster 중 하나만 있어야 합니다. 기존 연결은 자동 보존됩니다.")]
+    private GameObject monsterPrefab;
     [Tooltip("비우면 활성 PlayerMove를 자동 검색합니다.")]
     [SerializeField] private Transform player;
     [Tooltip("감지 사각형의 전체 가로(X)/세로(Y), 월드 단위입니다. 회전/Scale은 반영하지 않으며 선택 시 청록색 기즈모로 표시됩니다.")]
@@ -15,23 +18,24 @@ public sealed class MeleeEnemySpawner : MonoBehaviour
     [Tooltip("켜면 한 번만 생성합니다. 끄면 처치 후 범위를 나갔다 다시 들어올 때 재생성합니다. 살아 있는 동안은 중복 생성하지 않습니다.")]
     [SerializeField] private bool spawnOnce = true;
 
-    private EnemyController spawnedEnemy;
+    private GameObject spawnedEnemy;
     private bool hasSpawned, wasInside;
     private float nextPlayerSearch;
-    public EnemyController SpawnedEnemy => spawnedEnemy;
+    public GameObject SpawnedEnemy => IsDefeated(spawnedEnemy) ? null : spawnedEnemy;
     public bool HasSpawned => hasSpawned;
-    public bool CanSpawnForCombatArea => enemyPrefab != null || spawnedEnemy != null || (spawnOnce && hasSpawned);
+    public bool CanSpawnForCombatArea => SpawnedEnemy != null || (spawnOnce && hasSpawned) || IsSupportedPrefab(PrefabRoot);
+    private GameObject PrefabRoot => monsterPrefab != null ? monsterPrefab : enemyPrefab != null ? enemyPrefab.gameObject : null;
     private Vector2 ActivationSize => new Vector2(Mathf.Max(.1f, activationSize.x), Mathf.Max(.1f, activationSize.y));
 
     /// <summary>전투 구역 입장 시 생성합니다. 이미 생성한 적과 1회 생성 제한은 유지합니다.</summary>
-    public EnemyController SpawnForCombatArea(Transform target)
+    public GameObject SpawnForCombatArea(Transform target)
     {
-        if (spawnedEnemy != null) return spawnedEnemy;
+        if (SpawnedEnemy != null) return SpawnedEnemy;
         if (spawnOnce && hasSpawned) return null;
-        if (target == null || enemyPrefab == null) return null;
+        if (target == null || !IsSupportedPrefab(PrefabRoot)) return null;
         player = target;
         SpawnEnemy();
-        return spawnedEnemy;
+        return SpawnedEnemy;
     }
 
     private void Update()
@@ -45,7 +49,7 @@ public sealed class MeleeEnemySpawner : MonoBehaviour
         }
         if (player == null || !player.gameObject.activeInHierarchy) { wasInside = false; return; }
         bool inside = IsInsideActivationArea(player.position);
-        if (inside && !wasInside && spawnedEnemy == null && (!spawnOnce || !hasSpawned)) SpawnEnemy();
+        if (inside && !wasInside && SpawnedEnemy == null && (!spawnOnce || !hasSpawned)) SpawnEnemy();
         wasInside = inside;
     }
 
@@ -58,14 +62,46 @@ public sealed class MeleeEnemySpawner : MonoBehaviour
 
     private void SpawnEnemy()
     {
-        if (enemyPrefab == null) { Debug.LogWarning("근접 몬스터 프리팹을 지정하세요.", this); return; }
+        var prefab = PrefabRoot;
+        if (!IsSupportedPrefab(prefab))
+        { Debug.LogWarning("Enemy Prefab 루트에 활성 EnemyController 또는 TriangleMeleeMonster가 하나만 필요합니다. MeleeMonster / mon_1 프리팹을 지정하세요.", this); return; }
+        var targetPlayer = player != null ? player.GetComponentInParent<PlayerMove>() : null;
+        if (prefab.GetComponent<TriangleMeleeMonster>() != null && targetPlayer == null)
+        { Debug.LogWarning("mon_1의 대상으로 PlayerMove가 있는 플레이어를 연결하세요.", this); return; }
         Transform point = spawnPoint != null ? spawnPoint : transform;
-        spawnedEnemy = Instantiate(enemyPrefab, point.position, Quaternion.identity);
-        spawnedEnemy.player = player;
+        spawnedEnemy = Instantiate(prefab, point.position, Quaternion.identity);
+        var original = spawnedEnemy.GetComponent<EnemyController>();
+        if (original != null) original.player = player;
+        var triangle = spawnedEnemy.GetComponent<TriangleMeleeMonster>();
+        if (triangle != null) triangle.player = targetPlayer;
+        spawnedEnemy.SetActive(true);
         hasSpawned = true;
     }
 
-    private void OnValidate() => activationSize = ActivationSize;
+    private static bool IsSupportedPrefab(GameObject prefab)
+    {
+        if (prefab == null) return false;
+        var original = prefab.GetComponent<EnemyController>();
+        var triangle = prefab.GetComponent<TriangleMeleeMonster>();
+        return original != null && original.enabled && triangle == null
+            || triangle != null && triangle.enabled && original == null;
+    }
+
+    /// <summary>Triangle의 사망 애니메이션/시체가 남아 있어도 전멸과 재생성 조건에서 처치로 인식합니다. 단순 비활성화는 처치가 아닙니다.</summary>
+    public static bool IsDefeated(GameObject enemy)
+    {
+        if (enemy == null) return true;
+        var triangle = enemy.GetComponent<TriangleMeleeMonster>();
+        return triangle != null && triangle.IsDead;
+    }
+
+    private void MigrateLegacyPrefab()
+    {
+        if (monsterPrefab == null && enemyPrefab != null) monsterPrefab = enemyPrefab.gameObject;
+        if (monsterPrefab != null) enemyPrefab = null;
+    }
+    private void Awake() => MigrateLegacyPrefab();
+    private void OnValidate() { activationSize = ActivationSize;MigrateLegacyPrefab(); }
 
     private void OnDrawGizmosSelected()
     {

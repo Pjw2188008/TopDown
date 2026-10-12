@@ -20,6 +20,7 @@ public sealed class AccelerationErrorEffect : MonoBehaviour, IErrorSource
     private IAccelerationTarget accelerationTarget;
     private SpriteRenderer targetRenderer;
     private Color baseColor = Color.white;
+    private bool awakeCompleted;
 
     public float CurrentMultiplier => targetMultiplier;
     private ErrorEffectState state;
@@ -34,6 +35,7 @@ public sealed class AccelerationErrorEffect : MonoBehaviour, IErrorSource
 
     private void Awake()
     {
+        awakeCompleted = true;
         FindAccelerationTarget();
         targetRenderer = GetComponent<SpriteRenderer>();
 
@@ -89,6 +91,23 @@ public sealed class AccelerationErrorEffect : MonoBehaviour, IErrorSource
         {
             SpriteTint.SetColor(targetRenderer, baseColor);
         }
+    }
+
+    internal System.Action CaptureTutorialState()
+    {
+        var savedState = state;
+        if (!awakeCompleted && triggerOnStart) savedState.ActivateOriginal();
+        float savedMultiplier = targetMultiplier;
+        Color savedBase = awakeCompleted ? baseColor : SpriteTint.GetColor(GetComponent<SpriteRenderer>());
+        return () =>
+        {
+            if (this == null) return;
+            state = savedState;
+            targetMultiplier = savedMultiplier;
+            baseColor = savedBase;
+            FindAccelerationTarget();
+            accelerationTarget?.SetAccelerationMultiplier(state.IsActive ? targetMultiplier : 1f);
+        };
     }
 
     private void FindAccelerationTarget()
