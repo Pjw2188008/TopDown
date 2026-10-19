@@ -5,10 +5,19 @@ using UnityEngine;
 public partial class PlayerMove
 {
     [Header("플레이어 몸 충돌")]
-    [Tooltip("걷기/달리기를 막는 레이어입니다. Trigger와 개별 IgnoreCollision 대상은 통과합니다. 대쉬/물체 옮기기는 각각의 기존 충돌 마스크를 사용합니다.")]
+    [Tooltip("이동을 막는 레이어입니다. Floor 태그와 무관하게 일반 Collider2D가 이동을 막습니다. Trigger와 개별 IgnoreCollision 대상은 통과합니다. Floor는 사이드뷰 접지/점프 판정에만 사용합니다. 대시/물체 옮기기는 각각의 충돌 마스크를 사용합니다.")]
     [SerializeField] private LayerMask movementBlockingLayers = Physics2D.DefaultRaycastLayers;
     private Rigidbody2D playerBody;
     private readonly List<RaycastHit2D> movementHits = new List<RaycastHit2D>(16);
+    // Floor는 레이어가 아니라 태그입니다. Error 레이어와 동시에 지정할 수 있습니다.
+    // 바닥 묶음의 부모에 한 번 지정해도 자식 Collider 전체가 발판이 됩니다.
+    private static bool IsFloorCollider(Collider2D collider)
+    {
+        if (collider == null) return false;
+        for (Transform current = collider.transform; current != null; current = current.parent)
+            if (current.CompareTag("Floor")) return true;
+        return false;
+    }
 
     private void Awake()
     {

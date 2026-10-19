@@ -128,6 +128,8 @@ public partial class PlayerMove
                 {
                     if (hit.collider == null || hit.collider.transform.IsChildOf(transform)
                         || Physics2D.GetIgnoreCollision(shape, hit.collider) || hit.normal.y < .5f) continue;
+                    // 충돌은 일반 사물도 막지만, 접지/점프 가능한 바닥은 Floor만 인정합니다.
+                    if (IsSideView && !IsFloorCollider(hit.collider)) continue;
                     if (hit.distance == 0f && hit.collider.bounds.center.y >= shape.bounds.center.y) continue;
                     return true;
                 }
