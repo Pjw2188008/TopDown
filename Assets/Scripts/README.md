@@ -1,5 +1,7 @@
 # 스크립트 구조
 
+일반 몬스터는 사이드뷰용 MeleeEnemy / RangedEnemy 두 AI로 통합했고, 기존 일반 몬스터 스포너·웨이브는 제거했습니다. 보스·플레이어·맵 기능은 보존합니다. 최신 배치는 [몬스터 안내](Enemies/README.md)를 참고하세요.
+
 ## 기능별 폴더 안내
 
 ```text
@@ -12,13 +14,13 @@ Assets/Scripts/
 │  └─ Internal/        오류 규칙·모델·인터페이스
 ├─ Enemies/
 │  ├─ Melee/
-│  │  ├─ Attachable/   EnemyController, MeleeEnemy
-│  │  └─ Internal/     EnemyController.* partial 구현
+│  │  └─ Attachable/   MeleeEnemy (공통 abstract 구현도 같은 파일)
 │  ├─ Ranged/
-│  │  ├─ Attachable/   RangedEnemy, RangedEnemySpawner
-│  │  └─ Internal/     RangedEnemy.*, ReflectProjectile, Editor 도구
+│  │  ├─ Attachable/   RangedEnemy
+│  │  └─ Internal/     ReflectProjectile
 │  └─ Shared/
-│     └─ Attachable/   MovingEnemy, EnemyStagger
+│     ├─ Attachable/   EnemyStagger
+│     └─ Internal/     CombatParry, EnemyNavigation, EnemySideView
 ├─ Hazards/            즉사 레이저·사물 차단
 │  ├─ Attachable/      LaserHazard, LaserBlocker
 │  └─ Internal/Editor/ 레이저 생성 메뉴
@@ -35,17 +37,16 @@ Assets/Scripts/
 - **Internal/Editor**: Unity 편집기 메뉴 도구입니다. Editor 폴더 아래에 두어 빌드에서 제외하며 오브젝트에 부착하지 않습니다.
 - PlayerMove.*의 오류 입력·HUD는 플레이어의 일부이므로 Player/Internal에 둡니다. 재사용 가능한 오류 효과와 규칙은 Errors에 둡니다.
 - 각 기능 폴더의 README에 파일별 역할과 부착 위치를 정리했습니다.
-- 기존 스크립트의 .meta GUID, 클래스명, 직렬화 필드명과 기본값을 유지합니다. 기존 씬/프리팹에 스크립트를 다시 붙이지 마세요.
-- 프리팹·애니메이션·스프라이트는 기존 위치를 유지합니다. 이번 정리는 스크립트 및 문서에만 적용합니다.
+- 기존 일반 몬스터 프리팹/씬의 AI 연결은 새 두 AI로 이관했습니다. 스프라이트·Animator 연결은 유지합니다.
+- 이미지·애니메이션은 기존 위치를 유지합니다. 스포너 프리팹과 씬의 해당 연결은 제거했습니다.
 
 ## 현재 원거리 몬스터 구성
 
 피격 시 플레이어·근접·원거리 몬스터는 공용 DamageBlink로 약 0.35초 빨간색으로 표시된 뒤 원래 색상으로 돌아옵니다. 캐릭터를 숨기지 않습니다. 실제 HP 감소 때만 자동 실행되며 무적 시간은 없습니다. 세부 설정은 Shared/README.md를 참고하세요.
 
 - `Enemies/Ranged/Attachable/RangedEnemy.cs`: 이동, 공격 애니메이션, 주기적 발사와 체력. 원거리 적 루트에 부착합니다.
-- `Enemies/Ranged/Attachable/RangedEnemySpawner.cs`: 플레이어가 감지 범위에 진입하면 적 프리팹을 생성합니다.
 - `Enemies/Ranged/Internal/ReflectProjectile.cs`: 탄환 한 발의 이동·충돌·피해·패링/반사. 적이 자동 추가하므로 직접 부착하지 않습니다.
-- 씬에는 `Assets/RangedEnemy/RangedEnemySpawner.prefab`을 배치합니다. 세부 설정은 `Assets/RangedEnemy/README.md`를 확인하세요.
+- 씬에는 몬스터 프리팹 자체를 직접 배치합니다. `Assets/RangedEnemy/README.md`를 참고하세요.
 - 이전 테스트용 발사 컴포넌트와 씬 연결은 제거했습니다. `REDACT`의 `Reflection Error Test Source`는 반사·거대화 오류 원본만 남긴 정적 테스트 오브젝트이며 공격하지 않습니다.
 
 ## 플레이어 Rigidbody2D / 투사체 충돌
@@ -58,23 +59,15 @@ Assets/Scripts/
 
 ## 2026-09-16 리팩토링
 
-- 씬에 붙이는 `EnemyController.cs`의 GUID와 Inspector 필드는 유지했습니다. 본체 경로는 `Enemies/Melee/Attachable`이며 내부 구현은 `Enemies/Melee/Internal/EnemyController.Movement.cs`, `.Combat.cs`, `.Collisions.cs`, `.Effects.cs`로 분리했습니다. 이 partial 파일들은 별도로 부착하지 않습니다.
+- 당시 분리했던 EnemyController 일반 몬스터 AI는 이후 MeleeEnemy로 통합하여 제거했습니다.
 - `PlayerMove.Interaction.cs`는 F 입력/안내/애니메이션, `PlayerMove.InteractionPositioning.cs`는 잡기 간격/방향별 자리 이동을 담당합니다. PlayerMove 연결은 그대로입니다.
 - 몬스터 충돌 검색은 재사용 List로 처리하고 플레이어 Collider를 한 프레임에 한 번만 수집합니다. 대상이 바뀌지 않으면 PlayerMove 참조도 재사용합니다. 동적으로 추가/활성화된 Collider는 계속 반영합니다.
 - 상호작용 충돌/경계 계산과 피해 수신자 탐색은 Unity ListPool을 사용하고 finally에서 반환합니다. 공격 중복 방지 HashSet도 재사용합니다. 기존 피해 순서/패링/충돌 필터는 유지합니다.
 - 코드 분리는 유지보수 목적이며 빌드 크기가 크게 줄어드는 변경은 아닙니다. 원본 이미지의 해상도/압축/메타 설정은 변경하지 않았습니다.
 
-## EnemyController — 순찰/추적 근접 몬스터
+## 일반 몬스터
 
-- `Assets/Scripts/Enemies/Melee/Attachable/EnemyController.cs`를 적 루트에 부착합니다. 기존 Stat/Range/Player 필드와 수치는 유지했습니다. EnemyStagger는 자동 추가하므로 MeleeEnemy/RangedEnemy를 중복 부착하지 마세요.
-- Player를 비우면 활성 PlayerMove를 찾습니다. 감지 → 추적 → 공격 준비(기본 0.4초) → 한 번 타격 → 쿨타임 순서입니다. 예고 시작에 방향/타격 위치를 고정하므로 범위 밖으로 피할 수 있습니다.
-- Attack Area Size는 공격 시작 범위, Attack Reach는 앞쪽 타격 중심 거리, Attack Hit Size는 실제 타격 크기입니다. 기즈모는 노란색=감지, 빨간색=공격 시작, 하늘색=실제 타격입니다.
-- 주황색 사각 예고가 끝나면 공격 이펙트와 타격이 함께 발생합니다. Attack Effect Sprite에 오른쪽 방향 이미지를 넣을 수 있습니다. 비우면 플레이어 공격 이미지, 그것도 없으면 빨간 임시 사각형을 사용합니다. 유지 시간 동안 피해는 반복되지 않습니다.
-- 기존 근접 패링/가드/반사 피해 처리를 사용합니다. 패링 성공 시 피해/가드 게이지 소모 없이 EnemyStagger 경직으로 이동/공격을 중단합니다. 경직 시간은 PlayerMove 패링 설정을 따릅니다.
-- 플레이어 공격은 ICombatDamageable을 통해 적 체력을 감소시킵니다. 여러 자식 Collider가 있어도 한 공격당 한 번만 피해를 줍니다. 체력 0이면 사망합니다.
-- Ignore Player Body Collision은 이 적과 플레이어 몸 충돌만 제외합니다. Collider를 끄거나 전역 충돌표를 바꾸지 않아 공격 검색/투사체 판정은 유지합니다. 비활성화 시 이 컴포넌트가 설정한 충돌 제외만 해제합니다.
-- Enemy 프리팹은 Enemy 레이어로 연결했습니다. Auto Assign Enemy Layer가 켜져 있으면 실행 중 Default Collider도 Enemy로 지정합니다. 커스텀 레이어는 PlayerMove의 Enemy Layer 마스크에 포함하세요.
-- 기존 적 피해 10 / 플레이어 최대 HP 10 / 테스트용 Restore Health On Defeat 설정은 그대로입니다. HP가 바로 가득 차면 자동 회복 옵션을 끄거나 테스트 피해량을 낮추세요.
+기존 EnemyController, MovingEnemy, TriangleMeleeMonster, RangedEnemyController는 제거했습니다. 근접은 MeleeEnemy, 원거리는 RangedEnemy를 사용합니다. 추적 모드·영역·복귀·피해·패링 및 Inspector 설정은 [몬스터 안내](Enemies/README.md)를 참고하세요.
 
 ## F 상호작용 — 물체 잡고 옮기기
 
@@ -85,7 +78,7 @@ Assets/Scripts/
 - 옮길 물체 루트에 **MovableInteractable**을 붙이세요. BoxCollider2D가 자동으로 추가됩니다. Collider는 활성 상태이고 Is Trigger가 꺼져 있어야 합니다.
 - 빠른 테스트: Play 종료 → **Tools > Story > Interaction > Create Test Box**. 플레이어 오른쪽에 임시 상자를 만듭니다. 기존 씬에는 자동으로 상자를 추가하지 않습니다.
 - PlayerMove의 상호작용 설정: 키(F), 검색 거리(기본 1.5), 대상 레이어, 장애물 레이어, 안내 UI/범위 기즈모. 선택한 Player의 노란 원으로 범위를 확인합니다.
-- MovableInteractable의 Move Speed Multiplier(기본 0.6)는 잡은 동안 걷기 속도에 곱합니다. Space 달리기/대쉬, 공격, 가드, E 편집 전환, 1/2 오류 사용은 잡고 있는 동안 차단합니다. 놓은 뒤 정상 조작으로 돌아갑니다.
+- MovableInteractable의 Move Speed Multiplier(기본 0.6)는 잡은 동안 기준 이동 속도에 곱합니다. Space 점프/Shift 대쉬, 공격, 가드, E 편집 전환, 1/2 오류 사용은 잡고 있는 동안 차단합니다. 놓은 뒤 정상 조작으로 돌아갑니다.
 - B 도감은 열 수 있고 잡은 상태로 일시 정지됩니다. 도감을 닫고 계속 옮기거나 F로 놓으세요.
 - 플레이어와 물체를 같은 거리만큼 이동하며 둘 중 하나라도 장애물에 닿으면 함께 멈춥니다. Trigger/레이어 충돌 제외 설정은 유지합니다. 검사 방식은 Collider 월드 사각 경계 기반이라 회전/복잡한 모양에서는 보수적으로 멈출 수 있습니다.
 - Rigidbody2D는 필수가 아닙니다. 있다면 잡는 동안 Kinematic으로 전환하고 놓을 때 기존 Body Type을 복구합니다. 잡기 전의 속도는 되살리지 않습니다. 자식에 별도 Rigidbody2D가 있는 복합 물체는 지원하지 않습니다.
@@ -146,7 +139,7 @@ Assets/Scripts/
 
 ## 대쉬 / 스태미나
 
-- Space를 **새로 누를 때 1회** 대쉬합니다. 유지하면 대쉬 종료 후 기존 달리기로 이어지며 자동 연속 대쉬하지 않습니다.
+- 왼쪽 Shift를 **새로 누를 때 1회** 대쉬합니다. Dash Key에서 변경할 수 있습니다. 유지한다고 자동 연속 대쉬하지 않습니다. Space는 사이드뷰 점프이며 스태미나를 쓰지 않습니다.
 - WASD 방향으로 대쉬합니다. 이동 입력이 없으면 마지막 이동 방향이며 8방향 속도/거리는 같습니다. 대쉬 중 방향은 고정됩니다.
 - 초기 스태미나 100, 대쉬당 30 소모. 부족하면 소비 없이 실패하고 HUD에 `스태미나 부족`이 표시됩니다.
 - 기본 속도 18, 시간 0.16초(장애물 없을 때 2.88 단위), 종료 후 재사용 대기 0.25초입니다.
@@ -159,10 +152,10 @@ Assets/Scripts/
 - 대쉬 잔상은 기존 잔상 풀을 공유하고 기본 0.035초 간격으로 생성합니다. `Show Run Afterimages`를 끄면 달리기/대쉬 잔상 모두 꺼집니다.
 - `Player/Internal/PlayerMove.Dash.cs`는 PlayerMove partial이므로 별도로 부착하지 않습니다.
 
-## 달리기 (Space 유지)
+## 일반 이동 — 항상 달리기
 
 - **달리기 잔상:** 실제로 달리는 동안 현재 스프라이트의 옅은 복사본이 이동 뒤쪽에 잠깐 남습니다.
-  걷기/정지/가드/패링 중에는 새 잔상이 생기지 않고 남아 있는 잔상만 서서히 사라집니다.
+  정지/가드/패링 중에는 새 잔상이 생기지 않고 남아 있는 잔상만 서서히 사라집니다.
 - PlayerMove의 `Show Run Afterimages`로 끌 수 있습니다. `Run Afterimage Interval`(기본 0.07초),
   `Lifetime`(0.2초), `Opacity`(0.22), `Offset`(0.1)으로 간격·유지 시간·불투명도·뒤쪽 간격을 조절합니다.
 - 잔상은 원래 애니메이션 프레임/좌우 반전/색/월드 크기를 따르며 플레이어보다 한 단계 뒤에 표시됩니다.
@@ -171,12 +164,12 @@ Assets/Scripts/
 - 게임 시간에 따라 사라져 편집 모드에서는 느려지고 도감에서는 정지합니다. Player 비활성화 시 숨기고 파괴 시 정리합니다.
 - `Player/Internal/PlayerMove.RunAfterimages.cs`는 partial 구현이므로 따로 부착하지 않습니다.
 
-- WASD 이동 중 Space를 누르고 있으면 이동 속도만 증가하고, 놓으면 즉시 걷기 속도로 복귀합니다.
+- 이동 키만 누르면 기존 달리기 속도로 이동합니다. 걷기/달리기 전환은 없고 Space나 Shift를 유지해도 일반 이동 속도는 달라지지 않습니다.
 - PlayerMove의 `Run Speed Multiplier`로 배율을 조절합니다(기본 1.5배). Move Speed가 5이면 달리기는 7.5입니다.
 - 기존 걷기 애니메이션/재생 속도를 그대로 사용합니다. Animator나 스프라이트를 추가할 필요가 없습니다.
-- 방향키 없이 Space만 누르면 움직이지 않으며, 대각선도 정규화되어 같은 속도로 이동합니다.
+- 사이드뷰에서 Space만 누르면 제자리 점프합니다. 탑다운/2.5D의 대각선 이동은 정규화되어 같은 속도로 이동합니다.
 - 가드/패링 중 이동 제한과 도감 일시 정지는 그대로 유지합니다. 편집 모드에서도 달리며 기존 슬로모션 배율을 따릅니다.
-- 달리기는 스태미나를 소비하지 않습니다. Space 단발 대쉬/스태미나는 위 대쉬 항목을 참고하세요.
+- 달리기와 점프는 대시 스태미나를 소비하지 않습니다. Shift 단발 대쉬/스태미나는 위 대쉬 항목을 참고하세요.
 
 ## 오류 발견 / 도감
 

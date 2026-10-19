@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 4792525091421682064}
   - component: {fileID: 1668871651065797607}
   - component: {fileID: 6580207639115106826}
+  - component: {fileID: 900000000000000001}
   m_Layer: 6
   m_Name: RangedEnemy 2
   m_TagString: Untagged
@@ -100,27 +101,45 @@ MonoBehaviour:
   m_GameObject: {fileID: 3892165845958671811}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 287239e905a0e5f4fbfe85c33001baa8, type: 3}
+  m_Script: {fileID: 11500000, guid: 8b2040c1211e70148b5d5a883dff70b0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  maxHealth: 10
+  aggroMode: 1
+  chaseAreaOffset: {x: 0, y: 0}
+  chaseAreaSize: {x: 12, y: 12}
+  target: {fileID: 0}
+  returnTolerance: 0.05
   moveSpeed: 3
+  maxHealth: 10
+  stoppingDistance: 3
+  movementBlockingLayers:
+    serializedVersion: 2
+    m_Bits: 115
+  useGravity: 1
+  stopAtLedges: 1
+  attackRange: 4
+  attackVerticalRange: 4
   attackDamage: 10
   attackCooldown: 1.5
-  projectileSpeed: 8
-  projectilePrefab: {fileID: 3711610605253569087, guid: 5e5c088845e2c31438af3069492d71b6, type: 3}
-  firePoint: {fileID: 596612478552667650}
-  attackPattern: 0
-  spreadCount: 3
-  spreadAngle: 15
-  patrolAreaSize: {x: 12, y: 12}
-  attackAreaSize: {x: 8, y: 8}
-  player: {fileID: 0}
-  animator: {fileID: 1668871651065797607}
-  fallbackDeathDuration: 0.75
-  facingRenderer: {fileID: 0}
+  hitNormalizedTime: 0.65
+  fallbackAttackDuration: 0.6
+  parryStunDuration: 1
+  hitStunDuration: 0.15
   spriteFacesLeft: 1
-  mirrorFirePoint: 1
+  idleState: Idle
+  moveState: Move
+  attackState: Attack
+  hitState: Hit
+  deathState: Death
+  fallbackDeathDuration: 0.75
+  projectilePrefab: {fileID: 3711610605253569087, guid: 5e5c088845e2c31438af3069492d71b6, type: 3}
+  muzzleOffset: {x: 0.6, y: 0}
+  projectileSpeed: 8
+  projectileLifetime: 5
+  projectileRadius: 0.12
+  horizontalProjectile: 0
+  projectileSprite: {fileID: 0}
+  projectileColor: {r: 1, g: 1, b: 1, a: 1}
 --- !u!95 &1668871651065797607
 Animator:
   serializedVersion: 7
@@ -220,3 +239,30 @@ Transform:
   m_Children: []
   m_Father: {fileID: 8682092183541211042}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!50 &900000000000000001
+Rigidbody2D:
+  serializedVersion: 5
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3892165845958671811}
+  m_BodyType: 1
+  m_Simulated: 1
+  m_UseFullKinematicContacts: 1
+  m_UseAutoMass: 0
+  m_Mass: 1
+  m_LinearDamping: 0
+  m_AngularDamping: 0.05
+  m_GravityScale: 0
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_Interpolate: 0
+  m_SleepingMode: 1
+  m_CollisionDetection: 1
+  m_Constraints: 4

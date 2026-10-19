@@ -12,12 +12,16 @@ public partial class PlayerMove
     private float sideViewGravity = 30f;
     [SerializeField, Min(.1f), Tooltip("사이드뷰 최대 낙하 속도입니다.")]
     private float sideViewMaxFallSpeed = 20f;
-    [SerializeField, Min(0f), Tooltip("사이드뷰 점프 높이(월드 단위)입니다. 0이면 점프를 끕니다. 중력이 0일 때도 점프하지 않습니다.")]
+    [SerializeField, Min(0f), Tooltip("점프 키를 계속 눌렀을 때의 최대 점프 높이(월드 단위)입니다. 0이면 점프를 끕니다. 중력이 0일 때도 점프하지 않습니다.")]
     private float sideViewJumpHeight = 2f;
-    [SerializeField, Tooltip("사이드뷰 점프 키입니다. 누르는 순간에만 점프합니다. Space는 기존 대시/달리기 키이므로 다른 키를 사용하세요.")]
-    private Key sideViewJumpKey = Key.W;
+    [SerializeField, Tooltip("상승 중 점프 키를 놓으면 상승 속도를 줄여 짧게 점프합니다. 계속 누르면 최대 높이까지 뜁니다. 다시 누르더라도 공중에서 상승력을 되돌리지 않습니다.")]
+    private bool sideViewVariableJump = true;
+    [SerializeField, Range(0f, 1f), Tooltip("점프 키를 놓은 순간 남길 상승 속도의 비율입니다. 낮을수록 짧은 점프가 낮고 빠르게 꺾입니다. 0은 즉시 상승 종료, 1은 기존 고정 높이 점프와 같습니다.")]
+    private float sideViewJumpReleaseMultiplier = .45f;
+    [SerializeField, Tooltip("사이드뷰 점프 키입니다. 기본 Space이며 누르는 순간에만 점프합니다. 대시 키와 다르게 설정하세요.")]
+    private Key sideViewJumpKey = Key.Space;
     [SerializeField, Tooltip("추가 점프 키입니다. None으로 끌 수 있습니다. 공중에서 추가 점프는 불가능합니다.")]
-    private Key sideViewAlternateJumpKey = Key.UpArrow;
+    private Key sideViewAlternateJumpKey = Key.None;
     public bool IsSideView => sideViewMode;
     public bool IsSideViewDepthMovement => IsSideView && sideViewDepthMovement;
     /// <summary>2.5D 기본 바닥에서의 높이입니다. 발판에 서 있으면 해당 발판 높이를 포함합니다.</summary>
@@ -30,6 +34,7 @@ public partial class PlayerMove
     private Collider2D[] sideViewGroundColliders;
     private Vector2[] sideViewGroundOffsets;
     private float sideViewFallSpeed;
+    private bool sideViewJumpCutAvailable;
     private static readonly int SideViewJumpStateHash = Animator.StringToHash("Jump_Right");
 
     // 일반 이동 애니메이션 경로에서만 호출합니다. 공격/가드/패링/상호작용은 우선권을 유지합니다.
@@ -77,7 +82,27 @@ public partial class PlayerMove
 
         // 낙하 속도의 음수는 상승입니다. 높이와 중력으로 초기 속도를 계산합니다.
         sideViewFallSpeed = -Mathf.Sqrt(2f * sideViewGravity * sideViewJumpHeight);
+        sideViewJumpCutAvailable = sideViewVariableJump;
         return true;
+    }
+
+    private void UpdateSideViewJumpRelease()
+    {
+        if (!sideViewJumpCutAvailable) return;
+        if (!sideViewVariableJump || sideViewFallSpeed >= 0f)
+        {
+            sideViewJumpCutAvailable = false;
+            return;
+        }
+        var keyboard = Keyboard.current;
+        bool held = keyboard != null &&
+            ((sideViewJumpKey != Key.None && keyboard[sideViewJumpKey].isPressed)
+            || (sideViewAlternateJumpKey != Key.None && keyboard[sideViewAlternateJumpKey].isPressed));
+        if (held) return;
+
+        // 점프 한 번에 한 번만 감속합니다. 놓고 다시 눌러도 재가속/공중 점프는 없습니다.
+        sideViewFallSpeed *= Mathf.Clamp01(sideViewJumpReleaseMultiplier);
+        sideViewJumpCutAvailable = false;
     }
 
     private bool IsSideViewGrounded()
@@ -115,6 +140,8 @@ public partial class PlayerMove
     private void UpdateSideViewGravity(float deltaTime)
     {
         if (!IsSideView || deltaTime <= 0f) return;
+        // 이번 프레임의 상승 이동 전에 키 해제를 반영합니다. 공격/대시 중 해제도 누락하지 않습니다.
+        UpdateSideViewJumpRelease();
         if (IsSideViewDepthMovement)
         {
             float support = GetSideViewSupportHeight();
@@ -126,6 +153,7 @@ public partial class PlayerMove
             if (sideViewFallSpeed >= 0f && nextHeight <= support)
             { sideViewHeight = support; sideViewFallSpeed = 0f; }
             else sideViewHeight = Mathf.Max(0f, nextHeight);
+            if (sideViewFallSpeed >= 0f) sideViewJumpCutAvailable = false;
             UpdateSideViewVisualHeight();
             return;
         }
@@ -135,6 +163,7 @@ public partial class PlayerMove
         Vector2 moved = MovePlayerWithCollision(Vector2.down * wanted);
         // 바닥뿐 아니라 상승 중 천장에 닿아도 수직 속도를 없앱니다.
         if (Mathf.Abs(moved.y) + .0001f < Mathf.Abs(wanted)) sideViewFallSpeed = 0f;
+        if (sideViewFallSpeed >= 0f) sideViewJumpCutAvailable = false;
         if (IsMovingObject && moved.y < -.03f) ReleaseInteraction();
     }
 
@@ -179,6 +208,7 @@ public partial class PlayerMove
 
     private void ResetSideViewJumpHeight()
     {
+        sideViewJumpCutAvailable = false;
         sideViewHeight = 0f;
         sideViewFallSpeed = 0f;
         if (appliedSideViewHeight != 0f || sideViewGroundColliders != null) ApplySideViewHeight(0f);

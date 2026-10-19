@@ -32,8 +32,12 @@ public partial class PlayerMove
         byError[error] = SuccessfulEnvironmentPasteVersion;
     }
 
+    private static bool IsErrorCutLayer(GameObject target)
+        => target != null && target.layer == LayerMask.NameToLayer("Error");
+
     private bool TryHandleErrorHit(Collider2D hit)
     {
+        if (hit == null || (isEditMode && !IsErrorCutLayer(hit.gameObject))) return false;
         var candidates = new System.Collections.Generic.List<MonoBehaviour>();
         bool hasActiveError = false;
         foreach (MonoBehaviour component in hit.GetComponents<MonoBehaviour>())

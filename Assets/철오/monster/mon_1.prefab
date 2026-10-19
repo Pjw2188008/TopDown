@@ -208,35 +208,36 @@ MonoBehaviour:
   m_GameObject: {fileID: 3809326024534140586}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0b73d4d54057b584e3de6748de56cc2c, type: 3}
+  m_Script: {fileID: 11500000, guid: c14da4a83cdc48e9b6f2e538fefb96bf, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  player: {fileID: 0}
-  maxHealth: 5
+  aggroMode: 1
+  chaseAreaOffset: {x: 0, y: 0}
+  chaseAreaSize: {x: 16, y: 6}
+  target: {fileID: 0}
+  returnTolerance: 0.05
   moveSpeed: 2
-  detectionRange: 8
-  stopDistance: 2.87
-  attackAreaOffset: {x: -0.15, y: 0.95}
-  attackAreaSize: {x: 5.74, y: 5.74}
-  attackDamage: 1
-  attackCooldown: 1.2
-  attackReach: 0
-  attackSize: {x: 1.2, y: 1}
-  blockingLayers:
+  maxHealth: 5
+  stoppingDistance: 2.87
+  movementBlockingLayers:
     serializedVersion: 2
     m_Bits: 115
-  releaseAfterAnimation: 1
-  attackTimingMode: 0
+  useGravity: 1
+  stopAtLedges: 1
+  attackRange: 2.87
+  attackVerticalRange: 2.87
+  attackDamage: 1
+  attackCooldown: 1.2
   hitNormalizedTime: 0.6
-  hitFrame: 4
-  shockwaveEffectPrefab: {fileID: 2721361235803897857, guid: 73cba3a8b3cf3d044b99e1c3933a25b0, type: 3}
-  shockwaveOriginOffset: {x: 0, y: 0.5}
-  shockwaveSpeed: 5
-  shockwaveDistance: 8
-  shockwaveRadius: 0.94
-  shockwaveColor: {r: 1, g: 1, b: 1, a: 1}
-  shockwaveSortingOrder: 30
   fallbackAttackDuration: 0.6
-  fallbackHitDuration: 0.25
+  parryStunDuration: 1
+  hitStunDuration: 0.15
+  spriteFacesLeft: 0
+  idleState: Idle
+  moveState: Move
+  attackState: Attack
+  hitState: Hit
+  deathState: Death
   fallbackDeathDuration: 0.75
-  destroyAfterDeath: 1
+  hitOffset: {x: 0.8, y: 0}
+  hitSize: {x: 1.2, y: 1}

@@ -61,7 +61,7 @@ public sealed partial class TutorialSequence : MonoBehaviour
     [SerializeField] private bool beginOnStart = true;
     [Tooltip("순서대로 실행할 단계입니다. 마지막 단계가 완료되면 안내를 숨기고 On Completed를 호출합니다.")]
     [SerializeField] private Step[] steps = {
-        new Step { message = "WASD를 이용하여 이동하세요.\nSpace를 꾹 누르면 달릴 수 있어요.\n표시된 목표 지점까지 이동하세요." },
+        new Step { message = "이동 키를 누르면 달립니다.\nSpace: 점프(사이드뷰) / 왼쪽 Shift: 대시\n표시된 목표 지점까지 이동하세요." },
         new Step { message = "이동 연습 완료!\n다음 튜토리얼 안내를 여기에 설정하세요." }
     };
     [Tooltip("모든 단계 완료 시 한 번 호출됩니다. 다음 튜토리얼 시작 함수 등을 연결하세요.")]

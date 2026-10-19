@@ -209,36 +209,41 @@ MonoBehaviour:
   m_GameObject: {fileID: 2724026191190132149}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d6217998239f8294c9cebaea4b94c786, type: 3}
+  m_Script: {fileID: 11500000, guid: c14da4a83cdc48e9b6f2e538fefb96bf, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  maxHealth: 5
+  aggroMode: 1
+  chaseAreaOffset: {x: 0, y: 0}
+  chaseAreaSize: {x: 10, y: 10}
+  target: {fileID: 0}
+  returnTolerance: 0.05
   moveSpeed: 2
-  attackDamage: 1
-  attackCooldown: 1.2
-  patrolAreaSize: {x: 10, y: 10}
-  attackAreaSize: {x: 3, y: 3}
-  attackWindup: 0.4
-  attackReach: 0.75
-  attackHitSize: {x: 1.2, y: 1.2}
-  attackEffectSprite: {fileID: 0}
-  attackEffectDuration: 0.18
-  showAttackWarning: 1
-  player: {fileID: 0}
-  ignorePlayerBodyCollision: 1
-  autoAssignEnemyLayer: 1
-  useMeleeAnimator: 1
-  meleeAttackClip: {fileID: 7400000, guid: de6bc6b11898f68459d5cdbb4626f2c3, type: 2}
-  meleeHitNormalizedTime: 0.65
-  useThrustAttack: 1
-  thrustStartNormalizedTime: 0.4
-  thrustPreparationSpeed: 0.8
-  thrustStrikeSpeed: 2.5
-  thrustDistance: 0.8
-  respectWalls: 1
-  meleeBlockingLayers:
+  maxHealth: 5
+  stoppingDistance: 0.8
+  movementBlockingLayers:
     serializedVersion: 2
     m_Bits: 115
+  useGravity: 1
+  stopAtLedges: 1
+  attackRange: 1.5
+  attackVerticalRange: 1.5
+  attackDamage: 1
+  attackCooldown: 1.2
+  hitNormalizedTime: 0.65
+  fallbackAttackDuration: 0.6
+  parryStunDuration: 1
+  hitStunDuration: 0.15
+  spriteFacesLeft: 0
+  idleState: Idle
+  moveState: Move
+  attackState: Attack
+  hitState: Hit
+  deathState: Death
+  fallbackDeathDuration: 0.75
+  hitOffset: {x: 0.75, y: 0}
+  hitSize: {x: 1.2, y: 1.2}
+  attackHitFrame: 16
+  meleeParryWindow: 0.3
 --- !u!114 &845234518296255131
 MonoBehaviour:
   m_ObjectHideFlags: 0

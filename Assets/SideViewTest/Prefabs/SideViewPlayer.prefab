@@ -136,7 +136,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   moveSpeed: 5
-  runSpeedMultiplier: 1.5
+  runSpeedMultiplier: 1
+  dashKey: 51
   dashSpeed: 18
   dashDuration: 0.16
   dashCooldown: 0.25
@@ -191,7 +192,7 @@ MonoBehaviour:
   attackSizeSide: {x: 1.3, y: 1.6}
   enemyLayer:
     serializedVersion: 2
-    m_Bits: 4294967295
+    m_Bits: 64
   attackEffectSprite: {fileID: 9188709469293079776, guid: 070efad017b34674cb6c515211ecf525, type: 3}
   attackEffectOnThirdLastFrame: 1
   attackImpactNormalizedTime: 0.85
@@ -199,6 +200,7 @@ MonoBehaviour:
   attackEffectDuration: 0.18
   attackEffectSizeMultiplier: {x: 1, y: 1}
   attackEffectSortingOrderOffset: 1
+  bossErrorReplacementTimeout: 5
   instantDeathRespawnPoint: {fileID: 0}
   interactionKey: 20
   interactionRange: 1.5
@@ -219,7 +221,9 @@ MonoBehaviour:
   sideViewGravity: 30
   sideViewMaxFallSpeed: 20
   sideViewJumpHeight: 2
-  sideViewJumpKey: 24
+  sideViewVariableJump: 1
+  sideViewJumpReleaseMultiplier: 0.45
+  sideViewJumpKey: 1
   sideViewAlternateJumpKey: 0
 --- !u!114 &5093556406473742990
 MonoBehaviour:

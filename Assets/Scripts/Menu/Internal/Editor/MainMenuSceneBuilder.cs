@@ -101,9 +101,9 @@ public static class MainMenuSceneBuilder
             display, new Vector2(0, -74), new Vector2(770, 95), 18);
         controller.applyButton = Button("화면 설정 적용", display, new Vector2(0, -160), new Vector2(260, 50));
 
-        string[] keys = { "W / A / S / D", "Space", "마우스 이동", "좌클릭", "우클릭", "E", "1 / 2", "F", "B", "마우스 휠" };
+        string[] keys = { "W / A / S / D", "Space / L.Shift", "마우스 이동", "좌클릭", "우클릭", "E", "1 / 2", "F", "B", "마우스 휠" };
         string[] actions = {
-            "이동 (대각선 포함)", "짧게 누르기: 대시  /  꾹 누르기: 달리기", "공격 방향 / 오류·대상 조준",
+            "항상 달리기 (사이드뷰: A/D·좌우 방향키)", "점프(사이드뷰) / 대시", "공격 방향 / 오류·대상 조준",
             "일반: 공격  /  편집: Cut 또는 준비된 Paste", "누르고 있기: 가드  /  피격 직전: 패링", "편집 모드 켜기 / 끄기",
             "전투: 오류 사용  /  편집: Paste 준비 (좌클릭 적용)", "물체 상호작용 / 놓기", "오류 도감 열기 / 닫기", "보관함이 가득 찼을 때 교체 대상 선택" };
         for (int i = 0; i < keys.Length; i++)

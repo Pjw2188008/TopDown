@@ -24,6 +24,8 @@ public partial class PlayerMove
     private void BeginErrorCutBatch(List<MonoBehaviour> sources)
     {
         if (isReplacingStoredError || !isEditMode || sources.Count == 0) return;
+        foreach (MonoBehaviour component in sources)
+            if (component == null || !IsErrorCutLayer(component.gameObject)) return;
         if (sources.Count > storedErrors.Capacity)
         {
             Debug.Log("보관함은 2칸입니다. 3종의 새 오류는 한 번에 Cut할 수 없습니다.");
@@ -67,7 +69,8 @@ public partial class PlayerMove
         for (int i = 0; i < pendingCutSources.Count; i++)
         {
             MonoBehaviour component = pendingCutSources[i];
-            if (component == null || !component.isActiveAndEnabled || !(component is IErrorSource source)
+            if (component == null || !IsErrorCutLayer(component.gameObject)
+                || !component.isActiveAndEnabled || !(component is IErrorSource source)
                 || !source.IsActive || !source.CanCut || source.ErrorType != pendingCutTypes[i]
                 || storedErrors.Contains(source.ErrorType)) return false;
         }

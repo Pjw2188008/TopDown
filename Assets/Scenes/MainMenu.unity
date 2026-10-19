@@ -1558,8 +1558,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: "\uC9E7\uAC8C \uB204\uB974\uAE30: \uB300\uC2DC  /  \uAFB9 \uB204\uB974\uAE30:
-    \uB2EC\uB9AC\uAE30"
+  m_Text: "점프(사이드뷰) / 대시"
 --- !u!222 &353806768
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -1713,7 +1712,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: "\uC774\uB3D9 (\uB300\uAC01\uC120 \uD3EC\uD568)"
+  m_Text: "항상 달리기 (사이드뷰: A/D·좌우 방향키)"
 --- !u!222 &378789851
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -4577,7 +4576,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: Space
+  m_Text: Space / L.Shift
 --- !u!222 &1058869127
 CanvasRenderer:
   m_ObjectHideFlags: 0

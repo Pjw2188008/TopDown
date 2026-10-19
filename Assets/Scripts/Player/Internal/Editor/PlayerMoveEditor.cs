@@ -20,17 +20,20 @@ public sealed class PlayerMoveEditor : Editor
                 EditorGUILayout.PropertyField(serializedObject.FindProperty("sideViewDepthMovement"),new GUIContent("2.5D 바닥 8방향 이동"));
             bool depth = serializedObject.FindProperty("sideViewDepthMovement").boolValue;
             EditorGUILayout.HelpBox(depth
-                ? "WASD/방향키로 바닥 이동. 본체 SpriteRenderer/Animator를 사용하며 점프 높이는 바닥 충돌과 별개입니다. 점프 키는 J 등 이동과 겹치지 않는 키로 지정하세요."
-                : "좌우 이동/전투 + 중력/점프. 공통 기능은 그대로 사용합니다. Space는 대시/달리기입니다.",MessageType.Info);
+                ? "WASD/방향키로 바닥 이동(항상 달리기). 기본 Space는 점프, 왼쪽 Shift는 대시입니다. 점프 높이는 바닥 충돌과 별개입니다."
+                : "좌우 이동은 항상 달리기입니다. 기본 Space는 점프, 왼쪽 Shift는 대시이며 나머지 공통 기능은 그대로 사용합니다.",MessageType.Info);
             EditorGUILayout.PropertyField(serializedObject.FindProperty("sideViewGravity"));
             EditorGUILayout.PropertyField(serializedObject.FindProperty("sideViewMaxFallSpeed"));
-            EditorGUILayout.PropertyField(serializedObject.FindProperty("sideViewJumpHeight"),new GUIContent("점프 높이"));
+            EditorGUILayout.PropertyField(serializedObject.FindProperty("sideViewJumpHeight"),new GUIContent("최대 점프 높이"));
+            EditorGUILayout.PropertyField(serializedObject.FindProperty("sideViewVariableJump"),new GUIContent("누르는 길이에 따른 점프"));
+            using (new EditorGUI.DisabledScope(!serializedObject.FindProperty("sideViewVariableJump").boolValue))
+                EditorGUILayout.PropertyField(serializedObject.FindProperty("sideViewJumpReleaseMultiplier"),new GUIContent("키 해제 시 상승 속도 비율"));
             EditorGUILayout.PropertyField(serializedObject.FindProperty("sideViewJumpKey"),new GUIContent("점프 키"));
             EditorGUILayout.PropertyField(serializedObject.FindProperty("sideViewAlternateJumpKey"),new GUIContent("추가 점프 키"));
         }
         string[] hidden=(side || mixed)
-            ? new[]{"m_Script","sideViewMode","sideViewDepthMovement","sideViewGravity","sideViewMaxFallSpeed","sideViewJumpHeight","sideViewJumpKey","sideViewAlternateJumpKey","verticalAttackHalfAngle"}
-            : new[]{"m_Script","sideViewMode","sideViewDepthMovement","sideViewGravity","sideViewMaxFallSpeed","sideViewJumpHeight","sideViewJumpKey","sideViewAlternateJumpKey"};
+            ? new[]{"m_Script","sideViewMode","sideViewDepthMovement","sideViewGravity","sideViewMaxFallSpeed","sideViewJumpHeight","sideViewVariableJump","sideViewJumpReleaseMultiplier","sideViewJumpKey","sideViewAlternateJumpKey","verticalAttackHalfAngle"}
+            : new[]{"m_Script","sideViewMode","sideViewDepthMovement","sideViewGravity","sideViewMaxFallSpeed","sideViewJumpHeight","sideViewVariableJump","sideViewJumpReleaseMultiplier","sideViewJumpKey","sideViewAlternateJumpKey"};
         DrawPropertiesExcluding(serializedObject,hidden);
         serializedObject.ApplyModifiedProperties();
     }

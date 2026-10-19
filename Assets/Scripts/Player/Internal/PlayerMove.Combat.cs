@@ -144,7 +144,9 @@ public partial class PlayerMove
     {
         Vector2 center = (Vector2)GroundPosition + attackDirection * GetCurrentAttackRange();
         float angle = Mathf.Atan2(attackDirection.y, attackDirection.x) * Mathf.Rad2Deg;
-        Collider2D[] hits = Physics2D.OverlapBoxAll(center, attackSizeSide * GetCurrentAttackScale(), angle, enemyLayer);
+        // 편집 모드의 Cut 대상은 일반 공격의 Enemy Layer 설정과 분리합니다.
+        int hitMask = isEditMode ? LayerMask.GetMask("Error") : (int)enemyLayer;
+        Collider2D[] hits = Physics2D.OverlapBoxAll(center, attackSizeSide * GetCurrentAttackScale(), angle, hitMask);
         handledAttackObjects.Clear();
         handledAttackReceivers.Clear();
         foreach (Collider2D hit in hits)
@@ -152,6 +154,8 @@ public partial class PlayerMove
             if (isEditMode && isReplacingStoredError) break;
             if (!handledAttackObjects.Add(hit.gameObject)) continue;
             if (hit.gameObject == gameObject || TryHandleErrorHit(hit)) continue;
+            // Error 레이어에 있어도 유효한 오류가 없으면 Cut 실패일 뿐, 피해를 주지 않습니다.
+            if (isEditMode) continue;
             if (CombatDamageUtility.TryFindReceiver(hit.gameObject, out ICombatDamageable receiver))
             {
                 // 같은 적의 루트/자식 Collider가 여러 개여도 한 공격당 피해는 한 번만 줍니다.

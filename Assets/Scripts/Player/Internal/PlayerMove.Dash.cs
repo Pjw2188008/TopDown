@@ -1,8 +1,9 @@
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 /// <summary>
-/// Space 단발 대쉬, 소모/자동 회복 스태미나, 대쉬 충돌 검사와 HUD입니다.
+/// 왼쪽 Shift(변경 가능) 단발 대쉬, 소모/자동 회복 스태미나, 대쉬 충돌 검사와 HUD입니다.
 /// PlayerMove의 partial 구현이므로 별도 부착하지 않습니다. 무적이나 새 애니메이션은 추가하지 않습니다.
 /// </summary>
 public partial class PlayerMove
@@ -16,6 +17,15 @@ public partial class PlayerMove
     private float dashRecoveryRemaining;
     private float dashFeedbackUntil;
     private readonly List<RaycastHit2D> dashHits = new List<RaycastHit2D>(16);
+
+    private void HandleDashInput(Vector2 movement)
+    {
+        var keyboard = Keyboard.current;
+        if (keyboard == null || dashKey == Key.None) return;
+        // Inspector에서 같은 키로 지정해도 점프와 대시가 한 입력에 겹치지 않습니다.
+        if (IsSideView && (dashKey == sideViewJumpKey || dashKey == sideViewAlternateJumpKey)) return;
+        if (keyboard[dashKey].wasPressedThisFrame) TryBeginDash(movement);
+    }
 
     private bool TryBeginDash(Vector2 movement)
     {

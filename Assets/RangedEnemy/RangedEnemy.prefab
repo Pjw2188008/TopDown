@@ -212,26 +212,42 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8b2040c1211e70148b5d5a883dff70b0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  aggroMode: 1
+  chaseAreaOffset: {x: 0, y: 0}
+  chaseAreaSize: {x: 12, y: 6}
   target: {fileID: 0}
+  returnTolerance: 0.05
   moveSpeed: 3
+  maxHealth: 5
   stoppingDistance: 1.26
-  attackRange: 3.51
   movementBlockingLayers:
     serializedVersion: 2
     m_Bits: 115
-  attackInterval: 1.5
-  firstAttackDelay: 1
-  releaseNormalizedTime: 0.65
+  useGravity: 1
+  stopAtLedges: 1
+  attackRange: 3.51
+  attackVerticalRange: 1.5
+  attackDamage: 1
+  attackCooldown: 1.5
+  hitNormalizedTime: 0.65
   fallbackAttackDuration: 0.5
-  projectileSprite: {fileID: -3156491990767165095, guid: e65413966066e4741837b32f6fda402a, type: 3}
+  parryStunDuration: 1
+  hitStunDuration: 0.15
+  spriteFacesLeft: 0
+  idleState: Idle
+  moveState: Move
+  attackState: Attack
+  hitState: Hit
+  deathState: Death
+  fallbackDeathDuration: 0.75
+  projectilePrefab: {fileID: 0}
+  muzzleOffset: {x: 0.45, y: 0}
   projectileSpeed: 8
-  projectileDamage: 1
   projectileLifetime: 6
   projectileRadius: 0.12
-  muzzleDistance: 0.45
-  maxBounces: 2
+  horizontalProjectile: 0
+  projectileSprite: {fileID: -3156491990767165095, guid: e65413966066e4741837b32f6fda402a, type: 3}
   projectileColor: {r: 1, g: 1, b: 1, a: 1}
-  maxHealth: 5
 --- !u!114 &3586665142811385782
 MonoBehaviour:
   m_ObjectHideFlags: 0

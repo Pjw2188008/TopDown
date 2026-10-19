@@ -19,14 +19,16 @@ public partial class PlayerMove : MonoBehaviour, ICombatDamageable
     private static readonly int DirectionHash = Animator.StringToHash("direction");
 
     [Header("플레이어 기본 설정")]
-    [Tooltip("플레이어 이동 속도입니다. 기본 이동 속도를 조절합니다.")]
+    [Tooltip("일반 이동의 기준 속도입니다. 실제 상시 달리기 속도는 이 값 × Run Speed Multiplier입니다. 물체를 잡고 옮기는 속도는 기존 기준값을 사용합니다.")]
     [SerializeField] private float moveSpeed = 5f;
 
-    [Tooltip("Space를 누르고 이동할 때 걷기 속도에 곱할 배율입니다. 키를 놓으면 걷기 속도로 돌아옵니다. 애니메이션과 재생 속도는 바꾸지 않으며 가드/패링 중에는 이동할 수 없습니다.")]
+    [Tooltip("일반 이동에 항상 적용하는 달리기 배율입니다. 걷기/달리기 키 구분은 없습니다. 기존 이동 애니메이션을 유지하며 가드/패링 중에는 이동할 수 없습니다.")]
     [SerializeField, Min(1f)] private float runSpeedMultiplier = 1.5f;
 
     [Header("대쉬 / 스태미나")]
-    [Tooltip("Space를 새로 누르면 대쉬합니다. 누른 채 유지하면 대쉬 종료 후 기존 달리기로 이어집니다. 이동 입력이 없으면 마지막 이동 방향으로 대쉬합니다. 별도 무적 효과는 없습니다.")]
+    [Tooltip("대시 키입니다. 기본은 왼쪽 Shift이며 Space는 사이드뷰 점프입니다. None이면 대시 입력을 끕니다.")]
+    [SerializeField] private Key dashKey = Key.LeftShift;
+    [Tooltip("대시 키를 새로 누르면 대쉬합니다. 이동 입력이 없으면 마지막 이동 방향으로 대쉬합니다. 별도 무적 효과는 없습니다.")]
     [SerializeField, Min(0.1f)] private float dashSpeed = 18f;
     [Tooltip("대쉬 유지 시간입니다(게임 시간, 초). 기본 거리 = 속도 × 시간이며 진행 방향은 시작 순간 고정됩니다.")]
     [SerializeField, Min(0.01f)] private float dashDuration = 0.16f;
@@ -179,7 +181,7 @@ public partial class PlayerMove : MonoBehaviour, ICombatDamageable
     [Tooltip("공격 판정의 크기입니다. 사각형 판정의 가로/세로 크기를 조절합니다.")]
     [SerializeField] private Vector2 attackSizeSide = new Vector2(0.8f, 0.8f);
 
-    [Tooltip("공격이 감지될 적 레이어입니다. 적 오브젝트가 이 레이어에 있어야 공격 판정에 걸립니다.")]
+    [Tooltip("일반 공격이 감지할 대상 레이어입니다. Error 레이어의 몬스터도 공격하려면 Error를 함께 체크하세요. 편집 모드의 Cut은 이 설정과 무관하게 Error 레이어만 감지합니다.")]
     [SerializeField] private LayerMask enemyLayer;
 
     [Header("공격 이펙트")]
@@ -317,7 +319,7 @@ public partial class PlayerMove : MonoBehaviour, ICombatDamageable
 
         Vector2 moveDirection = GetMovementInput();
         UpdateGuardState();
-        if (Keyboard.current.spaceKey.wasPressedThisFrame) TryBeginDash(moveDirection);
+        HandleDashInput(moveDirection);
         bool dashHandled = UpdateDashMovement(Time.deltaTime);
         HandleSideViewJumpInput();
         if (dashHandled) moveDirection = dashDirection;
@@ -332,8 +334,7 @@ public partial class PlayerMove : MonoBehaviour, ICombatDamageable
             moveDirection = moveDirection.normalized;
             lastDirection = moveDirection;
             Vector2 moved = MovePlayerWithCollision(moveDirection * GetCurrentMoveSpeed() * Time.deltaTime);
-            didRunThisFrame = Keyboard.current.spaceKey.isPressed && runSpeedMultiplier > 1f
-                && moved.sqrMagnitude > .00000001f;
+            didRunThisFrame = moved.sqrMagnitude > .00000001f;
             runAfterimageDirection = moveDirection;
         }
 
