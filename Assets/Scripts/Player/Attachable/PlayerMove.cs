@@ -175,7 +175,7 @@ public partial class PlayerMove : MonoBehaviour, ICombatDamageable
     [Tooltip("공격 후 다음 공격까지의 쿨타임입니다.")]
     [SerializeField] private float attackCooldown = 0.35f;
 
-    [Tooltip("기본 공격 범위의 거리입니다. 플레이어 앞쪽으로 얼마나 넓게 공격하는지 설정합니다.")]
+    [Tooltip("플레이어에서 공격 판정 중심까지의 거리(월드 단위)입니다. 이펙트만 옮기려면 이펙트 위치 보정을 사용하세요.")]
     [SerializeField] private float attackRangeSide = 0.75f;
 
     [Tooltip("공격 판정의 크기입니다. 사각형 판정의 가로/세로 크기를 조절합니다.")]
@@ -205,7 +205,19 @@ public partial class PlayerMove : MonoBehaviour, ICombatDamageable
     [Tooltip("공격 이펙트가 화면에 유지되는 시간입니다.")]
     [SerializeField, Min(0.01f)] private float attackEffectDuration = 0.18f;
 
-    [Tooltip("공격 판정 크기를 기준으로 이펙트 크기를 추가 조절합니다.")]
+    [InspectorName("이펙트 위치 보정")]
+    [Tooltip("평상시 공격 판정 중심에서 그림 중심까지의 보정(월드 단위)입니다. 오른쪽 기준 X=앞/뒤, Y=위/아래입니다. 사이드뷰 왼쪽은 X만 반전합니다. 2D 사이드뷰 거대화는 Y 보정을 유지하고 그림 아래쪽을 기준으로 위로 확대합니다(X는 배율 적용). 타격 판정은 별도입니다.")]
+    [SerializeField] private Vector2 attackEffectOffset = Vector2.zero;
+
+    [InspectorName("이펙트 크기를 공격 판정에 맞춤")]
+    [Tooltip("켜면 기존처럼 Attack Size Side × 크기 배율을 사용합니다. 끄면 아래 이펙트 크기(월드)를 직접 사용합니다. 기존 씬의 모양을 유지하기 위해 기본값은 켜짐입니다.")]
+    [SerializeField] private bool attackEffectMatchHitboxSize = true;
+
+    [InspectorName("이펙트 크기 (월드)")]
+    [Tooltip("공격 판정에 맞춤을 껐을 때 사용하는 그림의 전체 가로/세로 길이입니다. Transform Scale이나 스프라이트 PPU와 무관한 월드 단위이며, 거대화 전투 효과의 배율은 적용됩니다. 0 이하 값은 최소 0.001로 제한합니다. 타격 범위는 별도입니다.")]
+    [SerializeField] private Vector2 attackEffectWorldSize = Vector2.one;
+
+    [Tooltip("공격 판정에 맞춤을 켰을 때만 사용합니다. Attack Size Side를 기준으로 이펙트 크기를 추가 조절합니다. 껐을 때는 이펙트 크기(월드)를 사용합니다.")]
     [SerializeField] private Vector2 attackEffectSizeMultiplier = Vector2.one;
 
     [Tooltip("플레이어보다 이펙트를 몇 단계 앞에 표시할지 설정합니다.")]

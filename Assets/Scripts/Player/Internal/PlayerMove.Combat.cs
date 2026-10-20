@@ -103,10 +103,8 @@ public partial class PlayerMove
             return;
         }
 
-        float attackScale = GetCurrentAttackScale();
-        Vector2 effectCenter = (Vector2)GroundPosition
-            + attackDirection * GetCurrentAttackRange();
-        Vector2 targetSize = Vector2.Scale(attackSizeSide * attackScale, attackEffectSizeMultiplier);
+        Vector3 effectCenter = GetAttackEffectCenter(attackDirection);
+        Vector2 targetSize = GetAttackEffectSize();
         Vector2 spriteSize = attackEffectSprite.bounds.size;
 
         if (spriteSize.x <= 0f || spriteSize.y <= 0f)
@@ -127,22 +125,61 @@ public partial class PlayerMove
             targetSize.y / spriteSize.y,
             1f);
         effectObject.transform.localScale = effectScale;
-        float angle = Mathf.Atan2(attackDirection.y, attackDirection.x) * Mathf.Rad2Deg;
-        Quaternion rotation = Quaternion.Euler(0f, 0f, angle - (facingLeft ? 180f : 0f));
+        Quaternion rotation = GetAttackEffectRotation(attackDirection);
         effectObject.transform.rotation = rotation;
 
         Vector3 spriteCenter = attackEffectSprite.bounds.center;
         float centerOffsetX = spriteCenter.x * effectScale.x * (facingLeft ? -1f : 1f);
         float centerOffsetY = spriteCenter.y * effectScale.y;
-        effectObject.transform.position = (Vector3)effectCenter
+        effectObject.transform.position = effectCenter
             - rotation * new Vector3(centerOffsetX, centerOffsetY, 0f);
 
         Destroy(effectObject, Mathf.Max(0.01f, attackEffectDuration));
     }
 
+    // 생성과 미리보기가 같은 좌표 계산을 공유합니다. Pivot/좌우 반전에 따른 어긋남을 방지합니다.
+    private Quaternion GetAttackEffectRotation(Vector2 direction)
+    {
+        float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
+        return Quaternion.Euler(0f, 0f, angle - (direction.x < 0f ? 180f : 0f));
+    }
+
+    private Vector3 GetAttackEffectCenter(Vector2 direction)
+    {
+        float scale = GetCurrentAttackScale();
+        Vector2 offset = attackEffectOffset * scale;
+        // 2D에서는 평상시 그림의 아래쪽을 유지하며 위로 확대합니다.
+        // Y 보정까지 배율을 곱하면 음수 보정에서 다시 바닥 아래로 내려가므로 원래 높이를 유지합니다.
+        if (UseBottomAnchoredAttack)
+            offset.y = attackEffectOffset.y + GetBaseAttackEffectSize().y * (scale - 1f) * .5f;
+        if (direction.x < 0f) offset.x = -offset.x;
+        return GroundPosition + (Vector3)(direction * GetCurrentAttackRange())
+            + GetAttackEffectRotation(direction) * (Vector3)offset;
+    }
+
+    private Vector2 GetAttackEffectSize()
+        => GetBaseAttackEffectSize() * GetCurrentAttackScale();
+
+    private Vector2 GetBaseAttackEffectSize()
+    {
+        Vector2 size = attackEffectMatchHitboxSize
+            ? Vector2.Scale(attackSizeSide, attackEffectSizeMultiplier) : attackEffectWorldSize;
+        return new Vector2(Mathf.Max(.001f, size.x), Mathf.Max(.001f, size.y));
+    }
+
+    private bool UseBottomAnchoredAttack => IsSideView && !IsSideViewDepthMovement;
+
+    private Vector3 GetAttackHitCenter(Vector2 direction)
+    {
+        Vector3 center = GroundPosition + (Vector3)(direction * GetCurrentAttackRange());
+        if (UseBottomAnchoredAttack)
+            center.y += Mathf.Abs(attackSizeSide.y) * (GetCurrentAttackScale() - 1f) * .5f;
+        return center;
+    }
+
     private void AttackHit()
     {
-        Vector2 center = (Vector2)GroundPosition + attackDirection * GetCurrentAttackRange();
+        Vector2 center = GetAttackHitCenter(attackDirection);
         float angle = Mathf.Atan2(attackDirection.y, attackDirection.x) * Mathf.Rad2Deg;
         // 편집 모드의 Cut 대상은 일반 공격의 Enemy Layer 설정과 분리합니다.
         int hitMask = isEditMode ? LayerMask.GetMask("Error") : (int)enemyLayer;
@@ -201,11 +238,6 @@ public partial class PlayerMove
         DrawInteractionGizmo();
         DrawErrorDiscoveryGizmo();
         DrawParryFeedbackGizmo();
-        if (spriteRenderer == null)
-        {
-            return;
-        }
-
         if (Application.isPlaying)
         {
             DrawAttackGizmo(isAttacking ? attackDirection : GetCardinalAttackDirection(GetMouseDirection()));
@@ -220,15 +252,17 @@ public partial class PlayerMove
 
     private void DrawAttackGizmo(Vector2 direction)
     {
-        Vector2 center = (Vector2)GroundPosition + direction * GetCurrentAttackRange();
+        Vector3 center = GetAttackHitCenter(direction);
         Vector2 size = attackSizeSide * GetCurrentAttackScale();
-        Vector2 effectSize = Vector2.Scale(size, attackEffectSizeMultiplier);
+        Vector2 effectSize = GetAttackEffectSize();
         float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
         Matrix4x4 previousMatrix = Gizmos.matrix;
         Color previousColor = Gizmos.color;
         Gizmos.matrix = Matrix4x4.TRS(center, Quaternion.Euler(0f, 0f, angle), Vector3.one);
         Gizmos.color = new Color(1f, 0.5f, 0f, 0.7f);
         Gizmos.DrawWireCube(Vector3.zero, size);
+        // 파란 이펙트 박스는 실제 생성 위치/크기를 그대로 표시합니다. SpriteRenderer 연결 없이도 편집 중 표시합니다.
+        Gizmos.matrix = Matrix4x4.TRS(GetAttackEffectCenter(direction), GetAttackEffectRotation(direction), Vector3.one);
         Gizmos.color = new Color(0.2f, 0.7f, 1f, 0.15f);
         Gizmos.DrawCube(Vector3.zero, effectSize);
         Gizmos.color = new Color(0.2f, 0.7f, 1f, 0.9f);

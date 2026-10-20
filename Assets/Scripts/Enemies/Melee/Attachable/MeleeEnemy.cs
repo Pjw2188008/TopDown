@@ -5,7 +5,7 @@ using UnityEngine;
 [DisallowMultipleComponent]
 [RequireComponent(typeof(SpriteRenderer), typeof(Animator), typeof(Rigidbody2D))]
 [RequireComponent(typeof(BoxCollider2D), typeof(EnemyStagger))]
-public sealed class MeleeEnemy : TerritoryMonster
+public sealed partial class MeleeEnemy : TerritoryMonster
 {
     [Header("근접 타격")]
     [Tooltip("오른쪽 기준 타격 박스 중심 오프셋. 왼쪽에서 X만 반전됩니다.")]
@@ -25,6 +25,12 @@ public sealed class MeleeEnemy : TerritoryMonster
     protected override void ReleaseAttack()
     {
         if (Target == null) return;
+        if (activeAttackMode == MeleeAttackMode.Wave) { ReleaseWaves(); return; }
+        if (activeAttackMode == MeleeAttackMode.Thrust)
+        {
+            thrustActive = true; thrustElapsed = 0f; thrustTravelled = 0f; thrustHit = false;
+            return;
+        }
         Vector2 center = (Vector2)transform.position + new Vector2(hitOffset.x * FacingSign, hitOffset.y);
         foreach (var shape in Physics2D.OverlapBoxAll(center, SafeSize(hitSize), 0f))
             if (shape.GetComponentInParent<PlayerMove>() == Target)
@@ -32,8 +38,14 @@ public sealed class MeleeEnemy : TerritoryMonster
     }
     protected override void DrawAttackGizmos()
     {
+        if (attackMode == MeleeAttackMode.Wave) { DrawWaveGizmos(); return; }
         Gizmos.color = Color.yellow;
         Gizmos.DrawWireCube((Vector2)transform.position + new Vector2(hitOffset.x * FacingSign, hitOffset.y), SafeSize(hitSize));
+        if (attackMode == MeleeAttackMode.Thrust)
+        {
+            Vector2 end = (Vector2)transform.position + new Vector2((hitOffset.x + Mathf.Max(0f,thrustDistance)) * FacingSign, hitOffset.y);
+            Gizmos.color = Color.red; Gizmos.DrawLine(transform.position,end); Gizmos.DrawWireCube(end,SafeSize(hitSize));
+        }
     }
 }
 
@@ -197,6 +209,7 @@ public abstract class TerritoryMonster : MonoBehaviour, ICombatDamageable, IAcce
         if (CanAttackTarget() && cooldown <= 0f)
         {
             State = MonsterBehaviourState.Attacking; attackElapsed = 0f; struck = false; observedAttack = false;
+            OnAttackStarted();
             Play(attackState,true); return;
         }
         float difference = target.position.x-transform.position.x;
@@ -208,6 +221,7 @@ public abstract class TerritoryMonster : MonoBehaviour, ICombatDamageable, IAcce
     {
         if (Visual != null) Visual.flipX = facingLeft != spriteFacesLeft;
         if (!IsAttacking || Time.deltaTime <= 0f) return;
+        if (stagger.IsStunned || Time.time < hurtUntil) { CancelAttack(); return; }
         if (Target == null || !Target.isActiveAndEnabled || !IsInsideChaseArea(Target.transform.position)) { BeginReturn(); return; }
         float progress = attackElapsed/Mathf.Max(.05f,fallbackAttackDuration);
         AnimationClip clip = null;
@@ -231,10 +245,13 @@ public abstract class TerritoryMonster : MonoBehaviour, ICombatDamageable, IAcce
         }
         if (!struck && progress >= HitTime(clip))
         {
-            struck = true; if (CanAttackTarget()) ReleaseAttack();
+            struck = true; if (!RequiresTargetInRangeOnRelease || CanAttackTarget()) ReleaseAttack();
             if (!IsAttacking) return;
         }
-        if (progress >= 1f) { State = MonsterBehaviourState.Chasing; cooldown = Mathf.Max(0f,attackCooldown); Play(idleState); }
+        TickAttackAction(Time.deltaTime * multiplier);
+        if (!IsAttacking) return;
+        if (progress >= 1f && !HasActiveAttackAction)
+        { OnAttackEnded(); State = MonsterBehaviourState.Chasing; cooldown = Mathf.Max(0f,attackCooldown); Play(idleState); }
     }
     private bool CanAttackTarget()
     {
@@ -292,6 +309,7 @@ public abstract class TerritoryMonster : MonoBehaviour, ICombatDamageable, IAcce
     private void CancelAttack()
     {
         if (!IsAttacking) return;
+        OnAttackEnded();
         State = MonsterBehaviourState.Chasing; struck = true; cooldown = Mathf.Max(0f,attackCooldown); Play(idleState);
     }
     public bool ReceiveDamage(float amount,GameObject source,bool canReflect)
@@ -342,6 +360,29 @@ public abstract class TerritoryMonster : MonoBehaviour, ICombatDamageable, IAcce
     protected virtual void OnDisable()
     { CancelAttack(); RestoreCollisions(); if (animator != null) animator.speed = animationSpeed; }
     protected static Vector2 SafeSize(Vector2 size) => new Vector2(Mathf.Max(.1f,size.x),Mathf.Max(.1f,size.y));
+    // 공격 애니메이션/방향을 바꾸지 않고 전진합니다. 찌르기도 일반 이동의 벽/낭떠러지 제한을 공유합니다.
+    protected Vector2 MoveAttackStep(float signedDistance)
+    {
+        float half = SafeSize(chaseAreaSize).x * .5f;
+        float margin = 0f;
+        if (EnemySideView.TryBounds(transform,out var bounds))
+            margin = bounds.extents.x + Mathf.Abs(bounds.center.x-transform.position.x);
+        half = Mathf.Max(0f, half-margin);
+        float x = transform.position.x, left = ChaseAreaCenter.x-half, right = ChaseAreaCenter.x+half;
+        float distance = x < left ? Mathf.Max(0f,signedDistance) : x > right ? Mathf.Min(0f,signedDistance)
+            : Mathf.Clamp(x+signedDistance,left,right)-x;
+        navigation.sideView.stopAtLedges = stopAtLedges;
+        Vector2 step = navigation.sideView.ConstrainStep(transform,target,Vector2.right*distance,movementBlockingLayers);
+        float allowed = InteractionMotion.AllowedDistance(transform,target,step.normalized,step.magnitude,movementBlockingLayers,hits,default,true);
+        Vector2 result = step.normalized * allowed;
+        EnemySideView.Move(transform,result);
+        return result;
+    }
+    protected virtual void OnAttackStarted() { }
+    protected virtual void OnAttackEnded() { }
+    protected virtual void TickAttackAction(float dt) { }
+    protected virtual bool HasActiveAttackAction => false;
+    protected virtual bool RequiresTargetInRangeOnRelease => true;
     protected virtual void OnDrawGizmosSelected()
     {
         Gizmos.color = Color.cyan; Gizmos.DrawWireCube(ChaseAreaCenter,SafeSize(chaseAreaSize));
