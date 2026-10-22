@@ -10,12 +10,29 @@ public sealed partial class MeleeEnemy : TerritoryMonster
     [Header("근접 타격")]
     [Tooltip("오른쪽 기준 타격 박스 중심 오프셋. 왼쪽에서 X만 반전됩니다.")]
     public Vector2 hitOffset = new Vector2(.8f, 0f);
-    [Tooltip("실제 타격 박스 크기. 노란 기즈모로 표시합니다.")]
+    [Tooltip("일반 공격의 시작 조건과 실제 타격에 함께 쓰는 박스 크기. 노란 기즈모입니다. 플레이어의 몸 콜라이더가 이 범위에 들어와야 공격합니다.")]
     public Vector2 hitSize = new Vector2(1.4f, 1.5f);
     [Min(0), Tooltip("1부터 시작하는 Attack 타격 프레임. 0이면 Hit Normalized Time을 사용합니다. 실제 재생 클립의 FPS를 기준으로 계산합니다.")]
     public int attackHitFrame;
     [Min(0f), Tooltip("이 근접 공격에만 적용할 패링 입력 허용 시간(초). 길게 누른 가드는 패링이 되지 않습니다. 0이면 플레이어 기본값을 사용합니다.")]
     public float meleeParryWindow = .3f;
+
+    protected override bool CancelWindupWhenOutOfRange => true;
+    protected override bool IsTargetInAttackRange()
+    {
+        var mode = IsAttacking ? activeAttackMode : attackMode;
+        if (mode != MeleeAttackMode.Normal) return base.IsTargetInAttackRange();
+        if (Target == null) return false;
+        // 공격 중에는 시작 방향을 유지합니다. 준비 중 뒤로 넘어가도 돌아서 타격하지 않습니다.
+        Vector2 center = (Vector2)transform.position + new Vector2(hitOffset.x * FacingSign, hitOffset.y);
+        foreach (var shape in Physics2D.OverlapBoxAll(center, SafeSize(hitSize), 0f))
+            if (shape.enabled && !shape.isTrigger && shape.GetComponentInParent<PlayerMove>() == Target) return true;
+        return false;
+    }
+
+    protected override float ChaseStoppingDistance(bool canAttack)
+        // 범위 안이면 쿨타임을 기다리고, 밖이면 Stopping Distance 때문에 먼저 멈추지 않습니다.
+        => canAttack && Target != null ? Mathf.Abs(Target.transform.position.x-transform.position.x) : 0f;
     protected override float HitTime(AnimationClip clip)
     {
         if (attackHitFrame <= 0 || clip == null || clip.length <= 0f || clip.frameRate <= 0f) return base.HitTime(clip);
@@ -38,6 +55,11 @@ public sealed partial class MeleeEnemy : TerritoryMonster
     }
     protected override void DrawAttackGizmos()
     {
+        if (attackMode != MeleeAttackMode.Normal)
+        {
+            Gizmos.color = new Color(1f,.5f,0f);
+            Gizmos.DrawWireCube(transform.position,new Vector3(Mathf.Max(.1f,attackRange)*2f,Mathf.Max(.1f,attackVerticalRange)*2f,0));
+        }
         if (attackMode == MeleeAttackMode.Wave) { DrawWaveGizmos(); return; }
         Gizmos.color = Color.yellow;
         Gizmos.DrawWireCube((Vector2)transform.position + new Vector2(hitOffset.x * FacingSign, hitOffset.y), SafeSize(hitSize));
@@ -79,7 +101,7 @@ public abstract class TerritoryMonster : MonoBehaviour, ICombatDamageable, IAcce
     [Header("이동 / 체력")]
     [Min(0f)] public float moveSpeed = 2f;
     [Min(1f)] public float maxHealth = 10f;
-    [Min(0f), Tooltip("접근을 멈출 가로 거리. 공격 범위 이하로 설정합니다.")]
+    [Min(0f), Tooltip("원거리 몬스터가 접근을 멈출 가로 거리. 근접 몬스터는 이 값 대신 실제 공격 가능 여부에 따라 범위 밖에서 추격하고 안에서 멈춥니다.")]
     public float stoppingDistance = .8f;
     [Tooltip("벽/바닥 충돌 레이어. 플레이어 몸은 이동을 막지 않습니다.")]
     public LayerMask movementBlockingLayers = Physics2D.DefaultRaycastLayers;
@@ -88,8 +110,8 @@ public abstract class TerritoryMonster : MonoBehaviour, ICombatDamageable, IAcce
     [Tooltip("낭떠러지 앞에서 정지합니다. 자동 점프/발판 간 길찾기는 하지 않습니다.")]
     public bool stopAtLedges = true;
     [Header("공격 / 패링")]
-    [Min(.1f), Tooltip("공격을 시작할 가로 거리.")] public float attackRange = 1.5f;
-    [Min(.1f), Tooltip("공격을 시작할 수 있는 플레이어와의 높이 차이.")] public float attackVerticalRange = 1.5f;
+    [Min(.1f), Tooltip("원거리 또는 근접 파동/찌르기를 시작할 가로 거리. 근접 일반 공격은 Hit Offset/Hit Size 박스를 사용합니다.")] public float attackRange = 1.5f;
+    [Min(.1f), Tooltip("원거리 또는 근접 파동/찌르기의 허용 높이 차이. 근접 일반 공격은 Hit Offset/Hit Size 박스를 사용합니다.")] public float attackVerticalRange = 1.5f;
     [Min(0f)] public float attackDamage = 1f;
     [Min(0f), Tooltip("공격 종료 후 다음 공격까지 시간.")] public float attackCooldown = 1f;
     [Range(0f,1f), Tooltip("Attack 클립 중 한 번 타격/발사할 시점.")] public float hitNormalizedTime = .65f;
@@ -204,16 +226,21 @@ public abstract class TerritoryMonster : MonoBehaviour, ICombatDamageable, IAcce
         }
         if (!engaged && valid && aggroMode == MonsterAggroMode.WhenPlayerEntersArea) engaged = true;
         if (!engaged || !valid) { Patrol(dt); return; }
-        if (IsAttacking) { attackElapsed += dt*multiplier; return; }
+        if (IsAttacking)
+        {
+            if (CancelWindupWhenOutOfRange && !struck && !CanAttackTarget()) CancelAttack();
+            else { attackElapsed += dt*multiplier; return; }
+        }
         State = MonsterBehaviourState.Chasing; Face(target.position.x-transform.position.x);
-        if (CanAttackTarget() && cooldown <= 0f)
+        bool canAttack = CanAttackTarget();
+        if (canAttack && cooldown <= 0f)
         {
             State = MonsterBehaviourState.Attacking; attackElapsed = 0f; struck = false; observedAttack = false;
             OnAttackStarted();
             Play(attackState,true); return;
         }
         float difference = target.position.x-transform.position.x;
-        float stop = Mathf.Min(Mathf.Max(0f,stoppingDistance),Mathf.Max(.1f,attackRange));
+        float stop = ChaseStoppingDistance(canAttack);
         if (Mathf.Abs(difference) > stop) MoveTo(target.position.x-Mathf.Sign(difference)*stop,dt);
         else Play(idleState);
     }
@@ -223,6 +250,8 @@ public abstract class TerritoryMonster : MonoBehaviour, ICombatDamageable, IAcce
         if (!IsAttacking || Time.deltaTime <= 0f) return;
         if (stagger.IsStunned || Time.time < hurtUntil) { CancelAttack(); return; }
         if (Target == null || !Target.isActiveAndEnabled || !IsInsideChaseArea(Target.transform.position)) { BeginReturn(); return; }
+        // Update 뒤에 대상이 이동했어도 늦은 타격/발사를 만들지 않습니다.
+        if (CancelWindupWhenOutOfRange && !struck && !CanAttackTarget()) { CancelAttack(); return; }
         float progress = attackElapsed/Mathf.Max(.05f,fallbackAttackDuration);
         AnimationClip clip = null;
         if (HasState(attackState))
@@ -256,10 +285,17 @@ public abstract class TerritoryMonster : MonoBehaviour, ICombatDamageable, IAcce
     private bool CanAttackTarget()
     {
         if (Target == null || !Target.isActiveAndEnabled || !IsInsideChaseArea(target.position)) return false;
-        Vector2 delta = target.position-transform.position;
-        return Mathf.Abs(delta.x) <= Mathf.Max(.1f,attackRange) && Mathf.Abs(delta.y) <= Mathf.Max(.1f,attackVerticalRange)
-            && navigation.HasSight(transform,target,target.position,movementBlockingLayers);
+        Physics2D.SyncTransforms();
+        return IsTargetInAttackRange() && navigation.HasSight(transform,target,target.position,movementBlockingLayers);
     }
+    protected virtual bool IsTargetInAttackRange()
+    {
+        Vector2 delta = target.position-transform.position;
+        return Mathf.Abs(delta.x) <= Mathf.Max(.1f,attackRange) && Mathf.Abs(delta.y) <= Mathf.Max(.1f,attackVerticalRange);
+    }
+    protected virtual bool CancelWindupWhenOutOfRange => false;
+    protected virtual float ChaseStoppingDistance(bool canAttack)
+        => Mathf.Min(Mathf.Max(0f,stoppingDistance),Mathf.Max(.1f,attackRange));
     private void Patrol(float dt)
     {
         if (!patrolEnabled || moveSpeed <= 0f || patrolSpeedMultiplier <= 0f)
