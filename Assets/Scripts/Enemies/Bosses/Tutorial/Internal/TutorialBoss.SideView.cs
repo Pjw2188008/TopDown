@@ -1,14 +1,14 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-/// <summary>2D 사이드뷰 대상에게만 적용하는 바닥 낙석/좌우 충격파/발 고정 확대입니다. 직접 부착하지 않습니다.</summary>
+/// <summary>사이드뷰 보스의 바닥 낙석/좌우 충격파/발 고정 확대입니다. 직접 부착하지 않습니다.</summary>
 public sealed partial class TutorialBoss
 {
     [Header("사이드뷰 패턴")]
     [SerializeField, Tooltip("사이드뷰 낙석이 착지할 바닥/발판 레이어입니다. 일반 Collider2D가 필요하며 Trigger와 몬스터/플레이어는 제외합니다.")]
     private LayerMask sideViewGroundLayers = Physics2D.DefaultRaycastLayers;
     private readonly List<RaycastHit2D> groundHits = new List<RaycastHit2D>();
-    private bool IsSideViewBattle => sight.IsSideView(transform,player != null ? player.transform : null);
+    private bool IsSideViewBattle => true;
 
     private Bounds RockfallWorldBounds
     {

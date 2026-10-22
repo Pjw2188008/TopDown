@@ -1,0 +1,450 @@
+fileFormatVersion: 2
+guid: b2ce497729ada754290ad3f8f6996454
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -840628829053667118
+    second: RE_Slash_Right_12_0
+  - first:
+      213: 6193462021702769666
+    second: RE_Slash_Right_12_1
+  - first:
+      213: 5108487303296573432
+    second: RE_Slash_Right_12_2
+  - first:
+      213: 5548353595941401539
+    second: RE_Slash_Right_12_3
+  - first:
+      213: 5424595951054829843
+    second: RE_Slash_Right_12_4
+  - first:
+      213: 2365353650920575585
+    second: RE_Slash_Right_12_5
+  - first:
+      213: -6172064446515938879
+    second: RE_Slash_Right_12_6
+  - first:
+      213: -2774412846667424863
+    second: RE_Slash_Right_12_7
+  - first:
+      213: -876433454271073347
+    second: RE_Slash_Right_12_8
+  - first:
+      213: -2250963520042102322
+    second: RE_Slash_Right_12_9
+  - first:
+      213: -242140824486532684
+    second: RE_Slash_Right_12_10
+  - first:
+      213: 446315204288714785
+    second: RE_Slash_Right_12_11
+  - first:
+      213: -7941556898328993317
+    second: RE_Slash_Right_12_12
+  - first:
+      213: -2645169709271146594
+    second: RE_Slash_Right_12_13
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 0
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 128
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 0
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Android
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: RE_Slash_Right_12_0
+      rect:
+        serializedVersion: 2
+        x: 28
+        y: 329
+        width: 126
+        height: 132
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2d8bd48a88c7554f0800000000000000
+      internalID: -840628829053667118
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: RE_Slash_Right_12_1
+      rect:
+        serializedVersion: 2
+        x: 324
+        y: 324
+        width: 151
+        height: 148
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 20c5775f4e893f550800000000000000
+      internalID: 6193462021702769666
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: RE_Slash_Right_12_3
+      rect:
+        serializedVersion: 2
+        x: 195
+        y: 321
+        width: 114
+        height: 103
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3c33956f236bffc40800000000000000
+      internalID: 5548353595941401539
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: RE_Slash_Right_12_4
+      rect:
+        serializedVersion: 2
+        x: 504
+        y: 329
+        width: 109
+        height: 108
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 31935a8d649084b40800000000000000
+      internalID: 5424595951054829843
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: RE_Slash_Right_12_5
+      rect:
+        serializedVersion: 2
+        x: 12
+        y: 168
+        width: 154
+        height: 123
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1625b430d9c63d020800000000000000
+      internalID: 2365353650920575585
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: RE_Slash_Right_12_6
+      rect:
+        serializedVersion: 2
+        x: 172
+        y: 164
+        width: 138
+        height: 119
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1c9799e361c685aa0800000000000000
+      internalID: -6172064446515938879
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: RE_Slash_Right_12_7
+      rect:
+        serializedVersion: 2
+        x: 324
+        y: 165
+        width: 154
+        height: 114
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1ab9b16273e4f79d0800000000000000
+      internalID: -2774412846667424863
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: RE_Slash_Right_12_8
+      rect:
+        serializedVersion: 2
+        x: 504
+        y: 168
+        width: 114
+        height: 93
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: db377e8ba6846d3f0800000000000000
+      internalID: -876433454271073347
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: RE_Slash_Right_12_10
+      rect:
+        serializedVersion: 2
+        x: 30
+        y: 7
+        width: 127
+        height: 86
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4b92cdaf33eb3acf0800000000000000
+      internalID: -242140824486532684
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: RE_Slash_Right_12_11
+      rect:
+        serializedVersion: 2
+        x: 172
+        y: 3
+        width: 135
+        height: 111
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1281c794051a13600800000000000000
+      internalID: 446315204288714785
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: RE_Slash_Right_12_12
+      rect:
+        serializedVersion: 2
+        x: 324
+        y: 8
+        width: 125
+        height: 99
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: bd12c8fb31ce9c190800000000000000
+      internalID: -7941556898328993317
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: RE_Slash_Right_12_13
+      rect:
+        serializedVersion: 2
+        x: 476
+        y: 8
+        width: 134
+        height: 103
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e9f15440a287a4bd0800000000000000
+      internalID: -2645169709271146594
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 8738caeaad44cc64b9582ef62f840323
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      RE_Slash_Right_12_0: -840628829053667118
+      RE_Slash_Right_12_1: 6193462021702769666
+      RE_Slash_Right_12_10: -242140824486532684
+      RE_Slash_Right_12_11: 446315204288714785
+      RE_Slash_Right_12_12: -7941556898328993317
+      RE_Slash_Right_12_13: -2645169709271146594
+      RE_Slash_Right_12_2: 5108487303296573432
+      RE_Slash_Right_12_3: 5548353595941401539
+      RE_Slash_Right_12_4: 5424595951054829843
+      RE_Slash_Right_12_5: 2365353650920575585
+      RE_Slash_Right_12_6: -6172064446515938879
+      RE_Slash_Right_12_7: -2774412846667424863
+      RE_Slash_Right_12_8: -876433454271073347
+      RE_Slash_Right_12_9: -2250963520042102322
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

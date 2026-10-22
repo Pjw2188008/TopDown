@@ -1,17 +1,16 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-/// <summary>보스 중심에서 네 방향으로 발사하는 충격파. TutorialBoss partial이며 직접 부착하지 않습니다.</summary>
+/// <summary>보스 중심에서 좌우로 발사하는 사이드뷰 충격파. 직접 부착하지 않습니다.</summary>
 public sealed partial class TutorialBoss
 {
-    [Header("네 갈래 충격파")]
-    [SerializeField, Tooltip("거리와 무관하게 사용하며 근접 동작이 끝난 뒤 시작합니다. 낙석과는 동시 진행합니다. 탑다운은 네 방향, 2D 사이드뷰는 좌우 두 방향입니다.")] private bool enableShockwave = true;
+    [Header("좌우 충격파")]
+    [SerializeField, Tooltip("거리와 무관하게 사용하며 근접 동작이 끝난 뒤 시작합니다. 낙석과 동시에 진행하고 좌우 두 방향으로만 발사합니다.")] private bool enableShockwave = true;
     [SerializeField, Min(0f), Tooltip("방 입장 후 첫 충격파 준비까지의 최소 시간입니다.")] private float shockwaveFirstDelay = 5f;
     [SerializeField, Min(.1f), Tooltip("충격파 공격 시작 사이의 최소 간격입니다. 다른 공격 중이면 끝날 때까지 기다립니다.")] private float shockwaveInterval = 9f;
     [SerializeField, Min(.1f), Tooltip("충격파 애니메이션 시작부터 발사 프레임까지의 시간입니다. 애니메이션이 없어도 이 시간 뒤 발사합니다.")] private float shockwaveWindupTime = 1f;
     [SerializeField, Min(2), Tooltip("Boss_Shockwave 클립의 발사 프레임 번호(첫 프레임=1). 이후 후딜도 끝까지 재생합니다.")] private int shockwaveReleaseFrame = 9;
     [SerializeField, Tooltip("보스 중심 기준 발사 위치입니다. 월드 단위이며 보스의 좌우 반전과 무관합니다.")] private Vector2 shockwaveOriginOffset;
-    [SerializeField, Range(0f,90f), Tooltip("탑다운: 0이면 상하좌우(+), 45이면 대각선(X). 2D 사이드뷰에서는 무시하고 좌우로만 발사합니다.")] private float shockwaveAngle;
     [SerializeField, Min(.1f), Tooltip("충격파의 초당 이동 거리입니다.")] private float shockwaveSpeed = 5f;
     [SerializeField, Min(.1f), Tooltip("충격파의 최대 이동 거리입니다. 수명=거리/속도로 계산합니다. 벽에 닿거나 방 밖으로 나가면 먼저 사라집니다.")] private float shockwaveDistance = 10f;
     [SerializeField, Min(.05f), Tooltip("충격파의 기본 원형 타격 반지름입니다. 실제 판정과 기즈모에는 Shockwave Visual Scale 배율을 곱합니다.")] private float shockwaveRadius = .35f;
@@ -38,14 +37,12 @@ public sealed partial class TutorialBoss
             return origin;
         }
     }
-    private int ShockwaveCount => IsSideViewBattle ? 2 : 4;
+    private int ShockwaveCount => 2;
     // 공통 투사체의 최소 반지름(0.01)까지 맞춰 그림/판정/기즈모가 같은 크기 기준을 씁니다.
     private float ShockwaveHitRadius => Mathf.Max(.01f, Mathf.Max(.05f, shockwaveRadius) * Mathf.Max(.01f, shockwaveVisualScale));
     private Vector2 ShockwaveDirection(int index)
     {
-        if (IsSideViewBattle) return index == 0 ? Vector2.right : Vector2.left;
-        float angle = (shockwaveAngle + index * 90f) * Mathf.Deg2Rad;
-        return new Vector2(Mathf.Cos(angle), Mathf.Sin(angle));
+        return index == 0 ? Vector2.right : Vector2.left;
     }
 
     private void BeginShockwave()
@@ -92,7 +89,7 @@ public sealed partial class TutorialBoss
             projectile.PreserveParryReturnLifetime = true;
             projectile.Initialize(gameObject, direction, speed,
                 Mathf.Max(.1f, shockwaveDamage), radius, Mathf.Max(.1f, shockwaveDistance) / speed, 1, false);
-            projectile.HorizontalOnly = IsSideViewBattle;
+            projectile.HorizontalOnly = true;
             BindShockwaveError(projectile, pattern);
             if (shot.TryGetComponent<BossShockwaveEffect>(out var effect))
             {

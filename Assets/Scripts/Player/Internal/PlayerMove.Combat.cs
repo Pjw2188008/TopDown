@@ -169,12 +169,21 @@ public partial class PlayerMove
 
     private bool UseBottomAnchoredAttack => IsSideView && !IsSideViewDepthMovement;
 
+    private Vector2 GetBaseAttackHitSize()
+        => new Vector2(Mathf.Max(.01f, attackSizeSide.x), Mathf.Max(.01f, attackSizeSide.y));
+
+    // 실제 OverlapBox와 기즈모가 동일한 크기를 사용합니다.
+    private Vector2 GetAttackHitSize() => GetBaseAttackHitSize() * GetCurrentAttackScale();
+
     private Vector3 GetAttackHitCenter(Vector2 direction)
     {
-        Vector3 center = GroundPosition + (Vector3)(direction * GetCurrentAttackRange());
+        float scale = GetCurrentAttackScale();
+        Vector2 offset = attackHitOffset * scale;
         if (UseBottomAnchoredAttack)
-            center.y += Mathf.Abs(attackSizeSide.y) * (GetCurrentAttackScale() - 1f) * .5f;
-        return center;
+            offset.y = attackHitOffset.y + GetBaseAttackHitSize().y * (scale - 1f) * .5f;
+        if (direction.x < 0f) offset.x = -offset.x;
+        return GroundPosition + (Vector3)(direction * GetCurrentAttackRange())
+            + GetAttackEffectRotation(direction) * (Vector3)offset;
     }
 
     private void AttackHit()
@@ -183,7 +192,7 @@ public partial class PlayerMove
         float angle = Mathf.Atan2(attackDirection.y, attackDirection.x) * Mathf.Rad2Deg;
         // 편집 모드의 Cut 대상은 일반 공격의 Enemy Layer 설정과 분리합니다.
         int hitMask = isEditMode ? LayerMask.GetMask("Error") : (int)enemyLayer;
-        Collider2D[] hits = Physics2D.OverlapBoxAll(center, attackSizeSide * GetCurrentAttackScale(), angle, hitMask);
+        Collider2D[] hits = Physics2D.OverlapBoxAll(center, GetAttackHitSize(), angle, hitMask);
         handledAttackObjects.Clear();
         handledAttackReceivers.Clear();
         foreach (Collider2D hit in hits)
@@ -253,7 +262,7 @@ public partial class PlayerMove
     private void DrawAttackGizmo(Vector2 direction)
     {
         Vector3 center = GetAttackHitCenter(direction);
-        Vector2 size = attackSizeSide * GetCurrentAttackScale();
+        Vector2 size = GetAttackHitSize();
         Vector2 effectSize = GetAttackEffectSize();
         float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
         Matrix4x4 previousMatrix = Gizmos.matrix;

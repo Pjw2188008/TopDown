@@ -175,11 +175,18 @@ public partial class PlayerMove : MonoBehaviour, ICombatDamageable
     [Tooltip("공격 후 다음 공격까지의 쿨타임입니다.")]
     [SerializeField] private float attackCooldown = 0.35f;
 
-    [Tooltip("플레이어에서 공격 판정 중심까지의 거리(월드 단위)입니다. 이펙트만 옮기려면 이펙트 위치 보정을 사용하세요.")]
+    [Header("실제 공격 범위")]
+    [InspectorName("공통 공격 기준 거리")]
+    [Tooltip("플레이어에서 공격/이펙트의 기본 중심까지 거리(월드 단위)입니다. 실제 판정만 옮기려면 아래 실제 공격 위치 보정을 사용하세요. 기존 Attack Range Side 값입니다.")]
     [SerializeField] private float attackRangeSide = 0.75f;
 
-    [Tooltip("공격 판정의 크기입니다. 사각형 판정의 가로/세로 크기를 조절합니다.")]
+    [InspectorName("실제 공격 범위 크기")]
+    [Tooltip("주황색 사각형 타격 판정의 가로 X / 세로 Y (월드 단위)입니다. 최소 0.01로 제한합니다. 이펙트 크기를 공격 판정에 맞춤이 켜져 있으면 그림 크기도 함께 바뀝니다. 별도로 조절하려면 해당 옵션을 끄세요. 기존 Attack Size Side 값입니다.")]
     [SerializeField] private Vector2 attackSizeSide = new Vector2(0.8f, 0.8f);
+
+    [InspectorName("실제 공격 위치 보정")]
+    [Tooltip("기본 공격 중심에서 타격 판정만 이동합니다. 오른쪽 기준 X=앞/뒤, Y=위/아래(월드 단위). 왼쪽은 X만 반전하고 Y는 유지합니다. 이펙트 위치는 바뀌지 않습니다. 사이드뷰 거대화 시 평상시 판정 아래쪽을 유지하며 위로 커집니다.")]
+    [SerializeField] private Vector2 attackHitOffset = Vector2.zero;
 
     [Tooltip("일반 공격이 감지할 대상 레이어입니다. Error 레이어의 몬스터도 공격하려면 Error를 함께 체크하세요. 편집 모드의 Cut은 이 설정과 무관하게 Error 레이어만 감지합니다.")]
     [SerializeField] private LayerMask enemyLayer;
@@ -206,7 +213,7 @@ public partial class PlayerMove : MonoBehaviour, ICombatDamageable
     [SerializeField, Min(0.01f)] private float attackEffectDuration = 0.18f;
 
     [InspectorName("이펙트 위치 보정")]
-    [Tooltip("평상시 공격 판정 중심에서 그림 중심까지의 보정(월드 단위)입니다. 오른쪽 기준 X=앞/뒤, Y=위/아래입니다. 사이드뷰 왼쪽은 X만 반전합니다. 2D 사이드뷰 거대화는 Y 보정을 유지하고 그림 아래쪽을 기준으로 위로 확대합니다(X는 배율 적용). 타격 판정은 별도입니다.")]
+    [Tooltip("공통 공격 기준 중심에서 그림만 이동하는 보정(월드 단위)입니다. 오른쪽 기준 X=앞/뒤, Y=위/아래입니다. 사이드뷰 왼쪽은 X만 반전합니다. 실제 공격 위치 보정과는 독립적입니다. 2D 사이드뷰 거대화는 Y 보정을 유지하고 그림 아래쪽을 기준으로 위로 확대합니다(X는 배율 적용).")]
     [SerializeField] private Vector2 attackEffectOffset = Vector2.zero;
 
     [InspectorName("이펙트 크기를 공격 판정에 맞춤")]

@@ -195,6 +195,9 @@ MonoBehaviour:
   shockwaveSortingOrder: 30
   shockwaveEffectPrefab: {fileID: 2927701738001319926, guid: 31ae2438c8202464f9a9f148c5c0b900, type: 3}
   shockwaveVisualScale: 2
+  sideViewGroundLayers:
+    serializedVersion: 2
+    m_Bits: 371
 --- !u!114 &3510002234945900211
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -50,11 +50,13 @@ public sealed partial class TutorialBoss : MonoBehaviour, ICombatDamageable, ICo
         health = Mathf.Max(1f, maxHealth);
         var body = GetComponent<Rigidbody2D>();body.bodyType = RigidbodyType2D.Kinematic;
         movementBody = body;roomOrigin = transform.position;sight.useTriggerBody = true;
+        sight.sideView.ForceSideView = true;
         body.gravityScale = 0;body.constraints = RigidbodyConstraints2D.FreezeRotation;
         GetComponent<BoxCollider2D>().isTrigger = true; // 몸끼리 밀지 않으며 공격 검색에서는 피격 대상으로 사용합니다.
         int layer = LayerMask.NameToLayer("Enemy");if (layer >= 0 && gameObject.layer == 0) gameObject.layer = layer;
         PrepareVisuals();
         PrepareAnimation();
+        PrepareRoomGates();
         rockfallRemaining = Mathf.Max(0f,rockfallFirstDelay);
         shockwaveRemaining = Mathf.Max(0f,shockwaveFirstDelay);
         SetPhase(Phase.Recovery, attackCooldown);
@@ -74,6 +76,7 @@ public sealed partial class TutorialBoss : MonoBehaviour, ICombatDamageable, ICo
         if (dt <= 0 || phase == Phase.Dead) return;
         if (player == null && Time.time >= nextSearch)
         { player = FindFirstObjectByType<PlayerMove>();nextSearch = Time.time + .5f; }
+        TickRoomGates();
         sight.ApplyGravity(transform,player != null ? player.transform : null,dt,blockingLayers);
         if (player == null || !player.isActiveAndEnabled || player.IsInstantlyDead)
         {
@@ -126,7 +129,11 @@ public sealed partial class TutorialBoss : MonoBehaviour, ICombatDamageable, ICo
         if (phase == Phase.Ready)
         {
             if (enableShockwave && shockwaveRemaining <= 0f) { BeginShockwave();return; }
-            float distance = Vector2.Distance(transform.position, player.transform.position);
+            float distance = Mathf.Abs(transform.position.x - player.transform.position.x);
+            // 같은 X의 높은 발판에 있는 플레이어에게 허공 공격을 반복하지 않습니다.
+            if (EnemySideView.TryBounds(player.transform, out var targetBounds)
+                && (targetBounds.min.y > MeleeHitCenter.y + MeleeHitSize.y * .5f
+                    || targetBounds.max.y < MeleeHitCenter.y - MeleeHitSize.y * .5f)) return;
             if (distance > Mathf.Max(.1f,meleeRange) || !CanSee(player.transform.position)) return;
             FaceAttackDirection((Vector2)(player.transform.position-transform.position));
             BeginPatternError(PatternKind.Melee);
@@ -247,6 +254,7 @@ public sealed partial class TutorialBoss : MonoBehaviour, ICombatDamageable, ICo
         if (health <= 0)
         {
             SetPhase(Phase.Dead,0);GetComponent<BoxCollider2D>().enabled = false;
+            SetRoomGatesClosed(false);
             onDefeated.Invoke();Destroy(gameObject);
         }
         return true;
@@ -254,6 +262,7 @@ public sealed partial class TutorialBoss : MonoBehaviour, ICombatDamageable, ICo
 
     private void OnDisable()
     {
+        SetRoomGatesClosed(false);
         ClearAllPatternErrors();
         ResetShockwaveAttack();
         StopAttackAnimation();
@@ -262,6 +271,7 @@ public sealed partial class TutorialBoss : MonoBehaviour, ICombatDamageable, ICo
     }
     private void OnDestroy()
     {
+        DisposeRoomGates();
         ClearShockwaves();
         ClearRockfall();
         if (runtimeCircle != null) Destroy(runtimeCircle);if (runtimeSquare != null) Destroy(runtimeSquare);
@@ -283,5 +293,6 @@ public sealed partial class TutorialBoss : MonoBehaviour, ICombatDamageable, ICo
             new Vector3(Mathf.Max(.1f,roomSize.x),Mathf.Max(.1f,roomSize.y),0f));
         DrawRockfallAreaGizmo();
         DrawShockwaveGizmo();
+        DrawRoomGatesGizmo();
     }
 }

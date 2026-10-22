@@ -198,7 +198,10 @@ MonoBehaviour:
   attackImpactNormalizedTime: 0.85
   emptyAttackDuration: 0.3
   attackEffectDuration: 0.18
-  attackEffectSizeMultiplier: {x: 1, y: 1}
+  attackEffectOffset: {x: -0.47, y: 0}
+  attackEffectMatchHitboxSize: 1
+  attackEffectWorldSize: {x: 1, y: 1}
+  attackEffectSizeMultiplier: {x: 0.44, y: 0.43}
   attackEffectSortingOrderOffset: 1
   bossErrorReplacementTimeout: 5
   instantDeathRespawnPoint: {fileID: 0}

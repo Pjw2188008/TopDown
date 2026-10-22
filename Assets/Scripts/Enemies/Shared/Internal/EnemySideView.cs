@@ -5,6 +5,8 @@ using UnityEngine;
 [System.Serializable]
 public sealed class EnemySideView
 {
+    // 사이드뷰 전용 보스처럼 플레이어 검색/모드와 무관하게 중력을 사용하는 호출자용입니다.
+    public bool ForceSideView { get; set; }
     [Tooltip("대상이 사이드뷰 ON / 2.5D OFF이면 좌우 추적과 중력을 사용합니다. 탑다운/2.5D에서는 기존 길찾기를 유지합니다.")]
     public bool followPlayerMode = true;
     [Min(0f), Tooltip("사이드뷰에서 초당 하강 가속도입니다. 공격/경직 중에도 바닥에 착지합니다.")]
@@ -18,6 +20,7 @@ public sealed class EnemySideView
 
     public bool IsActive(Transform root, Transform target)
     {
+        if (ForceSideView) return true;
         if (!followPlayerMode) return false;
         if (target != null) cachedPlayer = target.GetComponentInParent<PlayerMove>();
         else if (cachedPlayer == null || cachedPlayer.gameObject.scene != root.gameObject.scene)

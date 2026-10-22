@@ -40,7 +40,7 @@ public sealed partial class TutorialBoss
     private void UpdateMovementAnimation(Vector2 displacement)
     {
         if (attackAnimationActive || (phase != Phase.Ready && phase != Phase.Recovery)) return;
-        bool moving = displacement.sqrMagnitude > .00000001f;
+        bool moving = Mathf.Abs(displacement.x) > .0001f;
         if (moving) FaceAttackDirection(displacement);
         bool hasMove = HasBossAnimator && bossAnimator.HasState(0,Animator.StringToHash("Move"));
         PlayBossState(moving && hasMove ? "Move" : "Idle", false);
