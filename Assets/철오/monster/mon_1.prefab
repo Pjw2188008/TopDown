@@ -32,7 +32,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.5, y: 0.5, z: 0.5}
+  m_LocalScale: {x: 1, y: 1, z: 0.5}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
@@ -80,8 +80,8 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 0
-  m_Sprite: {fileID: 6209978585022412254, guid: a5c96c08f7a77ad49b227dbffab6f58c, type: 3}
+  m_SortingOrder: 1
+  m_Sprite: {fileID: 7443277364796647437, guid: b57e2c6e87753a84780bdf8e417e0bb9, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -175,17 +175,17 @@ BoxCollider2D:
   m_UsedByEffector: 0
   m_CompositeOperation: 0
   m_CompositeOrder: 0
-  m_Offset: {x: 0.017542481, y: 1.0876343}
+  m_Offset: {x: -0.012867391, y: 0.59347165}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0}
-    oldSize: {x: 2.3888888, y: 2.1111112}
+    oldSize: {x: 1.1127273, y: 1.1345454}
     newSize: {x: 1, y: 1}
     adaptiveTilingThreshold: 0.5
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
-  m_Size: {x: 2.3840787, y: 2.1332288}
+  m_Size: {x: 1.0004234, y: 1.1449037}
   m_EdgeRadius: 0
 --- !u!114 &1140001
 MonoBehaviour:
@@ -212,10 +212,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   aggroMode: 1
-  chaseAreaOffset: {x: 0, y: 0}
-  chaseAreaSize: {x: 16, y: 6}
+  chaseAreaOffset: {x: 0, y: 0.78}
+  chaseAreaSize: {x: 5.8, y: 1.93}
   target: {fileID: 0}
   returnTolerance: 0.05
+  patrolEnabled: 1
+  patrolSpeedMultiplier: 0.5
+  patrolWaitTime: 0.6
+  patrolEdgePadding: 0.15
   moveSpeed: 2
   maxHealth: 5
   stoppingDistance: 2.87
@@ -224,7 +228,7 @@ MonoBehaviour:
     m_Bits: 115
   useGravity: 1
   stopAtLedges: 1
-  attackRange: 2.87
+  attackRange: 3.17
   attackVerticalRange: 2.87
   attackDamage: 1
   attackCooldown: 1.2
@@ -239,5 +243,20 @@ MonoBehaviour:
   hitState: Hit
   deathState: Death
   fallbackDeathDuration: 0.75
-  hitOffset: {x: 0.8, y: 0}
-  hitSize: {x: 1.2, y: 1}
+  hitOffset: {x: 0.67, y: 0.51}
+  hitSize: {x: 0.87, y: 0.97}
+  attackHitFrame: 0
+  meleeParryWindow: 0.3
+  attackMode: 0
+  waveOffset: {x: 0.4, y: 0}
+  waveSpeed: 6
+  waveDistance: 8
+  waveHitRadius: 0.3
+  waveVisualSize: {x: 1, y: 1}
+  waveSprite: {fileID: 0}
+  waveAnimationController: {fileID: 0}
+  waveColor: {r: 0.5, g: 0.9, b: 1, a: 1}
+  keepWaveAboveFeet: 1
+  thrustDistance: 2
+  thrustDuration: 0.25
+  thrustAccelerationPower: 2
