@@ -1,0 +1,1092 @@
+fileFormatVersion: 2
+guid: 8ff1f878addf1294bb9c2f7af585d3ca
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: 3542052875454932880
+    second: damaged_floor_segment_0
+  - first:
+      213: 7205301613481478374
+    second: damaged_floor_segment_1
+  - first:
+      213: -5743646679310185300
+    second: damaged_floor_segment_2
+  - first:
+      213: -4514731847692064594
+    second: damaged_floor_segment_3
+  - first:
+      213: 6096921138246677521
+    second: damaged_floor_segment_4
+  - first:
+      213: 1749026141856817542
+    second: damaged_floor_segment_5
+  - first:
+      213: -1311363214071168530
+    second: damaged_floor_segment_6
+  - first:
+      213: 5869267620145049157
+    second: damaged_floor_segment_7
+  - first:
+      213: 1091650088727085471
+    second: damaged_floor_segment_8
+  - first:
+      213: 8174078814447052510
+    second: damaged_floor_segment_9
+  - first:
+      213: 3330608395419377653
+    second: damaged_floor_segment_10
+  - first:
+      213: -6452955463804083732
+    second: damaged_floor_segment_11
+  - first:
+      213: 5933260132392682826
+    second: damaged_floor_segment_12
+  - first:
+      213: -4854057780788994714
+    second: damaged_floor_segment_13
+  - first:
+      213: -8948614677723622457
+    second: damaged_floor_segment_14
+  - first:
+      213: -1437063679766451077
+    second: damaged_floor_segment_15
+  - first:
+      213: 6806959918482043337
+    second: damaged_floor_segment_16
+  - first:
+      213: -7620770076572340468
+    second: damaged_floor_segment_17
+  - first:
+      213: 4959264204246934470
+    second: damaged_floor_segment_18
+  - first:
+      213: -5991726536013938972
+    second: damaged_floor_segment_19
+  - first:
+      213: 3989674853935243068
+    second: damaged_floor_segment_20
+  - first:
+      213: -6248182377829785989
+    second: damaged_floor_segment_21
+  - first:
+      213: 9085486228418687343
+    second: damaged_floor_segment_22
+  - first:
+      213: 970580564973480791
+    second: damaged_floor_segment_23
+  - first:
+      213: -1623937962947837175
+    second: damaged_floor_segment_24
+  - first:
+      213: -5069454862608423674
+    second: damaged_floor_segment_25
+  - first:
+      213: -1437098960357097493
+    second: damaged_floor_segment_26
+  - first:
+      213: -5553795815040696570
+    second: damaged_floor_segment_27
+  - first:
+      213: 4593657690983850850
+    second: damaged_floor_segment_28
+  - first:
+      213: 5706821029869715502
+    second: damaged_floor_segment_29
+  - first:
+      213: 2910742198615622301
+    second: damaged_floor_segment_30
+  - first:
+      213: 4676462602488357050
+    second: damaged_floor_segment_31
+  - first:
+      213: -4897370592967731653
+    second: damaged_floor_segment_32
+  - first:
+      213: -1210641554605380681
+    second: damaged_floor_segment_33
+  - first:
+      213: 4761992140731762205
+    second: damaged_floor_segment_34
+  - first:
+      213: 1619491626412409496
+    second: damaged_floor_segment_35
+  - first:
+      213: -8366512926154505932
+    second: damaged_floor_segment_36
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 0
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 1
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 0
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Android
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: damaged_floor_segment_0
+      rect:
+        serializedVersion: 2
+        x: 12
+        y: 39
+        width: 2146
+        height: 566
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0976429d256e72130800000000000000
+      internalID: 3542052875454932880
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: damaged_floor_segment_1
+      rect:
+        serializedVersion: 2
+        x: 889
+        y: 579
+        width: 13
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6e8cc1364af5ef360800000000000000
+      internalID: 7205301613481478374
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: damaged_floor_segment_2
+      rect:
+        serializedVersion: 2
+        x: 796
+        y: 562
+        width: 10
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: cac4d5cb6c77a40b0800000000000000
+      internalID: -5743646679310185300
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: damaged_floor_segment_3
+      rect:
+        serializedVersion: 2
+        x: 939
+        y: 558
+        width: 7
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ea8eb2afd437851c0800000000000000
+      internalID: -4514731847692064594
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: damaged_floor_segment_4
+      rect:
+        serializedVersion: 2
+        x: 957
+        y: 526
+        width: 88
+        height: 45
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 11473cce87d9c9450800000000000000
+      internalID: 6096921138246677521
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: damaged_floor_segment_5
+      rect:
+        serializedVersion: 2
+        x: 1084
+        y: 542
+        width: 41
+        height: 23
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6816f30620ac54810800000000000000
+      internalID: 1749026141856817542
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: damaged_floor_segment_6
+      rect:
+        serializedVersion: 2
+        x: 1359
+        y: 548
+        width: 10
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ee106cdca1a1dcde0800000000000000
+      internalID: -1311363214071168530
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: damaged_floor_segment_7
+      rect:
+        serializedVersion: 2
+        x: 1569
+        y: 560
+        width: 23
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 54ea276cdc3d37150800000000000000
+      internalID: 5869267620145049157
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: damaged_floor_segment_8
+      rect:
+        serializedVersion: 2
+        x: 796
+        y: 546
+        width: 10
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f910a9dc8f1562f00800000000000000
+      internalID: 1091650088727085471
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: damaged_floor_segment_9
+      rect:
+        serializedVersion: 2
+        x: 1078
+        y: 546
+        width: 7
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ed6a925af59207170800000000000000
+      internalID: 8174078814447052510
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: damaged_floor_segment_10
+      rect:
+        serializedVersion: 2
+        x: 1480
+        y: 548
+        width: 14
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5ffd7e670b2b83e20800000000000000
+      internalID: 3330608395419377653
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: damaged_floor_segment_11
+      rect:
+        serializedVersion: 2
+        x: 1044
+        y: 530
+        width: 9
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ce1aa84e13f7276a0800000000000000
+      internalID: -6452955463804083732
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: damaged_floor_segment_12
+      rect:
+        serializedVersion: 2
+        x: 1052
+        y: 532
+        width: 7
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a45c04797ac275250800000000000000
+      internalID: 5933260132392682826
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: damaged_floor_segment_13
+      rect:
+        serializedVersion: 2
+        x: 1062
+        y: 532
+        width: 7
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 66dd9d09a2ce2acb0800000000000000
+      internalID: -4854057780788994714
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: damaged_floor_segment_14
+      rect:
+        serializedVersion: 2
+        x: 959
+        y: 518
+        width: 7
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7c3df66cc5220d380800000000000000
+      internalID: -8948614677723622457
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: damaged_floor_segment_15
+      rect:
+        serializedVersion: 2
+        x: 1001
+        y: 506
+        width: 18
+        height: 22
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b7ca7e772368e0ce0800000000000000
+      internalID: -1437063679766451077
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: damaged_floor_segment_16
+      rect:
+        serializedVersion: 2
+        x: 84
+        y: 101
+        width: 8
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9c1b1752bfd277e50800000000000000
+      internalID: 6806959918482043337
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: damaged_floor_segment_17
+      rect:
+        serializedVersion: 2
+        x: 217
+        y: 93
+        width: 9
+        height: 22
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c0faafeedf59d3690800000000000000
+      internalID: -7620770076572340468
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: damaged_floor_segment_18
+      rect:
+        serializedVersion: 2
+        x: 254
+        y: 94
+        width: 21
+        height: 20
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6c3e279b488d2d440800000000000000
+      internalID: 4959264204246934470
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: damaged_floor_segment_19
+      rect:
+        serializedVersion: 2
+        x: 312
+        y: 95
+        width: 7
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4ee7b95067c19dca0800000000000000
+      internalID: -5991726536013938972
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: damaged_floor_segment_20
+      rect:
+        serializedVersion: 2
+        x: 473
+        y: 97
+        width: 11
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c3f5e16342c2e5730800000000000000
+      internalID: 3989674853935243068
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: damaged_floor_segment_21
+      rect:
+        serializedVersion: 2
+        x: 483
+        y: 95
+        width: 15
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b7e999d4b3ff949a0800000000000000
+      internalID: -6248182377829785989
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: damaged_floor_segment_22
+      rect:
+        serializedVersion: 2
+        x: 876
+        y: 97
+        width: 6
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f6179987691261e70800000000000000
+      internalID: 9085486228418687343
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: damaged_floor_segment_23
+      rect:
+        serializedVersion: 2
+        x: 1068
+        y: 95
+        width: 27
+        height: 17
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 75b6429a1e1387d00800000000000000
+      internalID: 970580564973480791
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: damaged_floor_segment_24
+      rect:
+        serializedVersion: 2
+        x: 1092
+        y: 81
+        width: 17
+        height: 24
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9030935d60d9679e0800000000000000
+      internalID: -1623937962947837175
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: damaged_floor_segment_25
+      rect:
+        serializedVersion: 2
+        x: 1303
+        y: 95
+        width: 7
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 605295d59ada5a9b0800000000000000
+      internalID: -5069454862608423674
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: damaged_floor_segment_26
+      rect:
+        serializedVersion: 2
+        x: 1362
+        y: 96
+        width: 7
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: beff4d01c166e0ce0800000000000000
+      internalID: -1437098960357097493
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: damaged_floor_segment_27
+      rect:
+        serializedVersion: 2
+        x: 1593
+        y: 95
+        width: 7
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 60fb279a124fce2b0800000000000000
+      internalID: -5553795815040696570
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: damaged_floor_segment_28
+      rect:
+        serializedVersion: 2
+        x: 1939
+        y: 98
+        width: 7
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 26365dae453ffbf30800000000000000
+      internalID: 4593657690983850850
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: damaged_floor_segment_29
+      rect:
+        serializedVersion: 2
+        x: 1945
+        y: 94
+        width: 9
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e200d1a9d73b23f40800000000000000
+      internalID: 5706821029869715502
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: damaged_floor_segment_30
+      rect:
+        serializedVersion: 2
+        x: 94
+        y: 79
+        width: 14
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d92493d9b98056820800000000000000
+      internalID: 2910742198615622301
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: damaged_floor_segment_31
+      rect:
+        serializedVersion: 2
+        x: 641
+        y: 87
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ab0a7b2c5f126e040800000000000000
+      internalID: 4676462602488357050
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: damaged_floor_segment_32
+      rect:
+        serializedVersion: 2
+        x: 1193
+        y: 79
+        width: 13
+        height: 20
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b36d6b0a46b090cb0800000000000000
+      internalID: -4897370592967731653
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: damaged_floor_segment_33
+      rect:
+        serializedVersion: 2
+        x: 1571
+        y: 85
+        width: 7
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7bb6b6b9befe23fe0800000000000000
+      internalID: -1210641554605380681
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: damaged_floor_segment_34
+      rect:
+        serializedVersion: 2
+        x: 1756
+        y: 79
+        width: 11
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d16c4833f9ef51240800000000000000
+      internalID: 4761992140731762205
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: damaged_floor_segment_35
+      rect:
+        serializedVersion: 2
+        x: 1912
+        y: 79
+        width: 12
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8920805cd07997610800000000000000
+      internalID: 1619491626412409496
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: damaged_floor_segment_36
+      rect:
+        serializedVersion: 2
+        x: 1923
+        y: 81
+        width: 9
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 431c8d342dc24eb80800000000000000
+      internalID: -8366512926154505932
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 5e97eb03825dee720800000000000000
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      damaged_floor_segment_0: 3542052875454932880
+      damaged_floor_segment_1: 7205301613481478374
+      damaged_floor_segment_10: 3330608395419377653
+      damaged_floor_segment_11: -6452955463804083732
+      damaged_floor_segment_12: 5933260132392682826
+      damaged_floor_segment_13: -4854057780788994714
+      damaged_floor_segment_14: -8948614677723622457
+      damaged_floor_segment_15: -1437063679766451077
+      damaged_floor_segment_16: 6806959918482043337
+      damaged_floor_segment_17: -7620770076572340468
+      damaged_floor_segment_18: 4959264204246934470
+      damaged_floor_segment_19: -5991726536013938972
+      damaged_floor_segment_2: -5743646679310185300
+      damaged_floor_segment_20: 3989674853935243068
+      damaged_floor_segment_21: -6248182377829785989
+      damaged_floor_segment_22: 9085486228418687343
+      damaged_floor_segment_23: 970580564973480791
+      damaged_floor_segment_24: -1623937962947837175
+      damaged_floor_segment_25: -5069454862608423674
+      damaged_floor_segment_26: -1437098960357097493
+      damaged_floor_segment_27: -5553795815040696570
+      damaged_floor_segment_28: 4593657690983850850
+      damaged_floor_segment_29: 5706821029869715502
+      damaged_floor_segment_3: -4514731847692064594
+      damaged_floor_segment_30: 2910742198615622301
+      damaged_floor_segment_31: 4676462602488357050
+      damaged_floor_segment_32: -4897370592967731653
+      damaged_floor_segment_33: -1210641554605380681
+      damaged_floor_segment_34: 4761992140731762205
+      damaged_floor_segment_35: 1619491626412409496
+      damaged_floor_segment_36: -8366512926154505932
+      damaged_floor_segment_4: 6096921138246677521
+      damaged_floor_segment_5: 1749026141856817542
+      damaged_floor_segment_6: -1311363214071168530
+      damaged_floor_segment_7: 5869267620145049157
+      damaged_floor_segment_8: 1091650088727085471
+      damaged_floor_segment_9: 8174078814447052510
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

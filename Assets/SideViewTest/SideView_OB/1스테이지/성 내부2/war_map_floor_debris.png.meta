@@ -1,0 +1,1742 @@
+fileFormatVersion: 2
+guid: c7e0b896b68847847a2ecb668542b18e
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -3407720074219248542
+    second: war_map_floor_debris_0
+  - first:
+      213: -3836344760878026930
+    second: war_map_floor_debris_1
+  - first:
+      213: -4189312145893133939
+    second: war_map_floor_debris_2
+  - first:
+      213: -146661770645848597
+    second: war_map_floor_debris_3
+  - first:
+      213: 1574260130987680706
+    second: war_map_floor_debris_4
+  - first:
+      213: -7843395483850666303
+    second: war_map_floor_debris_5
+  - first:
+      213: -4971465278739515520
+    second: war_map_floor_debris_6
+  - first:
+      213: 59789420082950118
+    second: war_map_floor_debris_7
+  - first:
+      213: -4289389286530482193
+    second: war_map_floor_debris_8
+  - first:
+      213: 4763104822808435210
+    second: war_map_floor_debris_9
+  - first:
+      213: -872165480413078886
+    second: war_map_floor_debris_10
+  - first:
+      213: 6775583284226016641
+    second: war_map_floor_debris_11
+  - first:
+      213: 6360251555628778758
+    second: war_map_floor_debris_12
+  - first:
+      213: 946047882852041292
+    second: war_map_floor_debris_13
+  - first:
+      213: 5368640072158368463
+    second: war_map_floor_debris_14
+  - first:
+      213: -4233040776158760394
+    second: war_map_floor_debris_15
+  - first:
+      213: -577797314399724744
+    second: war_map_floor_debris_16
+  - first:
+      213: -6223770620588037801
+    second: war_map_floor_debris_17
+  - first:
+      213: 419909936334879859
+    second: war_map_floor_debris_18
+  - first:
+      213: 6231163713982963343
+    second: war_map_floor_debris_19
+  - first:
+      213: 2183821188632329065
+    second: war_map_floor_debris_20
+  - first:
+      213: -3754861639389134577
+    second: war_map_floor_debris_21
+  - first:
+      213: -8494141909317499076
+    second: war_map_floor_debris_22
+  - first:
+      213: -8759663110568819055
+    second: war_map_floor_debris_23
+  - first:
+      213: 4876956310279455178
+    second: war_map_floor_debris_24
+  - first:
+      213: -3452286825851798356
+    second: war_map_floor_debris_25
+  - first:
+      213: 8219139851699777559
+    second: war_map_floor_debris_26
+  - first:
+      213: -6507232123216550206
+    second: war_map_floor_debris_27
+  - first:
+      213: -1098071158283618205
+    second: war_map_floor_debris_28
+  - first:
+      213: -9149530627809436659
+    second: war_map_floor_debris_29
+  - first:
+      213: 3538169948853266490
+    second: war_map_floor_debris_30
+  - first:
+      213: 3638424015574291794
+    second: war_map_floor_debris_31
+  - first:
+      213: -3625148633793794111
+    second: war_map_floor_debris_32
+  - first:
+      213: -544723465470181590
+    second: war_map_floor_debris_33
+  - first:
+      213: -8392800404637748744
+    second: war_map_floor_debris_34
+  - first:
+      213: -7277256776322252925
+    second: war_map_floor_debris_35
+  - first:
+      213: 8452200454666384326
+    second: war_map_floor_debris_36
+  - first:
+      213: 6581227509099302230
+    second: war_map_floor_debris_37
+  - first:
+      213: 1463386079664044683
+    second: war_map_floor_debris_38
+  - first:
+      213: -8234406682460764798
+    second: war_map_floor_debris_39
+  - first:
+      213: 7615871527846031838
+    second: war_map_floor_debris_40
+  - first:
+      213: 1198364008795481578
+    second: war_map_floor_debris_41
+  - first:
+      213: 378810051056473847
+    second: war_map_floor_debris_42
+  - first:
+      213: -3904471128084529142
+    second: war_map_floor_debris_43
+  - first:
+      213: -4598591067747704407
+    second: war_map_floor_debris_44
+  - first:
+      213: -784161008782122718
+    second: war_map_floor_debris_45
+  - first:
+      213: -5569945346097427235
+    second: war_map_floor_debris_46
+  - first:
+      213: 2351484588134326226
+    second: war_map_floor_debris_47
+  - first:
+      213: 2933820629853502341
+    second: war_map_floor_debris_48
+  - first:
+      213: 1904219050578048136
+    second: war_map_floor_debris_49
+  - first:
+      213: -231074430231149894
+    second: war_map_floor_debris_50
+  - first:
+      213: 7118224617928501773
+    second: war_map_floor_debris_51
+  - first:
+      213: 7617750288693854854
+    second: war_map_floor_debris_52
+  - first:
+      213: 4304224283599879008
+    second: war_map_floor_debris_53
+  - first:
+      213: 5179789117719393503
+    second: war_map_floor_debris_54
+  - first:
+      213: -4687254751372916350
+    second: war_map_floor_debris_55
+  - first:
+      213: -7918287838345147935
+    second: war_map_floor_debris_56
+  - first:
+      213: -278419030403644825
+    second: war_map_floor_debris_57
+  - first:
+      213: 1986832843347919391
+    second: war_map_floor_debris_58
+  - first:
+      213: 122594736703751943
+    second: war_map_floor_debris_59
+  - first:
+      213: -3665106225596643536
+    second: war_map_floor_debris_60
+  - first:
+      213: -4664488541857931767
+    second: war_map_floor_debris_61
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 0
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 1
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 0
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Android
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: war_map_floor_debris_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 0
+        width: 2145
+        height: 656
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 264a13ab5a855b0d0800000000000000
+      internalID: -3407720074219248542
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: war_map_floor_debris_1
+      rect:
+        serializedVersion: 2
+        x: 662
+        y: 608
+        width: 13
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e4f2feb04c092cac0800000000000000
+      internalID: -3836344760878026930
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: war_map_floor_debris_2
+      rect:
+        serializedVersion: 2
+        x: 1030
+        y: 593
+        width: 79
+        height: 95
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d817fca9cc29cd5c0800000000000000
+      internalID: -4189312145893133939
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: war_map_floor_debris_3
+      rect:
+        serializedVersion: 2
+        x: 1158
+        y: 602
+        width: 7
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: bed368a85e3f6fdf0800000000000000
+      internalID: -146661770645848597
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: war_map_floor_debris_4
+      rect:
+        serializedVersion: 2
+        x: 1400
+        y: 498
+        width: 220
+        height: 202
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2c3a4939f35e8d510800000000000000
+      internalID: 1574260130987680706
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: war_map_floor_debris_5
+      rect:
+        serializedVersion: 2
+        x: 456
+        y: 569
+        width: 14
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1ce8d201d59a62390800000000000000
+      internalID: -7843395483850666303
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: war_map_floor_debris_6
+      rect:
+        serializedVersion: 2
+        x: 627
+        y: 578
+        width: 7
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 087fa8f3baec10bb0800000000000000
+      internalID: -4971465278739515520
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: war_map_floor_debris_7
+      rect:
+        serializedVersion: 2
+        x: 851
+        y: 570
+        width: 14
+        height: 23
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6efee59292a64d000800000000000000
+      internalID: 59789420082950118
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: war_map_floor_debris_8
+      rect:
+        serializedVersion: 2
+        x: 881
+        y: 546
+        width: 37
+        height: 38
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: feffbf88b270974c0800000000000000
+      internalID: -4289389286530482193
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: war_map_floor_debris_9
+      rect:
+        serializedVersion: 2
+        x: 923
+        y: 578
+        width: 9
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a0a527fa992f91240800000000000000
+      internalID: 4763104822808435210
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: war_map_floor_debris_10
+      rect:
+        serializedVersion: 2
+        x: 418
+        y: 570
+        width: 7
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a9ade92dd1275e3f0800000000000000
+      internalID: -872165480413078886
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: war_map_floor_debris_11
+      rect:
+        serializedVersion: 2
+        x: 489
+        y: 546
+        width: 25
+        height: 25
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 185cd523915b70e50800000000000000
+      internalID: 6775583284226016641
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: war_map_floor_debris_12
+      rect:
+        serializedVersion: 2
+        x: 798
+        y: 564
+        width: 6
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 605016f7717244850800000000000000
+      internalID: 6360251555628778758
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: war_map_floor_debris_13
+      rect:
+        serializedVersion: 2
+        x: 826
+        y: 562
+        width: 10
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c4208ed7989012d00800000000000000
+      internalID: 946047882852041292
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: war_map_floor_debris_14
+      rect:
+        serializedVersion: 2
+        x: 394
+        y: 546
+        width: 15
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: fc25deb83bd318a40800000000000000
+      internalID: 5368640072158368463
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: war_map_floor_debris_15
+      rect:
+        serializedVersion: 2
+        x: 448
+        y: 544
+        width: 6
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 632305977d73145c0800000000000000
+      internalID: -4233040776158760394
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: war_map_floor_debris_16
+      rect:
+        serializedVersion: 2
+        x: 464
+        y: 543
+        width: 8
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 83b970367604bf7f0800000000000000
+      internalID: -577797314399724744
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: war_map_floor_debris_17
+      rect:
+        serializedVersion: 2
+        x: 473
+        y: 532
+        width: 17
+        height: 20
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 75966547899b0a9a0800000000000000
+      internalID: -6223770620588037801
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: war_map_floor_debris_18
+      rect:
+        serializedVersion: 2
+        x: 408
+        y: 532
+        width: 9
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 37cb5e0ccd1d3d500800000000000000
+      internalID: 419909936334879859
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: war_map_floor_debris_19
+      rect:
+        serializedVersion: 2
+        x: 466
+        y: 538
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f8e124d326a897650800000000000000
+      internalID: 6231163713982963343
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: war_map_floor_debris_20
+      rect:
+        serializedVersion: 2
+        x: 1432
+        y: 506
+        width: 7
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 96bb669fccd7e4e10800000000000000
+      internalID: 2183821188632329065
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: war_map_floor_debris_21
+      rect:
+        serializedVersion: 2
+        x: 1448
+        y: 506
+        width: 7
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f01487bab3d04ebc0800000000000000
+      internalID: -3754861639389134577
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: war_map_floor_debris_22
+      rect:
+        serializedVersion: 2
+        x: 1542
+        y: 506
+        width: 8
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c374f57ffeebe1a80800000000000000
+      internalID: -8494141909317499076
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: war_map_floor_debris_23
+      rect:
+        serializedVersion: 2
+        x: 90
+        y: 77
+        width: 30
+        height: 32
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 196c376cfcc6f6680800000000000000
+      internalID: -8759663110568819055
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: war_map_floor_debris_24
+      rect:
+        serializedVersion: 2
+        x: 121
+        y: 81
+        width: 7
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ac18e4bcced6ea340800000000000000
+      internalID: 4876956310279455178
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: war_map_floor_debris_25
+      rect:
+        serializedVersion: 2
+        x: 281
+        y: 87
+        width: 6
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: cacb7524c630710d0800000000000000
+      internalID: -3452286825851798356
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: war_map_floor_debris_26
+      rect:
+        serializedVersion: 2
+        x: 78
+        y: 47
+        width: 34
+        height: 32
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 71072d3f520401270800000000000000
+      internalID: 8219139851699777559
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: war_map_floor_debris_27
+      rect:
+        serializedVersion: 2
+        x: 149
+        y: 62
+        width: 11
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2c6aaa85cdaa1b5a0800000000000000
+      internalID: -6507232123216550206
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: war_map_floor_debris_28
+      rect:
+        serializedVersion: 2
+        x: 149
+        y: 33
+        width: 43
+        height: 40
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3683760791ed2c0f0800000000000000
+      internalID: -1098071158283618205
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: war_map_floor_debris_29
+      rect:
+        serializedVersion: 2
+        x: 378
+        y: 71
+        width: 7
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d0c9cdbce56560180800000000000000
+      internalID: -9149530627809436659
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: war_map_floor_debris_30
+      rect:
+        serializedVersion: 2
+        x: 2108
+        y: 63
+        width: 7
+        height: 18
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a386c5c82da1a1130800000000000000
+      internalID: 3538169948853266490
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: war_map_floor_debris_31
+      rect:
+        serializedVersion: 2
+        x: 2114
+        y: 63
+        width: 11
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2555e8e6d574e7230800000000000000
+      internalID: 3638424015574291794
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: war_map_floor_debris_32
+      rect:
+        serializedVersion: 2
+        x: 129
+        y: 53
+        width: 7
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1cf6ab04682e0bdc0800000000000000
+      internalID: -3625148633793794111
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: war_map_floor_debris_33
+      rect:
+        serializedVersion: 2
+        x: 137
+        y: 47
+        width: 11
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a2f74dbe4e0c078f0800000000000000
+      internalID: -544723465470181590
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: war_map_floor_debris_34
+      rect:
+        serializedVersion: 2
+        x: 187
+        y: 17
+        width: 37
+        height: 37
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8f1ffcabf78c68b80800000000000000
+      internalID: -8392800404637748744
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: war_map_floor_debris_35
+      rect:
+        serializedVersion: 2
+        x: 1351
+        y: 47
+        width: 14
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 38ff10cb48df10b90800000000000000
+      internalID: -7277256776322252925
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: war_map_floor_debris_36
+      rect:
+        serializedVersion: 2
+        x: 1364
+        y: 50
+        width: 7
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6c3f8c6288f3c4570800000000000000
+      internalID: 8452200454666384326
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: war_map_floor_debris_37
+      rect:
+        serializedVersion: 2
+        x: 1548
+        y: 45
+        width: 8
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 65d84e9fc87355b50800000000000000
+      internalID: 6581227509099302230
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: war_map_floor_debris_38
+      rect:
+        serializedVersion: 2
+        x: 1565
+        y: 25
+        width: 17
+        height: 29
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b8a70a7d2edfe4410800000000000000
+      internalID: 1463386079664044683
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: war_map_floor_debris_39
+      rect:
+        serializedVersion: 2
+        x: 2027
+        y: 47
+        width: 7
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 285c2d300c289bd80800000000000000
+      internalID: -8234406682460764798
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: war_map_floor_debris_40
+      rect:
+        serializedVersion: 2
+        x: 2075
+        y: 47
+        width: 8
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ed13640ddc201b960800000000000000
+      internalID: 7615871527846031838
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: war_map_floor_debris_41
+      rect:
+        serializedVersion: 2
+        x: 245
+        y: 12
+        width: 30
+        height: 24
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ae52edf77b171a010800000000000000
+      internalID: 1198364008795481578
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: war_map_floor_debris_42
+      rect:
+        serializedVersion: 2
+        x: 314
+        y: 14
+        width: 41
+        height: 34
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7f691920cbdc14500800000000000000
+      internalID: 378810051056473847
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: war_map_floor_debris_43
+      rect:
+        serializedVersion: 2
+        x: 362
+        y: 17
+        width: 7
+        height: 21
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a00c0ce123880d9c0800000000000000
+      internalID: -3904471128084529142
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: war_map_floor_debris_44
+      rect:
+        serializedVersion: 2
+        x: 402
+        y: 30
+        width: 19
+        height: 18
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9a12d9bc9c58e20c0800000000000000
+      internalID: -4598591067747704407
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: war_map_floor_debris_45
+      rect:
+        serializedVersion: 2
+        x: 442
+        y: 15
+        width: 32
+        height: 27
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 22164d897b91e15f0800000000000000
+      internalID: -784161008782122718
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: war_map_floor_debris_46
+      rect:
+        serializedVersion: 2
+        x: 1402
+        y: 14
+        width: 19
+        height: 23
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ddcc583f73493b2b0800000000000000
+      internalID: -5569945346097427235
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: war_map_floor_debris_47
+      rect:
+        serializedVersion: 2
+        x: 1542
+        y: 27
+        width: 18
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2df5d8236c622a020800000000000000
+      internalID: 2351484588134326226
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: war_map_floor_debris_48
+      rect:
+        serializedVersion: 2
+        x: 1559
+        y: 29
+        width: 7
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 58b712d915607b820800000000000000
+      internalID: 2933820629853502341
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: war_map_floor_debris_49
+      rect:
+        serializedVersion: 2
+        x: 1584
+        y: 34
+        width: 8
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8847c3433252d6a10800000000000000
+      internalID: 1904219050578048136
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: war_map_floor_debris_50
+      rect:
+        serializedVersion: 2
+        x: 281
+        y: 17
+        width: 6
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ab2856da70f0bccf0800000000000000
+      internalID: -231074430231149894
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: war_map_floor_debris_51
+      rect:
+        serializedVersion: 2
+        x: 410
+        y: 17
+        width: 7
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d0aa117739309c260800000000000000
+      internalID: 7118224617928501773
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: war_map_floor_debris_52
+      rect:
+        serializedVersion: 2
+        x: 428
+        y: 15
+        width: 15
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6820a39e68fa7b960800000000000000
+      internalID: 7617750288693854854
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: war_map_floor_debris_53
+      rect:
+        serializedVersion: 2
+        x: 497
+        y: 15
+        width: 15
+        height: 18
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 06bb4916e2dabbb30800000000000000
+      internalID: 4304224283599879008
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: war_map_floor_debris_54
+      rect:
+        serializedVersion: 2
+        x: 1313
+        y: 17
+        width: 7
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: fd4391542ce42e740800000000000000
+      internalID: 5179789117719393503
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: war_map_floor_debris_55
+      rect:
+        serializedVersion: 2
+        x: 1392
+        y: 17
+        width: 7
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 289c7a443a683feb0800000000000000
+      internalID: -4687254751372916350
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: war_map_floor_debris_56
+      rect:
+        serializedVersion: 2
+        x: 1398
+        y: 17
+        width: 9
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1e94426f9279c1290800000000000000
+      internalID: -7918287838345147935
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: war_map_floor_debris_57
+      rect:
+        serializedVersion: 2
+        x: 1450
+        y: 17
+        width: 13
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7620512fd5bd22cf0800000000000000
+      internalID: -278419030403644825
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: war_map_floor_debris_58
+      rect:
+        serializedVersion: 2
+        x: 1466
+        y: 17
+        width: 7
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f1205dfb1f5a29b10800000000000000
+      internalID: 1986832843347919391
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: war_map_floor_debris_59
+      rect:
+        serializedVersion: 2
+        x: 1472
+        y: 17
+        width: 7
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7074f84734b83b100800000000000000
+      internalID: 122594736703751943
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: war_map_floor_debris_60
+      rect:
+        serializedVersion: 2
+        x: 1496
+        y: 15
+        width: 7
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0374d3f6e4de22dc0800000000000000
+      internalID: -3665106225596643536
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: war_map_floor_debris_61
+      rect:
+        serializedVersion: 2
+        x: 1546
+        y: 15
+        width: 18
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 90e9dab7268644fb0800000000000000
+      internalID: -4664488541857931767
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 5e97eb03825dee720800000000000000
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      war_map_floor_debris_0: -3407720074219248542
+      war_map_floor_debris_1: -3836344760878026930
+      war_map_floor_debris_10: -872165480413078886
+      war_map_floor_debris_11: 6775583284226016641
+      war_map_floor_debris_12: 6360251555628778758
+      war_map_floor_debris_13: 946047882852041292
+      war_map_floor_debris_14: 5368640072158368463
+      war_map_floor_debris_15: -4233040776158760394
+      war_map_floor_debris_16: -577797314399724744
+      war_map_floor_debris_17: -6223770620588037801
+      war_map_floor_debris_18: 419909936334879859
+      war_map_floor_debris_19: 6231163713982963343
+      war_map_floor_debris_2: -4189312145893133939
+      war_map_floor_debris_20: 2183821188632329065
+      war_map_floor_debris_21: -3754861639389134577
+      war_map_floor_debris_22: -8494141909317499076
+      war_map_floor_debris_23: -8759663110568819055
+      war_map_floor_debris_24: 4876956310279455178
+      war_map_floor_debris_25: -3452286825851798356
+      war_map_floor_debris_26: 8219139851699777559
+      war_map_floor_debris_27: -6507232123216550206
+      war_map_floor_debris_28: -1098071158283618205
+      war_map_floor_debris_29: -9149530627809436659
+      war_map_floor_debris_3: -146661770645848597
+      war_map_floor_debris_30: 3538169948853266490
+      war_map_floor_debris_31: 3638424015574291794
+      war_map_floor_debris_32: -3625148633793794111
+      war_map_floor_debris_33: -544723465470181590
+      war_map_floor_debris_34: -8392800404637748744
+      war_map_floor_debris_35: -7277256776322252925
+      war_map_floor_debris_36: 8452200454666384326
+      war_map_floor_debris_37: 6581227509099302230
+      war_map_floor_debris_38: 1463386079664044683
+      war_map_floor_debris_39: -8234406682460764798
+      war_map_floor_debris_4: 1574260130987680706
+      war_map_floor_debris_40: 7615871527846031838
+      war_map_floor_debris_41: 1198364008795481578
+      war_map_floor_debris_42: 378810051056473847
+      war_map_floor_debris_43: -3904471128084529142
+      war_map_floor_debris_44: -4598591067747704407
+      war_map_floor_debris_45: -784161008782122718
+      war_map_floor_debris_46: -5569945346097427235
+      war_map_floor_debris_47: 2351484588134326226
+      war_map_floor_debris_48: 2933820629853502341
+      war_map_floor_debris_49: 1904219050578048136
+      war_map_floor_debris_5: -7843395483850666303
+      war_map_floor_debris_50: -231074430231149894
+      war_map_floor_debris_51: 7118224617928501773
+      war_map_floor_debris_52: 7617750288693854854
+      war_map_floor_debris_53: 4304224283599879008
+      war_map_floor_debris_54: 5179789117719393503
+      war_map_floor_debris_55: -4687254751372916350
+      war_map_floor_debris_56: -7918287838345147935
+      war_map_floor_debris_57: -278419030403644825
+      war_map_floor_debris_58: 1986832843347919391
+      war_map_floor_debris_59: 122594736703751943
+      war_map_floor_debris_6: -4971465278739515520
+      war_map_floor_debris_60: -3665106225596643536
+      war_map_floor_debris_61: -4664488541857931767
+      war_map_floor_debris_7: 59789420082950118
+      war_map_floor_debris_8: -4289389286530482193
+      war_map_floor_debris_9: 4763104822808435210
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

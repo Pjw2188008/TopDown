@@ -1,0 +1,736 @@
+fileFormatVersion: 2
+guid: 9952d9d539a803d4081dcb09b5d9236e
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: 6386708524179875772
+    second: castle_gate_front_sprite_sheet_0
+  - first:
+      213: 843156207765701656
+    second: castle_gate_front_sprite_sheet_1
+  - first:
+      213: -1401334410539212453
+    second: castle_gate_front_sprite_sheet_2
+  - first:
+      213: -1573534263591153151
+    second: castle_gate_front_sprite_sheet_3
+  - first:
+      213: -6059901687312026329
+    second: castle_gate_front_sprite_sheet_4
+  - first:
+      213: -3067470432143933953
+    second: castle_gate_front_sprite_sheet_5
+  - first:
+      213: 1440587644617296493
+    second: castle_gate_front_sprite_sheet_6
+  - first:
+      213: -1515333237522268455
+    second: castle_gate_front_sprite_sheet_7
+  - first:
+      213: 6813952198861071984
+    second: castle_gate_front_sprite_sheet_8
+  - first:
+      213: -2955324767849818030
+    second: castle_gate_front_sprite_sheet_9
+  - first:
+      213: 5913317173463561580
+    second: castle_gate_front_sprite_sheet_10
+  - first:
+      213: -7453333372071348653
+    second: castle_gate_front_sprite_sheet_11
+  - first:
+      213: -7085341054412355798
+    second: castle_gate_front_sprite_sheet_12
+  - first:
+      213: -8769875089446594711
+    second: castle_gate_front_sprite_sheet_13
+  - first:
+      213: 6481874266414489628
+    second: castle_gate_front_sprite_sheet_14
+  - first:
+      213: 3218816696042105208
+    second: castle_gate_front_sprite_sheet_15
+  - first:
+      213: -3605197183664098489
+    second: castle_gate_front_sprite_sheet_16
+  - first:
+      213: 8905683598925674327
+    second: castle_gate_front_sprite_sheet_17
+  - first:
+      213: -6133928245048411048
+    second: castle_gate_front_sprite_sheet_18
+  - first:
+      213: 1145793448143387623
+    second: castle_gate_front_sprite_sheet_19
+  - first:
+      213: 1892820633625647131
+    second: castle_gate_front_sprite_sheet_20
+  - first:
+      213: -8982732440635677267
+    second: castle_gate_front_sprite_sheet_21
+  - first:
+      213: 7702359446191664465
+    second: castle_gate_front_sprite_sheet_22
+  - first:
+      213: -50417738889482472
+    second: castle_gate_front_sprite_sheet_23
+  - first:
+      213: -4022522038515219303
+    second: castle_gate_front_sprite_sheet_24
+  - first:
+      213: 6874476506529096036
+    second: castle_gate_front_sprite_sheet_25
+  - first:
+      213: -5124282170658454002
+    second: castle_gate_front_sprite_sheet_26
+  - first:
+      213: 2660580967595021124
+    second: castle_gate_front_sprite_sheet_27
+  - first:
+      213: -854068239875205616
+    second: castle_gate_front_sprite_sheet_28
+  - first:
+      213: -9216437726458270532
+    second: castle_gate_front_sprite_sheet_29
+  - first:
+      213: 9024953565368442469
+    second: castle_gate_front_sprite_sheet_30
+  - first:
+      213: 4012756657059701602
+    second: castle_gate_front_sprite_sheet_31
+  - first:
+      213: -6038622717286212735
+    second: castle_gate_front_sprite_sheet_32
+  - first:
+      213: 667450426363557696
+    second: castle_gate_front_sprite_sheet_33
+  - first:
+      213: -7014397286250800668
+    second: castle_gate_front_sprite_sheet_34
+  - first:
+      213: -2731199181242031650
+    second: castle_gate_front_sprite_sheet_35
+  - first:
+      213: 2041090390603832892
+    second: castle_gate_front_sprite_sheet_36
+  - first:
+      213: 7367150254709713218
+    second: castle_gate_front_sprite_sheet_37
+  - first:
+      213: 3707377567992614926
+    second: castle_gate_front_sprite_sheet_38
+  - first:
+      213: -7289014700221307989
+    second: castle_gate_front_sprite_sheet_39
+  - first:
+      213: -1686174232061348045
+    second: castle_gate_front_sprite_sheet_40
+  - first:
+      213: -7015341101673838208
+    second: castle_gate_front_sprite_sheet_41
+  - first:
+      213: 4854126329509391571
+    second: castle_gate_front_sprite_sheet_42
+  - first:
+      213: 517236146304672963
+    second: castle_gate_front_sprite_sheet_43
+  - first:
+      213: 1184811911703096675
+    second: castle_gate_front_sprite_sheet_44
+  - first:
+      213: 1324653485420695549
+    second: castle_gate_front_sprite_sheet_45
+  - first:
+      213: 8247636458025145239
+    second: castle_gate_front_sprite_sheet_46
+  - first:
+      213: -5023382993629230576
+    second: castle_gate_front_sprite_sheet_47
+  - first:
+      213: 3200892891633213923
+    second: castle_gate_front_sprite_sheet_48
+  - first:
+      213: 5461814544224855013
+    second: castle_gate_front_sprite_sheet_49
+  - first:
+      213: -2469123492670110654
+    second: castle_gate_front_sprite_sheet_50
+  - first:
+      213: 8055123146228378557
+    second: castle_gate_front_sprite_sheet_51
+  - first:
+      213: 7037854319103991841
+    second: castle_gate_front_sprite_sheet_52
+  - first:
+      213: -782017674799569071
+    second: castle_gate_front_sprite_sheet_53
+  - first:
+      213: -3621495842427662850
+    second: castle_gate_front_sprite_sheet_54
+  - first:
+      213: -790621790624514623
+    second: castle_gate_front_sprite_sheet_55
+  - first:
+      213: -887549321140170694
+    second: castle_gate_front_sprite_sheet_56
+  - first:
+      213: 1063208560994933914
+    second: castle_gate_front_sprite_sheet_57
+  - first:
+      213: -4896501320454972508
+    second: castle_gate_front_sprite_sheet_58
+  - first:
+      213: 1930836785039445301
+    second: castle_gate_front_sprite_sheet_59
+  - first:
+      213: 8308883577255524991
+    second: castle_gate_front_sprite_sheet_60
+  - first:
+      213: -7925415152996438152
+    second: castle_gate_front_sprite_sheet_61
+  - first:
+      213: 3976195835465747219
+    second: castle_gate_front_sprite_sheet_62
+  - first:
+      213: -8131022637910408250
+    second: castle_gate_front_sprite_sheet_63
+  - first:
+      213: -687510529669352484
+    second: castle_gate_front_sprite_sheet_64
+  - first:
+      213: 4895527614044000324
+    second: castle_gate_front_sprite_sheet_65
+  - first:
+      213: 5132698395817958131
+    second: castle_gate_front_sprite_sheet_66
+  - first:
+      213: 6166956434530448438
+    second: castle_gate_front_sprite_sheet_67
+  - first:
+      213: 5898867499275985778
+    second: castle_gate_front_sprite_sheet_68
+  - first:
+      213: -5530408297886971660
+    second: castle_gate_front_sprite_sheet_69
+  - first:
+      213: -6623838510525154482
+    second: castle_gate_front_sprite_sheet_70
+  - first:
+      213: -3907469565917165721
+    second: castle_gate_front_sprite_sheet_71
+  - first:
+      213: 8271037901142772406
+    second: castle_gate_front_sprite_sheet_72
+  - first:
+      213: 772927187408704030
+    second: castle_gate_front_sprite_sheet_73
+  - first:
+      213: -8018976496699122690
+    second: castle_gate_front_sprite_sheet_74
+  - first:
+      213: -2854435407509828877
+    second: castle_gate_front_sprite_sheet_75
+  - first:
+      213: -2040989264303329870
+    second: castle_gate_front_sprite_sheet_76
+  - first:
+      213: -5947123338644443593
+    second: castle_gate_front_sprite_sheet_77
+  - first:
+      213: 4338504714558597504
+    second: castle_gate_front_sprite_sheet_78
+  - first:
+      213: -8839979440039784032
+    second: castle_gate_front_sprite_sheet_79
+  - first:
+      213: -658248127781507160
+    second: castle_gate_front_sprite_sheet_80
+  - first:
+      213: -28526429506575614
+    second: castle_gate_front_sprite_sheet_81
+  - first:
+      213: -1129040533187854254
+    second: castle_gate_front_sprite_sheet_82
+  - first:
+      213: -2138634912747104498
+    second: castle_gate_front_sprite_sheet_83
+  - first:
+      213: 6735152572840259998
+    second: castle_gate_front_sprite_sheet_84
+  - first:
+      213: 853626642311702030
+    second: castle_gate_front_sprite_sheet_85
+  - first:
+      213: -4528775648968728161
+    second: castle_gate_front_sprite_sheet_86
+  - first:
+      213: 3880188872373548774
+    second: castle_gate_front_sprite_sheet_87
+  - first:
+      213: 7611474098219123727
+    second: castle_gate_front_sprite_sheet_88
+  - first:
+      213: -6412856935448117585
+    second: castle_gate_front_sprite_sheet_89
+  - first:
+      213: -2620481361657617738
+    second: castle_gate_front_sprite_sheet_90
+  - first:
+      213: 8779819100623795176
+    second: castle_gate_front_sprite_sheet_91
+  - first:
+      213: -638862633064012914
+    second: castle_gate_front_sprite_sheet_92
+  - first:
+      213: 4534777919003995862
+    second: castle_gate_front_sprite_sheet_93
+  - first:
+      213: -6753450980401045249
+    second: castle_gate_front_sprite_sheet_94
+  - first:
+      213: 2984492568353931797
+    second: castle_gate_front_sprite_sheet_95
+  - first:
+      213: 63000718057333718
+    second: castle_gate_front_sprite_sheet_96
+  - first:
+      213: -2903949256863950010
+    second: castle_gate_front_sprite_sheet_97
+  - first:
+      213: -3119667788244617432
+    second: castle_gate_front_sprite_sheet_98
+  - first:
+      213: -3253777397188004363
+    second: castle_gate_front_sprite_sheet_99
+  - first:
+      213: 8394264750020727305
+    second: castle_gate_front_sprite_sheet_100
+  - first:
+      213: -2945732283086930568
+    second: castle_gate_front_sprite_sheet_101
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 0
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 0
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Android
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: castle_gate_front_sprite_sheet_0
+      rect:
+        serializedVersion: 2
+        x: 15
+        y: 648
+        width: 477
+        height: 309
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: cb763b3809522a850800000000000000
+      internalID: 6386708524179875772
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: castle_gate_front_sprite_sheet_1
+      rect:
+        serializedVersion: 2
+        x: 525
+        y: 648
+        width: 484
+        height: 317
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8144a0e8a1e73bb00800000000000000
+      internalID: 843156207765701656
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: castle_gate_front_sprite_sheet_2
+      rect:
+        serializedVersion: 2
+        x: 1043
+        y: 646
+        width: 473
+        height: 372
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b51674837c57d8ce0800000000000000
+      internalID: -1401334410539212453
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: castle_gate_front_sprite_sheet_3
+      rect:
+        serializedVersion: 2
+        x: 170
+        y: 321
+        width: 168
+        height: 317
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1025eb89ceea92ae0800000000000000
+      internalID: -1573534263591153151
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: castle_gate_front_sprite_sheet_4
+      rect:
+        serializedVersion: 2
+        x: 525
+        y: 344
+        width: 483
+        height: 145
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 725f9f9a587e6eba0800000000000000
+      internalID: -6059901687312026329
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: castle_gate_front_sprite_sheet_5
+      rect:
+        serializedVersion: 2
+        x: 1035
+        y: 318
+        width: 487
+        height: 110
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ffdfb05e4e72e65d0800000000000000
+      internalID: -3067470432143933953
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: castle_gate_front_sprite_sheet_6
+      rect:
+        serializedVersion: 2
+        x: 1203
+        y: 43
+        width: 122
+        height: 235
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d6a0b3984defdf310800000000000000
+      internalID: 1440587644617296493
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: castle_gate_front_sprite_sheet_7
+      rect:
+        serializedVersion: 2
+        x: 701
+        y: 14
+        width: 158
+        height: 314
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9de7425f27478fae0800000000000000
+      internalID: -1515333237522268455
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: castle_gate_front_sprite_sheet_8
+      rect:
+        serializedVersion: 2
+        x: 54
+        y: 20
+        width: 388
+        height: 267
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0762b994c65009e50800000000000000
+      internalID: 6813952198861071984
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 2d51bd01447441844a725d68ac63547d
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      castle_gate_front_sprite_sheet_0: 6386708524179875772
+      castle_gate_front_sprite_sheet_1: 843156207765701656
+      castle_gate_front_sprite_sheet_10: 5913317173463561580
+      castle_gate_front_sprite_sheet_100: 8394264750020727305
+      castle_gate_front_sprite_sheet_101: -2945732283086930568
+      castle_gate_front_sprite_sheet_11: -7453333372071348653
+      castle_gate_front_sprite_sheet_12: -7085341054412355798
+      castle_gate_front_sprite_sheet_13: -8769875089446594711
+      castle_gate_front_sprite_sheet_14: 6481874266414489628
+      castle_gate_front_sprite_sheet_15: 3218816696042105208
+      castle_gate_front_sprite_sheet_16: -3605197183664098489
+      castle_gate_front_sprite_sheet_17: 8905683598925674327
+      castle_gate_front_sprite_sheet_18: -6133928245048411048
+      castle_gate_front_sprite_sheet_19: 1145793448143387623
+      castle_gate_front_sprite_sheet_2: -1401334410539212453
+      castle_gate_front_sprite_sheet_20: 1892820633625647131
+      castle_gate_front_sprite_sheet_21: -8982732440635677267
+      castle_gate_front_sprite_sheet_22: 7702359446191664465
+      castle_gate_front_sprite_sheet_23: -50417738889482472
+      castle_gate_front_sprite_sheet_24: -4022522038515219303
+      castle_gate_front_sprite_sheet_25: 6874476506529096036
+      castle_gate_front_sprite_sheet_26: -5124282170658454002
+      castle_gate_front_sprite_sheet_27: 2660580967595021124
+      castle_gate_front_sprite_sheet_28: -854068239875205616
+      castle_gate_front_sprite_sheet_29: -9216437726458270532
+      castle_gate_front_sprite_sheet_3: -1573534263591153151
+      castle_gate_front_sprite_sheet_30: 9024953565368442469
+      castle_gate_front_sprite_sheet_31: 4012756657059701602
+      castle_gate_front_sprite_sheet_32: -6038622717286212735
+      castle_gate_front_sprite_sheet_33: 667450426363557696
+      castle_gate_front_sprite_sheet_34: -7014397286250800668
+      castle_gate_front_sprite_sheet_35: -2731199181242031650
+      castle_gate_front_sprite_sheet_36: 2041090390603832892
+      castle_gate_front_sprite_sheet_37: 7367150254709713218
+      castle_gate_front_sprite_sheet_38: 3707377567992614926
+      castle_gate_front_sprite_sheet_39: -7289014700221307989
+      castle_gate_front_sprite_sheet_4: -6059901687312026329
+      castle_gate_front_sprite_sheet_40: -1686174232061348045
+      castle_gate_front_sprite_sheet_41: -7015341101673838208
+      castle_gate_front_sprite_sheet_42: 4854126329509391571
+      castle_gate_front_sprite_sheet_43: 517236146304672963
+      castle_gate_front_sprite_sheet_44: 1184811911703096675
+      castle_gate_front_sprite_sheet_45: 1324653485420695549
+      castle_gate_front_sprite_sheet_46: 8247636458025145239
+      castle_gate_front_sprite_sheet_47: -5023382993629230576
+      castle_gate_front_sprite_sheet_48: 3200892891633213923
+      castle_gate_front_sprite_sheet_49: 5461814544224855013
+      castle_gate_front_sprite_sheet_5: -3067470432143933953
+      castle_gate_front_sprite_sheet_50: -2469123492670110654
+      castle_gate_front_sprite_sheet_51: 8055123146228378557
+      castle_gate_front_sprite_sheet_52: 7037854319103991841
+      castle_gate_front_sprite_sheet_53: -782017674799569071
+      castle_gate_front_sprite_sheet_54: -3621495842427662850
+      castle_gate_front_sprite_sheet_55: -790621790624514623
+      castle_gate_front_sprite_sheet_56: -887549321140170694
+      castle_gate_front_sprite_sheet_57: 1063208560994933914
+      castle_gate_front_sprite_sheet_58: -4896501320454972508
+      castle_gate_front_sprite_sheet_59: 1930836785039445301
+      castle_gate_front_sprite_sheet_6: 1440587644617296493
+      castle_gate_front_sprite_sheet_60: 8308883577255524991
+      castle_gate_front_sprite_sheet_61: -7925415152996438152
+      castle_gate_front_sprite_sheet_62: 3976195835465747219
+      castle_gate_front_sprite_sheet_63: -8131022637910408250
+      castle_gate_front_sprite_sheet_64: -687510529669352484
+      castle_gate_front_sprite_sheet_65: 4895527614044000324
+      castle_gate_front_sprite_sheet_66: 5132698395817958131
+      castle_gate_front_sprite_sheet_67: 6166956434530448438
+      castle_gate_front_sprite_sheet_68: 5898867499275985778
+      castle_gate_front_sprite_sheet_69: -5530408297886971660
+      castle_gate_front_sprite_sheet_7: -1515333237522268455
+      castle_gate_front_sprite_sheet_70: -6623838510525154482
+      castle_gate_front_sprite_sheet_71: -3907469565917165721
+      castle_gate_front_sprite_sheet_72: 8271037901142772406
+      castle_gate_front_sprite_sheet_73: 772927187408704030
+      castle_gate_front_sprite_sheet_74: -8018976496699122690
+      castle_gate_front_sprite_sheet_75: -2854435407509828877
+      castle_gate_front_sprite_sheet_76: -2040989264303329870
+      castle_gate_front_sprite_sheet_77: -5947123338644443593
+      castle_gate_front_sprite_sheet_78: 4338504714558597504
+      castle_gate_front_sprite_sheet_79: -8839979440039784032
+      castle_gate_front_sprite_sheet_8: 6813952198861071984
+      castle_gate_front_sprite_sheet_80: -658248127781507160
+      castle_gate_front_sprite_sheet_81: -28526429506575614
+      castle_gate_front_sprite_sheet_82: -1129040533187854254
+      castle_gate_front_sprite_sheet_83: -2138634912747104498
+      castle_gate_front_sprite_sheet_84: 6735152572840259998
+      castle_gate_front_sprite_sheet_85: 853626642311702030
+      castle_gate_front_sprite_sheet_86: -4528775648968728161
+      castle_gate_front_sprite_sheet_87: 3880188872373548774
+      castle_gate_front_sprite_sheet_88: 7611474098219123727
+      castle_gate_front_sprite_sheet_89: -6412856935448117585
+      castle_gate_front_sprite_sheet_9: -2955324767849818030
+      castle_gate_front_sprite_sheet_90: -2620481361657617738
+      castle_gate_front_sprite_sheet_91: 8779819100623795176
+      castle_gate_front_sprite_sheet_92: -638862633064012914
+      castle_gate_front_sprite_sheet_93: 4534777919003995862
+      castle_gate_front_sprite_sheet_94: -6753450980401045249
+      castle_gate_front_sprite_sheet_95: 2984492568353931797
+      castle_gate_front_sprite_sheet_96: 63000718057333718
+      castle_gate_front_sprite_sheet_97: -2903949256863950010
+      castle_gate_front_sprite_sheet_98: -3119667788244617432
+      castle_gate_front_sprite_sheet_99: -3253777397188004363
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
