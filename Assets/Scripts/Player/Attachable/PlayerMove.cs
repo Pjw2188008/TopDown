@@ -13,8 +13,6 @@ public partial class PlayerMove : MonoBehaviour, ICombatDamageable
     private readonly ErrorInventory storedErrors = new ErrorInventory(MaxStoredErrors);
     private readonly EnvironmentPasteSession environmentPaste = new EnvironmentPasteSession();
     private static readonly int AttackRightStateHash = Animator.StringToHash("Attack_Right");
-    private static readonly int AttackUpStateHash = Animator.StringToHash("Attack_Up");
-    private static readonly int AttackDownStateHash = Animator.StringToHash("Attack_Down");
     private static readonly int IsMovingHash = Animator.StringToHash("isMoving");
     private static readonly int DirectionHash = Animator.StringToHash("direction");
 
@@ -166,8 +164,6 @@ public partial class PlayerMove : MonoBehaviour, ICombatDamageable
     [SerializeField] private bool showParryFeedbackGizmo = true;
 
     [Header("기본 공격")]
-    [Tooltip("위/아래 축에서 이 각도 이내의 커서만 세로 공격으로 처리합니다. 기본 22.5도는 8방향 중 위/아래만 세로 공격, 네 대각선은 좌우 공격에 포함합니다. 이펙트와 판정은 상하좌우로만 나갑니다.")]
-    [SerializeField, Range(1f, 45f)] private float verticalAttackHalfAngle = 22.5f;
 
     [Tooltip("근접 공격이 적에게 주는 피해량입니다.")]
     [SerializeField, Min(0.1f)] private float attackDamage = 1f;
@@ -192,7 +188,7 @@ public partial class PlayerMove : MonoBehaviour, ICombatDamageable
     [SerializeField] private LayerMask enemyLayer;
 
     [Header("공격 이펙트")]
-    [Tooltip("오른쪽을 향하는 공격 이펙트 이미지를 넣으세요. 클릭 순간 결정한 상하좌우 방향으로만 표시됩니다. 대각선 커서는 좌우 공격으로 처리합니다.")]
+    [Tooltip("오른쪽을 향하는 공격 이펙트 이미지를 넣으세요. 공격 시작 시 바라보는 좌우 방향으로 표시하며 왼쪽은 반전합니다.")]
     // 설정용 이미지이므로 애니메이션 키 대상에서 제외합니다.
     // Animation 창에 Sprite를 드롭할 때 PlayerMove가 대상 후보로 표시되지 않게 합니다.
     [UnityEngine.Animations.NotKeyable]
@@ -299,7 +295,8 @@ public partial class PlayerMove : MonoBehaviour, ICombatDamageable
         didDashThisFrame = false;
         // 도감 클릭이 공격/Cut/Paste 입력으로 전달되지 않도록 가장 먼저 처리합니다.
         if (HandleErrorCodexInput()) return;
-        if (IsSideView && (!guardHasFocus || Time.timeScale <= 0f)) return;
+        if (!guardHasFocus || Time.timeScale <= 0f) return;
+        if (HandlePortalInput()) return;
         UpdateSideViewGravity(Time.deltaTime);
         bool bossRewardInputConsumed = HandleBossErrorRewardInput();
         bool interactionInputConsumed = bossRewardInputConsumed || HandleInteractionInput();
@@ -342,7 +339,7 @@ public partial class PlayerMove : MonoBehaviour, ICombatDamageable
         bool dashHandled = UpdateDashMovement(Time.deltaTime);
         HandleSideViewJumpInput();
         if (dashHandled) moveDirection = dashDirection;
-        bool isMoving = dashHandled || (moveDirection != Vector2.zero && !isGuarding && !isPlayingParry && !(IsSideView && isAttacking));
+        bool isMoving = dashHandled || (moveDirection != Vector2.zero && !isGuarding && !isPlayingParry && !isAttacking);
 
         if (IsMovingObject)
         {
@@ -395,7 +392,7 @@ public partial class PlayerMove : MonoBehaviour, ICombatDamageable
         DestroyRunAfterimages();
         CloseErrorCodex();
         if (parryFeedbackCanvas != null) Destroy(parryFeedbackCanvas.gameObject);
-        if (IsSideView && editModeOverlay != null) Destroy(editModeOverlay.canvas.gameObject);
+        if (editModeOverlay != null) Destroy(editModeOverlay.canvas.gameObject);
         Time.timeScale = 1f;
         Time.fixedDeltaTime = 0.02f;
     }

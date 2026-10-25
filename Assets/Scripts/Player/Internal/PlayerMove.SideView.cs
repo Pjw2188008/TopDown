@@ -4,10 +4,6 @@ using UnityEngine.InputSystem;
 /// <summary>사이드뷰 전용 중력, 접지 검사와 단발 점프입니다. PlayerMove partial이므로 따로 붙이지 않습니다.</summary>
 public partial class PlayerMove
 {
-    [SerializeField, Tooltip("켜면 좌우 이동/공격/가드/패링/대시와 중력을 사용합니다. 끄면 기존 탑다운 방식입니다. 모드별 Animator도 연결하세요. Play 전에 설정합니다.")]
-    private bool sideViewMode;
-    [SerializeField, Tooltip("XY 바닥 8방향 이동입니다. 점프는 본체를 올리되 Collider 오프셋으로 바닥 판정을 유지합니다. 별도 Visual 자식은 필요 없습니다. Play 전에 설정하세요.")]
-    private bool sideViewDepthMovement;
     [SerializeField, Min(0f), Tooltip("사이드뷰 하강 가속도입니다. Rigidbody Gravity Scale 대신 이동 전 충돌 검사로 적용합니다.")]
     private float sideViewGravity = 30f;
     [SerializeField, Min(.1f), Tooltip("사이드뷰 최대 낙하 속도입니다.")]
@@ -22,17 +18,9 @@ public partial class PlayerMove
     private Key sideViewJumpKey = Key.Space;
     [SerializeField, Tooltip("추가 점프 키입니다. None으로 끌 수 있습니다. 공중에서 추가 점프는 불가능합니다.")]
     private Key sideViewAlternateJumpKey = Key.None;
-    public bool IsSideView => sideViewMode;
-    public bool IsSideViewDepthMovement => IsSideView && sideViewDepthMovement;
-    /// <summary>2.5D 기본 바닥에서의 높이입니다. 발판에 서 있으면 해당 발판 높이를 포함합니다.</summary>
-    public float SideViewHeight => IsSideViewDepthMovement ? sideViewHeight : 0f;
-    private float sideViewHeight;
     private float sideViewFacing = 1f;
-    // 렌더링 위치에서 이미 적용한 높이를 빼면 바닥 좌표입니다.
-    public Vector3 GroundPosition => transform.position - Vector3.up * appliedSideViewHeight;
-    private float appliedSideViewHeight;
-    private Collider2D[] sideViewGroundColliders;
-    private Vector2[] sideViewGroundOffsets;
+    // 사이드뷰에서는 실제 Transform 위치가 이동/조준 기준입니다.
+    public Vector3 GroundPosition => transform.position;
     private float sideViewFallSpeed;
     private bool sideViewJumpCutAvailable;
     private static readonly int SideViewJumpStateHash = Animator.StringToHash("Jump_Right");
@@ -66,7 +54,7 @@ public partial class PlayerMove
     private void HandleSideViewJumpInput()
     {
         var keyboard = Keyboard.current;
-        if (!IsSideView || keyboard == null) return;
+        if (keyboard == null) return;
         if ((sideViewJumpKey != Key.None && keyboard[sideViewJumpKey].wasPressedThisFrame)
             || (sideViewAlternateJumpKey != Key.None && keyboard[sideViewAlternateJumpKey].wasPressedThisFrame))
             TryBeginSideViewJump();
@@ -74,7 +62,7 @@ public partial class PlayerMove
 
     private bool TryBeginSideViewJump()
     {
-        if (!IsSideView || !isActiveAndEnabled || !guardHasFocus || Time.timeScale <= 0f || IsInstantlyDead
+        if (!isActiveAndEnabled || !guardHasFocus || Time.timeScale <= 0f || IsInstantlyDead
             || isErrorCodexOpen || isAttacking || isGuarding || isPlayingParry || IsGuardRequested()
             || isDashing || didDashThisFrame || IsMovingObject || isSelectingStoredError
             || isReplacingStoredError || environmentPaste.IsBusy || sideViewFallSpeed < 0f
@@ -107,8 +95,6 @@ public partial class PlayerMove
 
     private bool IsSideViewGrounded()
     {
-        if (IsSideViewDepthMovement)
-            return sideViewFallSpeed >= 0f && Mathf.Abs(sideViewHeight - GetSideViewSupportHeight()) <= .0001f;
         Physics2D.SyncTransforms();
         var colliders = UnityEngine.Pool.ListPool<Collider2D>.Get();
         try
@@ -129,7 +115,7 @@ public partial class PlayerMove
                     if (hit.collider == null || hit.collider.transform.IsChildOf(transform)
                         || Physics2D.GetIgnoreCollision(shape, hit.collider) || hit.normal.y < .5f) continue;
                     // 충돌은 일반 사물도 막지만, 접지/점프 가능한 바닥은 Floor만 인정합니다.
-                    if (IsSideView && !IsFloorCollider(hit.collider)) continue;
+                    if (!IsFloorCollider(hit.collider)) continue;
                     if (hit.distance == 0f && hit.collider.bounds.center.y >= shape.bounds.center.y) continue;
                     return true;
                 }
@@ -141,24 +127,9 @@ public partial class PlayerMove
 
     private void UpdateSideViewGravity(float deltaTime)
     {
-        if (!IsSideView || deltaTime <= 0f) return;
+        if (deltaTime <= 0f) return;
         // 이번 프레임의 상승 이동 전에 키 해제를 반영합니다. 공격/대시 중 해제도 누락하지 않습니다.
         UpdateSideViewJumpRelease();
-        if (IsSideViewDepthMovement)
-        {
-            float support = GetSideViewSupportHeight();
-            if (sideViewFallSpeed >= 0f && Mathf.Abs(sideViewHeight - support) <= .0001f)
-            { sideViewHeight = support; sideViewFallSpeed = 0f; UpdateSideViewVisualHeight(); return; }
-            sideViewFallSpeed = Mathf.Min(Mathf.Max(.1f, sideViewMaxFallSpeed), sideViewFallSpeed + Mathf.Max(0f, sideViewGravity) * deltaTime);
-            float nextHeight = sideViewHeight - sideViewFallSpeed * deltaTime;
-            // 이전 높이와 하강할 높이를 비교하여 저프레임에서도 윗면을 뚫지 않습니다.
-            if (sideViewFallSpeed >= 0f && nextHeight <= support)
-            { sideViewHeight = support; sideViewFallSpeed = 0f; }
-            else sideViewHeight = Mathf.Max(0f, nextHeight);
-            if (sideViewFallSpeed >= 0f) sideViewJumpCutAvailable = false;
-            UpdateSideViewVisualHeight();
-            return;
-        }
         // 기존 이동/대시와 같은 Kinematic Cast 경로를 사용해 물리 보정과 직접 이동의 충돌을 피합니다.
         sideViewFallSpeed = Mathf.Min(Mathf.Max(.1f, sideViewMaxFallSpeed), sideViewFallSpeed + Mathf.Max(0f, sideViewGravity) * deltaTime);
         float wanted = sideViewFallSpeed * deltaTime;
@@ -175,44 +146,12 @@ public partial class PlayerMove
         return sideViewFacing;
     }
 
-    private float GetSideViewSupportHeight()
-    {
-        // Collider는 점프 중에도 바닥에 남으므로 발 위치로 사용할 수 있습니다.
-        Vector2 feet = GroundPosition;
-        var body = GetComponent<Collider2D>();
-        if (body != null && body.enabled) feet = new Vector2(body.bounds.center.x, body.bounds.min.y);
-        return SideViewJumpPlatform.FindSupportHeight(feet, sideViewHeight);
-    }
 
-    private void UpdateSideViewVisualHeight()
-    {
-        if (!IsSideViewDepthMovement) return;
-        ApplySideViewHeight(sideViewHeight);
-    }
 
-    private void ApplySideViewHeight(float height)
-    {
-        if (sideViewGroundColliders == null)
-        {
-            sideViewGroundColliders = GetComponents<Collider2D>();
-            sideViewGroundOffsets = new Vector2[sideViewGroundColliders.Length];
-            for (int i = 0; i < sideViewGroundColliders.Length; i++) sideViewGroundOffsets[i] = sideViewGroundColliders[i].offset;
-        }
-        float delta = height - appliedSideViewHeight;
-        if (Mathf.Abs(delta) > 0f) ApplyPlayerDisplacement(Vector2.up * delta);
-        appliedSideViewHeight = height;
-        // 크기가 바뀌어도 월드 높이에 맞춰 Collider의 로컬 오프셋을 보정합니다.
-        Vector2 compensation = transform.InverseTransformVector(Vector3.up * height);
-        for (int i = 0; i < sideViewGroundColliders.Length; i++)
-            if (sideViewGroundColliders[i] != null) sideViewGroundColliders[i].offset = sideViewGroundOffsets[i] - compensation;
-        Physics2D.SyncTransforms();
-    }
 
     private void ResetSideViewJumpHeight()
     {
         sideViewJumpCutAvailable = false;
-        sideViewHeight = 0f;
         sideViewFallSpeed = 0f;
-        if (appliedSideViewHeight != 0f || sideViewGroundColliders != null) ApplySideViewHeight(0f);
     }
 }

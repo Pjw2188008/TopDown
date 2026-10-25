@@ -1286,7 +1286,6 @@ MonoBehaviour:
   keepLastAreaOutside: 1
   fitSmallAreas: 1
   fadeBetweenAreas: 1
-  fadeOnlyInSideView: 1
   fadeOutDuration: 0.18
   blackHoldDuration: 0.08
   fadeInDuration: 0.22
@@ -6229,7 +6228,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4866652785127809678, guid: 5b99f2bb2da6a8545852dec2ef742414, type: 3}
       propertyPath: roomSize.x
-      value: 21.3
+      value: 22.4
       objectReference: {fileID: 0}
     - target: {fileID: 4866652785127809678, guid: 5b99f2bb2da6a8545852dec2ef742414, type: 3}
       propertyPath: roomSize.y
@@ -6237,11 +6236,23 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4866652785127809678, guid: 5b99f2bb2da6a8545852dec2ef742414, type: 3}
       propertyPath: roomOffset.x
-      value: -8.73
+      value: -8.91
       objectReference: {fileID: 0}
     - target: {fileID: 4866652785127809678, guid: 5b99f2bb2da6a8545852dec2ef742414, type: 3}
       propertyPath: roomOffset.y
-      value: 1
+      value: 2.44
+      objectReference: {fileID: 0}
+    - target: {fileID: 4866652785127809678, guid: 5b99f2bb2da6a8545852dec2ef742414, type: 3}
+      propertyPath: rockfallCount
+      value: 4
+      objectReference: {fileID: 0}
+    - target: {fileID: 4866652785127809678, guid: 5b99f2bb2da6a8545852dec2ef742414, type: 3}
+      propertyPath: shockwaveRadius
+      value: 0.47
+      objectReference: {fileID: 0}
+    - target: {fileID: 4866652785127809678, guid: 5b99f2bb2da6a8545852dec2ef742414, type: 3}
+      propertyPath: shockwaveDistance
+      value: 9.93
       objectReference: {fileID: 0}
     - target: {fileID: 5803268300746287336, guid: 5b99f2bb2da6a8545852dec2ef742414, type: 3}
       propertyPath: m_LocalPosition.x
@@ -6249,7 +6260,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5803268300746287336, guid: 5b99f2bb2da6a8545852dec2ef742414, type: 3}
       propertyPath: m_LocalPosition.y
-      value: -29.7
+      value: -31.09
       objectReference: {fileID: 0}
     - target: {fileID: 5803268300746287336, guid: 5b99f2bb2da6a8545852dec2ef742414, type: 3}
       propertyPath: m_LocalPosition.z
@@ -42715,7 +42726,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 856138132916773424, guid: 27f13612cc6077b43a95295c8f3f12f2, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -15.69
+      value: 68.1
       objectReference: {fileID: 0}
     - target: {fileID: 856138132916773424, guid: 27f13612cc6077b43a95295c8f3f12f2, type: 3}
       propertyPath: m_LocalPosition.y

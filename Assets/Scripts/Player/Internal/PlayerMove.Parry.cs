@@ -159,8 +159,6 @@ public partial class PlayerMove
         GUI.Label(rect, "첨삭 성공!", parryFeedbackStyle);
         GUI.color = previousColor;
     }
-    private static readonly int ParryUpStateHash = Animator.StringToHash("Parry_Up");
-    private static readonly int ParryDownStateHash = Animator.StringToHash("Parry_Down");
     private static readonly int ParryRightStateHash = Animator.StringToHash("Parry_Right");
     private bool isPlayingParry;
     private int currentParryStateHash;
@@ -237,11 +235,11 @@ public partial class PlayerMove
     {
         if (animator == null || spriteRenderer == null) return;
         Vector2 direction = GetCardinalAttackDirection(GetMouseDirection());
-        int facing = direction.y != 0f ? (direction.y > 0f ? 0 : 1) : 2;
-        int stateHash = facing == 0 ? ParryUpStateHash : facing == 1 ? ParryDownStateHash : ParryRightStateHash;
+        const int facing = 2;
+        int stateHash = ParryRightStateHash;
         if (!animator.HasState(0, stateHash))
         {
-            Debug.LogWarning("Animator에 Parry_Up / Parry_Down / Parry_Right 상태를 연결해주세요.", this);
+            Debug.LogWarning("Animator에 Parry_Right 상태를 연결해주세요.", this);
             return;
         }
         currentParryStateHash = stateHash;
@@ -253,7 +251,7 @@ public partial class PlayerMove
         animator.speed = baseAnimatorSpeed;
         animator.SetBool(IsMovingHash, false);
         animator.SetInteger(DirectionHash, facing);
-        spriteRenderer.flipX = facing == 2 && direction.x < 0f;
+        spriteRenderer.flipX = direction.x < 0f;
         animator.Play(stateHash, 0, 0f);
     }
 

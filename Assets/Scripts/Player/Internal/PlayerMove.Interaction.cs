@@ -10,7 +10,7 @@ public partial class PlayerMove
     [SerializeField] private Key interactionKey = Key.F;
     [Tooltip("플레이어 중심에서 물체 Collider의 가장 가까운 지점까지의 상호작용 거리입니다.")]
     [SerializeField, Min(0.1f)] private float interactionRange = 1.5f;
-    [Tooltip("Collider 경계 사이의 여유 공간(월드 단위)입니다. 기본 0.3. 잡을 때 물체를 가능한 만큼 벌리고, 이동 입력 시 이 간격으로 물체 반대편에 자리 잡습니다. 0은 최초 간격 보정을 끄며 자리 이동에는 최소 충돌 여유 0.04를 둡니다.")]
+    [Tooltip("Collider 사이의 수평 여유 간격입니다. 잡을 때 물체를 벽에 막히지 않는 만큼 밀어냅니다. 0이면 간격 보정을 끕니다.")]
     [InspectorName("잡기 간격"), SerializeField, Min(0f)] private float interactionGrabGap = 0.3f;
     [Tooltip("잡을 물체를 검색할 레이어입니다. 기본값은 모든 레이어입니다.")]
     [SerializeField] private LayerMask interactionLayers = ~0;
@@ -26,11 +26,6 @@ public partial class PlayerMove
     private int interactionStateHash;
     private GUIStyle interactionPromptStyle;
     private readonly List<RaycastHit2D> interactionHits = new List<RaycastHit2D>(16);
-    // Start, destination and four outer corners: a small local route around the held object.
-    private readonly Vector2[] interactionRouteNodes = new Vector2[6];
-    private readonly float[] interactionRouteCosts = new float[6];
-    private readonly int[] interactionRoutePrevious = new int[6];
-    private readonly bool[] interactionRouteVisited = new bool[6];
     private bool IsMovingObject => heldInteractable != null && heldInteractable.isActiveAndEnabled && heldInteractable.IsHeldBy(transform);
 
     private bool CanBeginInteraction => guardHasFocus && !isEditMode && !isErrorCodexOpen && !isAttacking
@@ -85,15 +80,8 @@ public partial class PlayerMove
     private bool MoveWithInteractable(Vector2 movement)
     {
         if (!IsMovingObject || movement.sqrMagnitude <= .0001f) return false;
-        // 일반 이동처럼 입력 방향을 바라봅니다. 대각선은 수평 방향을 우선합니다.
-        // 입력이 없을 때는 마지막 방향을 유지하여 해당 방향의 정지 클립을 재생합니다.
-        interactionFacing = movement.x != 0f
-            ? new Vector2(Mathf.Sign(movement.x), 0f)
-            : new Vector2(0f, Mathf.Sign(movement.y));
-        if (IsSideView) interactionFacing = Vector2.right * GetSideViewFacing(movement);
+        interactionFacing = Vector2.right * GetSideViewFacing(movement);
         lastDirection = interactionFacing;
-        // 먼저 입력 방향의 반대편에 섭니다. 자리 이동 중에는 물체를 움직이지 않습니다.
-        if (!IsSideView && !TryRepositionForInteraction(Time.deltaTime, out bool repositioned)) return repositioned;
         Vector2 direction = movement.normalized;
         float wanted = Mathf.Max(0f, moveSpeed) * heldInteractable.MoveSpeedMultiplier * Time.deltaTime;
         Physics2D.SyncTransforms();
@@ -111,10 +99,10 @@ public partial class PlayerMove
     private void UpdateInteractionAnimation(bool moving)
     {
         if (animator == null || spriteRenderer == null) return;
-        string suffix = interactionFacing.y > .5f ? "Up" : interactionFacing.y < -.5f ? "Down" : "Right";
+        const string suffix = "Right";
         int hash = Animator.StringToHash((moving ? "Interact_Move_" : "Interact_Idle_") + suffix);
         animator.SetBool(IsMovingHash, false); // Suppress ordinary movement transitions while holding.
-        spriteRenderer.flipX = suffix == "Right" && interactionFacing.x < 0f;
+        spriteRenderer.flipX = interactionFacing.x < 0f;
         if (interactionStateHash == hash) return;
         interactionStateHash = hash;
         if (animator.HasState(0, hash)) { animator.speed = baseAnimatorSpeed; animator.Play(hash, 0, 0f); }
@@ -138,7 +126,7 @@ public partial class PlayerMove
         if (screen.z <= 0 || screen.x < 0 || screen.x > Screen.width || screen.y < 0 || screen.y > Screen.height) return;
         if (interactionPromptStyle == null) interactionPromptStyle = new GUIStyle(GUI.skin.box)
         { alignment = TextAnchor.MiddleCenter, fontSize = 14, wordWrap = true };
-        string message = IsMovingObject ? $"[{interactionKey}] 놓기 · {(IsSideView && !IsSideViewDepthMovement ? "A/D" : "WASD")} 옮기기" : $"[{interactionKey}] {target.InteractionName} 잡기";
+        string message = IsMovingObject ? $"[{interactionKey}] 놓기 · A/D 옮기기" : $"[{interactionKey}] {target.InteractionName} 잡기";
         GUI.Box(new Rect(screen.x - 120, Screen.height - screen.y + 38, 240, 44), message, interactionPromptStyle);
     }
 

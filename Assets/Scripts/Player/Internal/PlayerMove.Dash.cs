@@ -23,7 +23,7 @@ public partial class PlayerMove
         var keyboard = Keyboard.current;
         if (keyboard == null || dashKey == Key.None) return;
         // Inspector에서 같은 키로 지정해도 점프와 대시가 한 입력에 겹치지 않습니다.
-        if (IsSideView && (dashKey == sideViewJumpKey || dashKey == sideViewAlternateJumpKey)) return;
+        if (dashKey == sideViewJumpKey || dashKey == sideViewAlternateJumpKey) return;
         if (keyboard[dashKey].wasPressedThisFrame) TryBeginDash(movement);
     }
 
@@ -41,7 +41,7 @@ public partial class PlayerMove
             return false;
         }
         Vector2 direction = movement.sqrMagnitude > 0.0001f ? movement : lastDirection;
-        dashDirection = direction.sqrMagnitude > 0.0001f ? direction.normalized : Vector2.right;
+        dashDirection = Vector2.right * GetSideViewFacing(direction);
         lastDirection = dashDirection;
         currentDashStamina -= cost;
         dashRemaining = Mathf.Max(0.01f, dashDuration);

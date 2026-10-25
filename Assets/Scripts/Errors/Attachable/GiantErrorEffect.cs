@@ -6,7 +6,7 @@ using UnityEngine;
 /// </summary>
 public class GiantErrorEffect : MonoBehaviour, IErrorSource
 {
-    public enum GrowthAnchorMode { AutoSideView, Pivot, Bottom }
+    public enum GrowthAnchorMode { AutoBottom, Pivot, Bottom }
 
     [Header("거대화 오류")]
     [Tooltip("거대화가 적용된 대상의 최종 크기 배율입니다. Cut하면 이 배율이 오류 정보로 보관됩니다.")]
@@ -21,8 +21,8 @@ public class GiantErrorEffect : MonoBehaviour, IErrorSource
     [Tooltip("거대화 진행도에 따른 크기 변화 곡선입니다. 가로축은 시간, 세로축은 적용 비율입니다.")]
     [SerializeField] private AnimationCurve expansionCurve = AnimationCurve.EaseInOut(0f, 0f, 1f, 1f);
 
-    [Tooltip("AutoSideView는 2D 사이드뷰에서만 밑면을 유지합니다. Pivot은 기존 중심 확대, Bottom은 시점과 무관하게 밑면 기준 확대입니다.")]
-    [SerializeField] private GrowthAnchorMode growthAnchor = GrowthAnchorMode.AutoSideView;
+    [Tooltip("AutoBottom과 Bottom은 밑면을 유지하며 위로 확대합니다. Pivot은 중심 기준 확대를 직접 선택하는 옵션입니다.")]
+    [SerializeField] private GrowthAnchorMode growthAnchor = GrowthAnchorMode.AutoBottom;
     [Tooltip("밑면 기준으로 쓸 몸체 Collider2D입니다(선택). 비우면 자신/자식의 활성 비트리거 Collider 최하단을 사용합니다. 감지용 Trigger는 제외하고, Collider가 없으면 SpriteRenderer 밑면을 사용합니다.")]
     [SerializeField] private Collider2D bottomAnchorCollider;
 
@@ -65,7 +65,7 @@ public class GiantErrorEffect : MonoBehaviour, IErrorSource
 
         targetMultiplier = multiplier;
         growthStartScale = transform.localScale;
-        preserveBottom = ResolveBottomAnchor(IsSideViewScene());
+        preserveBottom = ResolveBottomAnchor();
         state.ActivateOriginal();
         isGrowing = true;
         growthProgress = 0f;
@@ -78,21 +78,10 @@ public class GiantErrorEffect : MonoBehaviour, IErrorSource
         state.MarkPasted();
     }
 
-    /// <summary>Pasteしたプレイヤーの視点を使い、複数プレイヤーがいる場合も自動設定を確定します。</summary>
-    public void ApplyPaste(float multiplier, bool sideView)
-    {
-        ApplyPaste(multiplier);
-        preserveBottom = ResolveBottomAnchor(sideView);
-    }
 
-    private bool ResolveBottomAnchor(bool sideView)
-        => growthAnchor == GrowthAnchorMode.Bottom || (growthAnchor == GrowthAnchorMode.AutoSideView && sideView);
+    private bool ResolveBottomAnchor()
+        => growthAnchor != GrowthAnchorMode.Pivot;
 
-    private bool IsSideViewScene()
-    {
-        var player = FindFirstObjectByType<PlayerMove>();
-        return player != null && player.IsSideView && !player.IsSideViewDepthMovement;
-    }
 
     public void ResetScale()
     {
@@ -116,7 +105,7 @@ public class GiantErrorEffect : MonoBehaviour, IErrorSource
         {
             savedState.ActivateOriginal();
             savedGrowing = true;
-            savedPreserveBottom = ResolveBottomAnchor(IsSideViewScene());
+            savedPreserveBottom = ResolveBottomAnchor();
         }
         return () =>
         {

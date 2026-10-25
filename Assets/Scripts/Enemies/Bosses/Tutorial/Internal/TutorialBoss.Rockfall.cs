@@ -7,7 +7,7 @@ public sealed partial class TutorialBoss
     [Header("맵 패턴 1 / 낙석")]
     [SerializeField, Min(0f), Tooltip("방 입장 후 첫 낙석까지의 게임 시간입니다. 추적/근접/충격파와 독립적으로 시작하며 보스 동작을 끊지 않습니다.")] private float rockfallFirstDelay = 3f;
     [SerializeField, Min(.1f), Tooltip("낙석 패턴이 끝난 후 다음 낙석까지의 최소 간격입니다. 거리에 관계없이 발동합니다.")] private float rockfallInterval = 6f;
-    [SerializeField, Range(1,16), Tooltip("한 패턴의 최대 낙석 수입니다. 안전한 배치 공간이 부족하면 줄어듭니다.")] private int rockfallCount = 5;
+    [SerializeField, Range(1,16), Tooltip("방 안에 배치할 한 패턴의 최대 낙석 수(1~16)입니다. 가로 공간을 나눠 실제 바닥 위에 배치하며, 유효한 바닥/간격이 부족할 때만 줄어듭니다.")] private int rockfallCount = 5;
     [SerializeField, Tooltip("낙석 전용 BoxCollider2D 범위입니다(Is Trigger 권장). 비우면 Room Area 또는 Room Size를 사용합니다. 반드시 보스 방 안에 배치하세요.")] private BoxCollider2D rockfallArea;
     [SerializeField, Tooltip("한 지점을 발동 당시 플레이어 위치에 배치합니다. 경고 이후에는 추적하지 않으며 벽/경계에 걸리면 무작위 위치로 대체합니다.")] private bool rockfallTargetPlayer = true;
     [SerializeField, Min(.1f), Tooltip("돌이 내려오기 전 바닥 경고를 보여주는 시간입니다.")] private float rockfallWarningTime = 1f;
@@ -27,7 +27,6 @@ public sealed partial class TutorialBoss
         public float radius, baseRadius, delay, elapsed, fallProgress, impactElapsed;
         public PatternError pattern;
         public bool impacted;
-        public bool sideView;
         public float surfaceY;
         public GameObject root;
         public SpriteRenderer warning, picture;
@@ -45,19 +44,38 @@ public sealed partial class TutorialBoss
         Physics2D.SyncTransforms();
         int count = Mathf.Clamp(rockfallCount,1,16);
         float radius = Mathf.Max(.1f,rockfallRadius);
-        if (rockfallPatternError.type == StoredErrorType.Giant) radius *= rockfallPatternError.multiplier;
-        for (int i=0;i<count;i++)
+        radius *= rockfallPatternError.Multiplier(StoredErrorType.Giant);
+        var bounds = RockfallWorldBounds;
+        float left = bounds.min.x+radius, right = bounds.max.x-radius;
+        if (rockfallTargetPlayer && TrySideViewRockPoint(player.transform.position.x,radius,true,out var target))
+            fallingRocks.Add(CreateRock(target,radius,0f));
+        // 탑다운의 무작위 XY 대신 방의 가로 구간 전체를 균등하게 탐색합니다.
+        // 가장 멀리 떨어진 유효 후보부터 골라 첫 돌 주변에만 배치가 몰리지 않게 합니다.
+        var candidates = new List<Vector2>();
+        int samples = Mathf.Clamp(Mathf.CeilToInt(Mathf.Max(0f,right-left)/Mathf.Max(.1f,radius*.25f)),64,512);
+        for (int i=0;left<=right && i<=samples;i++)
         {
-            Vector2 point = player.transform.position;
-            bool side = IsSideViewBattle;
-            bool found = i == 0 && rockfallTargetPlayer && (side
-                ? TrySideViewRockPoint(point.x,radius,true,out point) : IsRockPointValid(point,radius));
-            for (int attempt=0;!found && attempt<60;attempt++)
+            float x = Mathf.Lerp(left,right,(float)i/samples);
+            if (TrySideViewRockPoint(x,radius,false,out var point)) candidates.Add(point);
+        }
+        while (fallingRocks.Count<count && candidates.Count>0)
+        {
+            int best = -1;float bestDistance = -1f;
+            for (int i=candidates.Count-1;i>=0;i--)
             {
-                point = RandomRockPoint();
-                found = side ? TrySideViewRockPoint(point.x,radius,false,out point) : IsRockPointValid(point,radius);
+                // 지형 검사는 후보 수집 때 끝냈으므로 새로 추가한 돌과의 간격만 확인합니다.
+                float distance = fallingRocks.Count==0 ? Random.value : float.MaxValue;
+                foreach (var rock in fallingRocks)
+                {
+                    float squared = (candidates[i]-rock.point).sqrMagnitude;
+                    float gap = radius+rock.radius+.25f;
+                    if (squared<gap*gap) { distance=-1f;break; }
+                    distance = Mathf.Min(distance,squared);
+                }
+                if (distance>bestDistance) { best=i;bestDistance=distance; }
             }
-            if (!found) continue; // 좁은 방에서도 무한 탐색하거나 경고를 강제로 겹치지 않습니다.
+            if (best<0) break;
+            Vector2 point = candidates[best];candidates.RemoveAt(best);
             fallingRocks.Add(CreateRock(point,radius,fallingRocks.Count*Mathf.Max(0f,rockfallStagger)));
         }
         if (fallingRocks.Count == 0)
@@ -66,17 +84,6 @@ public sealed partial class TutorialBoss
             ClearRockfall();
             rockfallRemaining = Mathf.Max(.1f,rockfallInterval);
         }
-    }
-
-    private Vector2 RandomRockPoint()
-    {
-        var area = rockfallArea != null ? rockfallArea : roomArea;
-        if (area != null)
-        {
-            Vector2 local = area.offset + new Vector2(Random.Range(-.5f,.5f)*area.size.x,Random.Range(-.5f,.5f)*area.size.y);
-            return area.transform.TransformPoint(local);
-        }
-        return roomOrigin + roomOffset + new Vector2(Random.Range(-.5f,.5f)*Mathf.Max(.1f,roomSize.x),Random.Range(-.5f,.5f)*Mathf.Max(.1f,roomSize.y));
     }
 
     private bool IsRockPointValid(Vector2 point,float radius)
@@ -115,7 +122,7 @@ public sealed partial class TutorialBoss
         picture.sortingLayerID = layer;picture.sortingOrder = rockfallSortingOrder+1;
         Fit(picture,Vector2.one*radius*1.5f);picture.enabled = false;
         var rock = new FallingRock { point=point,radius=radius,baseRadius=Mathf.Max(.1f,rockfallRadius),
-            sideView=IsSideViewBattle,surfaceY=point.y-radius-.02f,
+            surfaceY=point.y-radius-.02f,
             pattern=rockfallPatternError,delay=delay,root=root,warning=warning,picture=picture };
         FitRockVisuals(rock);
         return rock;
@@ -143,8 +150,7 @@ public sealed partial class TutorialBoss
             float previousElapsed = rock.elapsed;
             rock.elapsed += dt;
             float start = rock.delay + warningTime;
-            float speed = rock.pattern != null && !rock.pattern.removed && rock.pattern.type == StoredErrorType.Acceleration
-                ? rock.pattern.multiplier : 1f;
+            float speed = rock.pattern != null ? rock.pattern.Multiplier(StoredErrorType.Acceleration) : 1f;
             float fallTime = Mathf.Max(.05f,rockfallFallTime) / speed;
             float fallingDelta = Mathf.Max(0f,rock.elapsed-start)-Mathf.Max(0f,previousElapsed-start);
             float previousProgress = rock.fallProgress;

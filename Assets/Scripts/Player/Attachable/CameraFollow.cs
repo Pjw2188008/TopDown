@@ -46,6 +46,19 @@ public partial class CameraFollow : MonoBehaviour
 
     public CameraBoundsArea ActiveArea => activeArea;
 
+    /// <summary>포탈 이동 후 같은 방에서도 추적 지연을 없앱니다. 다른 방의 기존 페이드는 유지합니다.</summary>
+    public void NotifyPortalTravel(Transform traveller)
+    {
+        if (player != traveller) return;
+        ResetAreaFollow();
+        // 목적지에 바운드가 없으면 출발 방 바운드에 계속 갇히지 않습니다.
+        if (CameraBoundsArea.FindAt(traveller.position, null) == null)
+        {
+            activeArea = null;
+            ResetRoomTransition();
+        }
+    }
+
     private void OnEnable()
     {
         viewCamera = GetComponent<Camera>();
@@ -86,7 +99,7 @@ public partial class CameraFollow : MonoBehaviour
             nextArea = keepLastAreaOutside && activeArea != null && activeArea.IsUsable
                 ? activeArea : (defaultArea != null && defaultArea.IsUsable ? defaultArea : null);
 
-        bool canFade = fadeBetweenAreas && (!fadeOnlyInSideView || (playerMove != null && playerMove.IsSideView));
+        bool canFade = fadeBetweenAreas;
         UpdateRoomTransition(nextArea, canFade, Time.unscaledDeltaTime);
         // 암전 중에는 이전 화면을 고정하고, 완전히 검어진 프레임에서만 경계/줌을 바꿉니다.
         if (roomFadePhase == RoomFadePhase.FadeOut) return;

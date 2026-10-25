@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
 
-/// <summary>추적/근접/충격파와 독립적인 낙석 시간표를 사용합니다. 자신의 공격 동작과 N회 패링 경직 중에만 멈춥니다.</summary>
+/// <summary>낙석은 독립 진행하며 추적을 허용합니다. 근접/충격파 동작과 누적 패링 경직 중에는 추적을 멈춥니다.</summary>
 [DisallowMultipleComponent]
 [RequireComponent(typeof(BoxCollider2D), typeof(Rigidbody2D))]
 public sealed partial class TutorialBoss : MonoBehaviour, ICombatDamageable, ICombatParryReceiver
@@ -15,15 +15,13 @@ public sealed partial class TutorialBoss : MonoBehaviour, ICombatDamageable, ICo
     [SerializeField, Tooltip("보스 방의 BoxCollider2D를 연결하세요(Is Trigger 권장). 보스 자신의 콜라이더가 아닌 고정된 방 오브젝트를 사용합니다. 방 밖에서는 추적/새 공격을 멈춥니다.")] private BoxCollider2D roomArea;
     [SerializeField, Tooltip("Room Area 미지정 시 보스 최초 위치 기준 방의 중심 오프셋입니다. 보스가 움직여도 범위는 따라가지 않습니다.")] private Vector2 roomOffset;
     [SerializeField, Tooltip("Room Area 미지정 시 사각형 방 범위의 가로/세로 크기입니다. 씬 기즈모로 표시됩니다.")] private Vector2 roomSize = new Vector2(24f,16f);
-    [SerializeField, Min(0f), Tooltip("공격 사이 대기 중 플레이어를 추적하는 초당 이동 거리입니다.")] private float chaseSpeed = 2f;
-    [SerializeField, Min(0f), Tooltip("플레이어에게 접근 후 멈출 중심 간 거리입니다. 근접 범위의 90% 이하로 제한합니다.")] private float stoppingDistance = 1.8f;
+    [SerializeField, Min(0f), Tooltip("공격 사이와 낙석 맵 패턴 중의 초당 추적 거리입니다. 근접/충격파 준비부터 공격 클립 종료까지(별도 충격파 준비 포함)는 멈춥니다. 근접 범위, 벽/낭떠러지와 누적 패링 경직을 지킵니다.")] private float chaseSpeed = 2f;
     [SerializeField, Min(0f), Tooltip("다음 공격까지 쉬는 시간입니다.")] private float attackCooldown = 1.2f;
     [SerializeField, Tooltip("공격 시야를 막는 벽 레이어입니다. Trigger는 제외합니다.")] private LayerMask blockingLayers = Physics2D.DefaultRaycastLayers;
     [Header("근접 휘두르기")]
-    [SerializeField, Min(.1f), Tooltip("이 거리 이내에서 근접 공격합니다. 바깥에서는 추적하며 낙석 맵 패턴은 거리와 무관한 주기로 발동합니다.")] private float meleeRange = 2.5f;
     [SerializeField, InspectorName("Slam Windup Time"), Min(.1f), Tooltip("근접 애니메이션 시작부터 Slam Hit Frame의 실제 타격까지 걸리는 시간입니다. 클립 재생 속도를 자동 조절하며 후딜 프레임도 끝까지 재생합니다.")] private float slamWarningTime = .9f;
     [SerializeField, InspectorName("Melee Hit Offset"), Tooltip("오른쪽을 바라볼 때 보스 중심 기준 공격 사각형 위치(X/Y, 월드 단위)입니다. 왼쪽을 바라보면 X만 자동 반전합니다. Y는 위/아래 위치이며 음수도 가능합니다.")] private Vector2 meleeHitBoxOffset = new Vector2(1.4f,0f);
-    [SerializeField, InspectorName("Melee Hit Size"), Tooltip("실제 공격 사각형의 가로(X)/세로(Y) 크기입니다. 월드 단위이며 청록색 기즈모와 판정이 일치합니다. 보스 몸 콜라이더와 별개입니다.")] private Vector2 meleeHitBoxSize = new Vector2(2.2f,2.2f);
+    [SerializeField, InspectorName("Melee Hit Size"), Tooltip("근접 시작 조건과 실제 타격에 쓰는 사각형 크기(X=가로/Y=세로, 월드 단위)입니다. 청록색 기즈모 안에 플레이어 몸이 들어오면 근접, 밖이면 충격파를 선택합니다. 보스 몸 콜라이더와 별개입니다.")] private Vector2 meleeHitBoxSize = new Vector2(2.2f,2.2f);
     [SerializeField, Min(.1f)] private float slamDamage = 2f;
     [SerializeField, Min(.01f), Tooltip("이 보스의 근접 공격에만 적용하는 최소 패링 허용 시간입니다. 기본 0.3초: 타격 전 0.3초 안에 우클릭을 시작하고 유지하면 성공합니다. 일반 적/투사체의 패링 시간은 바꾸지 않으며 플레이어 기본값이 더 길면 그 값을 유지합니다.")] private float meleeParryWindow = .3f;
     [Header("패링 누적 경직")]
@@ -44,13 +42,14 @@ public sealed partial class TutorialBoss : MonoBehaviour, ICombatDamageable, ICo
     public int ParryCount => parryCount;
     public int ParriesToStagger => Mathf.Max(1, parriesToStagger);
     public bool IsStaggered => phase == Phase.Staggered;
+    public bool BlocksPortalTravel(Vector2 from, Vector2 to)
+        => IsRoomLocked && (IsInsideRoom(from) || IsInsideRoom(to));
 
     private void Awake()
     {
         health = Mathf.Max(1f, maxHealth);
         var body = GetComponent<Rigidbody2D>();body.bodyType = RigidbodyType2D.Kinematic;
-        movementBody = body;roomOrigin = transform.position;sight.useTriggerBody = true;
-        sight.sideView.ForceSideView = true;
+        movementBody = body;roomOrigin = transform.position;
         body.gravityScale = 0;body.constraints = RigidbodyConstraints2D.FreezeRotation;
         GetComponent<BoxCollider2D>().isTrigger = true; // 몸끼리 밀지 않으며 공격 검색에서는 피격 대상으로 사용합니다.
         int layer = LayerMask.NameToLayer("Enemy");if (layer >= 0 && gameObject.layer == 0) gameObject.layer = layer;
@@ -124,17 +123,21 @@ public sealed partial class TutorialBoss : MonoBehaviour, ICombatDamageable, ICo
             if (!IsStaggered) SetPhase(Phase.Recovery,attackCooldown);
             return;
         }
-        if (attackAnimationActive) return; // 낙석이 진행 중인 근접/충격파 애니메이션을 끊지 않습니다.
-        if (phase == Phase.Ready || phase == Phase.Recovery) ChasePlayer(dt);
+        TickConcurrentShockwave(dt);
+        // 낙석/이미 발사된 충격파는 이동을 막지 않습니다. 직접 공격은 준비부터 클립 끝까지 제자리에서 진행합니다.
+        // 타격 후 Recovery로 바뀌어도 후속 애니메이션 또는 별도 충격파 준비가 남아 있으면 아직 이동하지 않습니다.
+        bool canChase = !attackAnimationActive && concurrentShockwaveError == null
+            && (phase == Phase.Ready || phase == Phase.Recovery);
+        if (canChase) ChasePlayer(dt);
+        if (attackAnimationActive) return;
         if (phase == Phase.Ready)
         {
-            if (enableShockwave && shockwaveRemaining <= 0f) { BeginShockwave();return; }
-            float distance = Mathf.Abs(transform.position.x - player.transform.position.x);
-            // 같은 X의 높은 발판에 있는 플레이어에게 허공 공격을 반복하지 않습니다.
-            if (EnemySideView.TryBounds(player.transform, out var targetBounds)
-                && (targetBounds.min.y > MeleeHitCenter.y + MeleeHitSize.y * .5f
-                    || targetBounds.max.y < MeleeHitCenter.y - MeleeHitSize.y * .5f)) return;
-            if (distance > Mathf.Max(.1f,meleeRange) || !CanSee(player.transform.position)) return;
+            if (!CanStartMelee())
+            {
+                if (enableShockwave && concurrentShockwaveError == null && shockwaveRemaining <= 0f)
+                    BeginShockwave();
+                return; // 충격파 쿨타임 중에도 위의 추적은 계속합니다.
+            }
             FaceAttackDirection((Vector2)(player.transform.position-transform.position));
             BeginPatternError(PatternKind.Melee);
             SetPhase(Phase.SlamWarning,Mathf.Max(.1f,slamWarningTime) / PatternSpeed);
@@ -165,9 +168,8 @@ public sealed partial class TutorialBoss : MonoBehaviour, ICombatDamageable, ICo
 
     private void ChasePlayer(float dt)
     {
-        float distance = Vector2.Distance(transform.position,player.transform.position);
-        if (IsSideViewBattle) distance = Mathf.Abs(transform.position.x-player.transform.position.x);
-        float stop = CanSee(player.transform.position) ? Mathf.Min(Mathf.Max(0f,stoppingDistance),Mathf.Max(.1f,meleeRange)*.9f) : 0f;
+        float distance = Mathf.Abs(transform.position.x-player.transform.position.x);
+        float stop = CanStartMelee() ? distance : 0f;
         float wanted = Mathf.Min(Mathf.Max(0f,chaseSpeed)*dt,Mathf.Max(0f,distance-stop));
         Vector2 step = sight.Step(transform,player.transform,player.transform.position,wanted,blockingLayers);
         if (step.sqrMagnitude < .00000001f) return;
@@ -216,6 +218,19 @@ public sealed partial class TutorialBoss : MonoBehaviour, ICombatDamageable, ICo
         foreach (var hit in Physics2D.OverlapBoxAll(MeleeHitCenter, MeleeHitSize, 0f))
             if (hit.enabled && !hit.isTrigger && hit.GetComponentInParent<PlayerMove>() == player)
                 return true;
+        return false;
+    }
+
+    // 선택/추적 시에는 대상 쪽을 바라본 박스를 검사하되, 진행 중 공격의 그림 방향은 바꾸지 않습니다.
+    private bool CanStartMelee()
+    {
+        if (!IsPlayerInRoom() || !CanSee(player.transform.position)) return false;
+        float deltaX = player.transform.position.x-transform.position.x;
+        float facing = Mathf.Abs(deltaX) > .0001f ? Mathf.Sign(deltaX) : MeleeFacingSign;
+        Vector2 center = (Vector2)transform.position + new Vector2(meleeHitBoxOffset.x*facing,meleeHitBoxOffset.y)*PatternSize;
+        Physics2D.SyncTransforms();
+        foreach (var hit in Physics2D.OverlapBoxAll(center,MeleeHitSize,0f))
+            if (hit.enabled && !hit.isTrigger && hit.GetComponentInParent<PlayerMove>() == player) return true;
         return false;
     }
 
@@ -279,7 +294,6 @@ public sealed partial class TutorialBoss : MonoBehaviour, ICombatDamageable, ICo
     }
     private void OnDrawGizmosSelected()
     {
-        Gizmos.color = Color.yellow;Gizmos.DrawWireSphere(transform.position, Mathf.Max(.1f, meleeRange));
         Gizmos.color = Color.cyan;
         Gizmos.DrawWireCube(MeleeHitCenter,MeleeHitSize);
         Gizmos.DrawLine(transform.position,MeleeHitCenter);

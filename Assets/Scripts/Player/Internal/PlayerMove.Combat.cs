@@ -19,12 +19,10 @@ public partial class PlayerMove
         isAttacking = true;
         suppressErrorCutForCurrentAttack = false;
 
-        // 대각선 커서는 좌우에 배정하고, 애니메이션/이펙트/판정을 같은 4방향으로 고정합니다.
+        // 애니메이션/이펙트/판정을 같은 좌우 방향으로 고정합니다.
         attackDirection = GetCardinalAttackDirection(GetMouseDirection());
-        bool verticalAttack = attackDirection.y != 0f;
-        int attackAnimationDirection = verticalAttack ? (attackDirection.y > 0f ? 0 : 1) : 2;
-        currentAttackStateHash = attackAnimationDirection == 0 ? AttackUpStateHash
-            : attackAnimationDirection == 1 ? AttackDownStateHash : AttackRightStateHash;
+        const int attackAnimationDirection = 2;
+        currentAttackStateHash = AttackRightStateHash;
         attackElapsedTime = 0f;
         currentAttackImpactTime = -1f;
         attackImpactTriggered = false;
@@ -34,7 +32,7 @@ public partial class PlayerMove
         animator.speed = baseAnimatorSpeed * attackSpeedMultiplier;
 
         animator.Play(currentAttackStateHash, 0, 0f);
-        spriteRenderer.flipX = !verticalAttack && attackDirection.x < 0f;
+        spriteRenderer.flipX = attackDirection.x < 0f;
     }
 
     private void UpdateAttackAnimation()
@@ -150,8 +148,7 @@ public partial class PlayerMove
         Vector2 offset = attackEffectOffset * scale;
         // 2D에서는 평상시 그림의 아래쪽을 유지하며 위로 확대합니다.
         // Y 보정까지 배율을 곱하면 음수 보정에서 다시 바닥 아래로 내려가므로 원래 높이를 유지합니다.
-        if (UseBottomAnchoredAttack)
-            offset.y = attackEffectOffset.y + GetBaseAttackEffectSize().y * (scale - 1f) * .5f;
+        offset.y = attackEffectOffset.y + GetBaseAttackEffectSize().y * (scale - 1f) * .5f;
         if (direction.x < 0f) offset.x = -offset.x;
         return GroundPosition + (Vector3)(direction * GetCurrentAttackRange())
             + GetAttackEffectRotation(direction) * (Vector3)offset;
@@ -167,7 +164,6 @@ public partial class PlayerMove
         return new Vector2(Mathf.Max(.001f, size.x), Mathf.Max(.001f, size.y));
     }
 
-    private bool UseBottomAnchoredAttack => IsSideView && !IsSideViewDepthMovement;
 
     private Vector2 GetBaseAttackHitSize()
         => new Vector2(Mathf.Max(.01f, attackSizeSide.x), Mathf.Max(.01f, attackSizeSide.y));
@@ -179,8 +175,7 @@ public partial class PlayerMove
     {
         float scale = GetCurrentAttackScale();
         Vector2 offset = attackHitOffset * scale;
-        if (UseBottomAnchoredAttack)
-            offset.y = attackHitOffset.y + GetBaseAttackHitSize().y * (scale - 1f) * .5f;
+        offset.y = attackHitOffset.y + GetBaseAttackHitSize().y * (scale - 1f) * .5f;
         if (direction.x < 0f) offset.x = -offset.x;
         return GroundPosition + (Vector3)(direction * GetCurrentAttackRange())
             + GetAttackEffectRotation(direction) * (Vector3)offset;
@@ -238,8 +233,7 @@ public partial class PlayerMove
 
     private Vector2 GetCardinalAttackDirection(Vector2 direction)
     {
-        if (IsSideView) return Vector2.right * GetSideViewFacing(direction);
-        return AttackMath.CardinalDirection(direction, verticalAttackHalfAngle);
+        return Vector2.right * GetSideViewFacing(direction);
     }
 
     private void OnDrawGizmosSelected()
@@ -255,7 +249,6 @@ public partial class PlayerMove
         {
             DrawAttackGizmo(Vector2.right);
             DrawAttackGizmo(Vector2.left);
-            if (!IsSideView) { DrawAttackGizmo(Vector2.up); DrawAttackGizmo(Vector2.down); }
         }
     }
 

@@ -1,5 +1,7 @@
 # 스크립트 구조
 
+> 사이드뷰 전용 정리: 플레이어 모드 선택·상하 이동/공격/가드/패링·2.5D 높이 보정 및 몬스터 탑다운 격자 길찾기를 제거했습니다. 기존 시점 플래그 값과 무관하게 좌우 이동·중력을 사용합니다. 사이드뷰 Animator와 그림, 씬/프리팹 참조는 유지합니다.
+
 일반 몬스터는 사이드뷰용 MeleeEnemy / RangedEnemy 두 AI로 통합했고, 기존 일반 몬스터 스포너·웨이브는 제거했습니다. 보스·플레이어·맵 기능은 보존합니다. 최신 배치는 [몬스터 안내](Enemies/README.md)를 참고하세요.
 
 ## 기능별 폴더 안내
@@ -54,7 +56,7 @@ Assets/Scripts/
 - ReflectProjectile의 충돌 검색은 다른 ReflectProjectile(자식 Collider 포함)을 제외합니다. 서로 지나가며, 그 뒤의 벽/플레이어/적 타격과 반사/패링은 계속 검사합니다.
 - Player 프리팹에 Rigidbody2D와 BoxCollider2D를 추가했습니다. 씬에 따로 만든 PlayerMove도 실행 시 누락된 몸 Collider와 Rigidbody2D를 준비합니다. 기존 Collider 크기/오프셋은 유지하며 몸 Collider는 Trigger를 끕니다.
 - Rigidbody2D는 Kinematic, Gravity Scale 0, Freeze Rotation, Continuous, Interpolate None입니다. 플레이어를 물리 반동으로 밀지 않고, 이동 전 충돌 검사를 한 뒤 Rigidbody 위치를 갱신합니다. 코드가 실행 시 이 설정을 보장하므로 Dynamic으로 변경하지 마세요.
-- 걷기/달리기는 Movement Blocking Layers에서 벽을 검사하며 약 0.02의 접촉 여유를 유지합니다. 벽으로 대각선 이동하면 열린 축으로 미끄러집니다. 대쉬와 상호작용은 기존 전용 충돌 검사를 유지하되 같은 Rigidbody 위치 적용 함수를 사용합니다.
+- 걷기/달리기는 Movement Blocking Layers에서 벽을 검사하며 약 0.02의 접촉 여유를 유지합니다. 수평 이동과 점프/중력 이동은 각각 충돌 검사합니다. 대쉬와 상호작용은 기존 전용 충돌 검사를 유지하되 같은 Rigidbody 위치 적용 함수를 사용합니다.
 - PlayerMove.Physics.cs는 별도 부착하지 않습니다. 이 구조에는 외력 기반 넉백을 추가하지 않았습니다. 기존 근접 적의 플레이어 몸 충돌 제외 설정은 유지됩니다.
 
 ## 2026-09-16 리팩토링
@@ -71,10 +73,10 @@ Assets/Scripts/
 
 ## F 상호작용 — 물체 잡고 옮기기
 
-- 가까운 물체에서 **F → 잡기**, **WASD → 함께 이동**, **F → 놓기**입니다. 누른 채 유지하지 않습니다.
-- 이동 입력에 맞춰 물체 반대편에 자리 잡은 뒤 함께 밀어 움직입니다. D는 물체 왼쪽, A는 오른쪽, W는 아래, S는 위에 섭니다. 대각선은 좌우 배치를 우선하며 실제 물체 이동은 대각선입니다. 가까운 Collider부터 선택하고 벽 너머의 대상은 잡지 않습니다.
-- 방향 전환 시 캐릭터가 걷기 속도로 물체 둘레의 모서리를 돌아갑니다. 자리 이동 중 물체는 멈추며, 도착한 뒤 함께 이동합니다. 키를 놓으면 자리 이동도 멈춥니다. 벽/장애물을 통과하지 않고, 양쪽 모서리 경로가 모두 막히면 멈추므로 다른 방향을 누르거나 F로 놓으세요. 범용 길찾기가 아니라 물체 주변의 짧은 경로만 검사합니다.
-- PlayerMove > 상호작용 > **잡기 간격**(기본 0.3)은 Collider 경계 사이의 여유 공간입니다. 잡는 순간에는 물체만 가능한 만큼 벌리며 이미 충분히 떨어져 있으면 그대로 둡니다. 이동 입력 시 캐릭터가 이 간격에 맞춰 자리를 잡습니다. 0은 최초 간격 보정을 끄지만 자리 이동에는 최소 충돌 여유 0.04를 둡니다. 스프라이트 투명 여백이 아닌 Collider 월드 사각 경계를 기준으로 합니다.
+- 가까운 물체에서 **F → 잡기**, **A/D → 함께 이동**, **F → 놓기**입니다. 누른 채 유지하지 않습니다.
+- 가까운 물체를 잡고 A/D로 좌우 운반합니다. 벽 너머의 대상은 잡지 않습니다.
+- 방향 전환은 좌우 애니메이션 반전만 사용하며 물체 둘레를 돌아가는 탑다운 자동 자리 이동은 제거했습니다.
+- PlayerMove > 상호작용 > **잡기 간격**(기본 0.3)은 Collider 경계 사이의 여유 공간입니다. 잡는 순간에는 물체만 가능한 만큼 벌리며 이미 충분히 떨어져 있으면 그대로 둡니다. 0은 최초 간격 보정을 끕니다. 스프라이트 투명 여백이 아닌 Collider 월드 사각 경계를 기준으로 합니다.
 - 옮길 물체 루트에 **MovableInteractable**을 붙이세요. BoxCollider2D가 자동으로 추가됩니다. Collider는 활성 상태이고 Is Trigger가 꺼져 있어야 합니다.
 - 빠른 테스트: Play 종료 → **Tools > Story > Interaction > Create Test Box**. 플레이어 오른쪽에 임시 상자를 만듭니다. 기존 씬에는 자동으로 상자를 추가하지 않습니다.
 - PlayerMove의 상호작용 설정: 키(F), 검색 거리(기본 1.5), 대상 레이어, 장애물 레이어, 안내 UI/범위 기즈모. 선택한 Player의 노란 원으로 범위를 확인합니다.
@@ -87,12 +89,12 @@ Assets/Scripts/
 
 ### 상호작용 애니메이션
 
-- `Assets/Player/Ani/Interact_Idle_Up/Down/Right.anim`: 잡은 채 정지.
-- `Assets/Player/Ani/Interact_Move_Up/Down/Right.anim`: 잡은 채 이동.
+- `Assets/SideViewTest/Animations/SideView_Interact_Idle_Right.anim`: 잡은 채 정지.
+- `Assets/SideViewTest/Animations/SideView_Interact_Move_Right.anim`: 잡은 채 이동.
 - 기존 이동 스프라이트를 임시 프레임으로 사용합니다. 기존 Move/Attack/Guard/Parry 클립은 변경하지 않습니다.
 - Player를 선택하고 Ctrl+6 → 위 Interact 클립 선택 → **SpriteRenderer > Sprite** 트랙 프레임을 직접 교체하세요. Animator의 Motion에 다른 클립을 연결해도 됩니다.
-- 이동 입력에 따라 방향을 바꿉니다. W는 Up, S는 Down, D는 Right, A는 Right 클립 flipX입니다. 대각선은 일반 이동처럼 좌우를 우선하며, 키를 놓으면 마지막 방향의 Interact_Idle 클립을 사용합니다. 자리 이동 중에도 해당 방향의 Interact_Move 클립을 사용합니다.
-- 스크립트가 6개 상태를 직접 재생하며 놓으면 Player_Idle로 복귀합니다. Any State 전환이나 별도 입력 파라미터는 필요하지 않습니다.
+- D는 Right 클립, A는 Right 클립의 flipX입니다. 키를 놓으면 마지막 좌우 방향의 Interact_Idle_Right를 유지합니다.
+- 스크립트가 좌우 공용 정지/이동 2개 상태를 직접 재생하며 놓으면 Player_Idle로 복귀합니다. Any State 전환이나 별도 입력 파라미터는 필요하지 않습니다.
 - `Tools > Story > Interaction > Set Up Animator`는 누락된 상태/클립만 복구하며 이미 편집한 프레임이나 연결된 Motion은 덮어쓰지 않습니다.
 - `Player/Internal/PlayerMove.Interaction.cs`, `Shared/Internal/InteractionMotion.cs`, `Interaction/Internal/Editor/InteractionSetup.cs`는 별도 부착하지 않습니다.
 
@@ -140,7 +142,7 @@ Assets/Scripts/
 ## 대쉬 / 스태미나
 
 - 왼쪽 Shift를 **새로 누를 때 1회** 대쉬합니다. Dash Key에서 변경할 수 있습니다. 유지한다고 자동 연속 대쉬하지 않습니다. Space는 사이드뷰 점프이며 스태미나를 쓰지 않습니다.
-- WASD 방향으로 대쉬합니다. 이동 입력이 없으면 마지막 이동 방향이며 8방향 속도/거리는 같습니다. 대쉬 중 방향은 고정됩니다.
+- 좌우 방향으로 대쉬합니다. 이동 입력이 없으면 마지막 좌우 방향을 사용하며 대쉬 중 방향은 고정됩니다.
 - 초기 스태미나 100, 대쉬당 30 소모. 부족하면 소비 없이 실패하고 HUD에 `스태미나 부족`이 표시됩니다.
 - 기본 속도 18, 시간 0.16초(장애물 없을 때 2.88 단위), 종료 후 재사용 대기 0.25초입니다.
 - 대쉬 중 회복하지 않으며 종료 후 0.8초부터 초당 25 회복합니다. 달리기는 스태미나를 소모하지 않습니다.
@@ -167,7 +169,7 @@ Assets/Scripts/
 - 이동 키만 누르면 기존 달리기 속도로 이동합니다. 걷기/달리기 전환은 없고 Space나 Shift를 유지해도 일반 이동 속도는 달라지지 않습니다.
 - PlayerMove의 `Run Speed Multiplier`로 배율을 조절합니다(기본 1.5배). Move Speed가 5이면 달리기는 7.5입니다.
 - 기존 걷기 애니메이션/재생 속도를 그대로 사용합니다. Animator나 스프라이트를 추가할 필요가 없습니다.
-- 사이드뷰에서 Space만 누르면 제자리 점프합니다. 탑다운/2.5D의 대각선 이동은 정규화되어 같은 속도로 이동합니다.
+- Space는 점프이며 A/D 또는 좌우 방향키로 이동합니다. 탑다운/2.5D 이동 모드는 제거했습니다.
 - 가드/패링 중 이동 제한과 도감 일시 정지는 그대로 유지합니다. 편집 모드에서도 달리며 기존 슬로모션 배율을 따릅니다.
 - 달리기와 점프는 대시 스태미나를 소비하지 않습니다. Shift 단발 대쉬/스태미나는 위 대쉬 항목을 참고하세요.
 
@@ -224,7 +226,7 @@ Player/Internal의 PlayerMove.*.cs는 하나의 PlayerMove 클래스를 나눈 p
 컴포넌트가 추가된 것이 아니며 같은 필드와 상태를 공유합니다.
 - Movement: 이동/조준.
 - Combat: 공격 애니메이션/판정/이펙트/피해/기즈모.
-- Guard: 우클릭 유지 가드/상하좌우 방향/포커스 해제 처리. 별도 부착하지 않습니다.
+- Guard: 우클릭 유지 가드/좌우 방향/포커스 해제 처리. 별도 부착하지 않습니다.
 - Editing: 편집 모드와 UI.
 - ErrorInput: 1/2 슬롯 사용 및 Full 교체 입력.
 - ErrorInventory: 획득/교체와 보관 모델 연결.
@@ -236,13 +238,13 @@ Player/Internal의 PlayerMove.*.cs는 하나의 PlayerMove 클래스를 나눈 p
 - ErrorDefinitions / ErrorRules: 오류 종류, 표시 이름, 호환 대상 표.
 - ErrorEffectState: 원본/붙여넣기 출처 및 활성 여부.
 - IErrorSource: 오류를 공통 방식으로 제거하는 규약. IAccelerationTarget도 이 파일에 있습니다.
-- AttackMath: 4방향 공격과 끝에서 세 번째 프레임 시점 계산.
+- AttackMath: 끝에서 세 번째 프레임 타격 시점 계산.
 - CombatDamage: 피해 수신자 탐색/전달.
 - ReflectProjectile: RangedEnemy가 자동 부착하는 공용 투사체 컴포넌트.
 
 ## 유지한 게임 규칙
-- 이동은 8방향, 대각선 이동 이미지는 좌우 클립.
-- 공격은 상하좌우. 대각선 커서는 좌우 영역으로 분류.
+- 이동은 좌우, 점프는 Space, 대쉬는 왼쪽 Shift.
+- 공격·가드·패링은 오른쪽 클립과 좌우 반전을 사용.
 - 기본 타격은 끝에서 세 번째 프레임 시작 시점, 공격 자체는 끝까지 재생.
 - 일반 모드: 1/2 번호를 누르면 해당 고정 슬롯의 오류를 즉시 전투 Paste.
 - 편집 모드: 1/2 번호로 즉시 준비 → 좌클릭 적용. 같은 번호 또는 편집 모드 종료(E)로 소비 없이 취소.
@@ -285,7 +287,7 @@ Tools/ScriptTests/Run.ps1에 Unity.exe 경로를 전달하면 독립 로직 테�
 
 Unity에서 Play를 끈 상태로 변경분을 가져오고 컴파일 후 다음 항목을 확인하세요.
 - Player의 기존 Inspector 참조/수치, Missing Script 여부.
-- 8방향 이동, 4방향 공격, 가속 중 타격 프레임.
+- 좌우 이동·점프, 좌우 공격, 가속 중 타격 프레임.
 - 거대화/가속/반사 획득, 일반 모드 1/2 즉시 사용, 편집 모드 1/2 준비/취소와 좌클릭 Paste.
 - 가득 찬 보관함 교체 확정/취소 및 원본이 사라진 경우.
 - Paste한 대상 재획득 차단, 다른 원본에서 동일 오류 재획득.

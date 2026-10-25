@@ -9,8 +9,6 @@ using UnityEngine.InputSystem;
 public partial class PlayerMove
 {
     private static readonly int GuardRightStateHash = Animator.StringToHash("Guard_Right");
-    private static readonly int GuardUpStateHash = Animator.StringToHash("Guard_Up");
-    private static readonly int GuardDownStateHash = Animator.StringToHash("Guard_Down");
     private bool isGuarding;
     private bool guardHasFocus = true;
     private int currentGuardStateHash;
@@ -75,13 +73,12 @@ public partial class PlayerMove
         }
 
         Vector2 direction = GetCardinalAttackDirection(GetMouseDirection());
-        int animationDirection = direction.y != 0f ? (direction.y > 0f ? 0 : 1) : 2;
-        int stateHash = animationDirection == 0 ? GuardUpStateHash
-            : animationDirection == 1 ? GuardDownStateHash : GuardRightStateHash;
+        const int animationDirection = 2;
+        int stateHash = GuardRightStateHash;
 
         animator.SetBool(IsMovingHash, false);
         animator.SetInteger(DirectionHash, animationDirection);
-        spriteRenderer.flipX = animationDirection == 2 && direction.x < 0f;
+        spriteRenderer.flipX = direction.x < 0f;
 
         // 같은 방향은 재시작하지 않고, 방향별 클립의 끝에서 세 번째 프레임을 유지합니다.
         if (!isGuarding || currentGuardStateHash != stateHash)
@@ -100,7 +97,6 @@ public partial class PlayerMove
 
     private void LateUpdate()
     {
-        UpdateSideViewVisualHeight();
         if (IsInstantlyDead) return;
         UpdateRunAfterimages(Time.deltaTime);
         if (isErrorCodexOpen) return;
@@ -162,15 +158,12 @@ public partial class PlayerMove
     private void OnDisable()
     {
         ClearBossErrorRewards();
-        if (IsSideView)
-        {
-            CloseErrorCodex(); // 먼저 도감 이전 시간 배율을 복원한 뒤 편집 모드를 종료합니다.
-            ResetSideViewJumpHeight();
-            isAttacking = false;
-            environmentPaste.Cancel();
-            if (isEditMode) ToggleEditMode();
-            if (isReplacingStoredError) CancelStoredErrorReplacement(null);
-        }
+        CloseErrorCodex(); // 먼저 도감 이전 시간 배율을 복원한 뒤 편집 모드를 종료합니다.
+        ResetSideViewJumpHeight();
+        isAttacking = false;
+        environmentPaste.Cancel();
+        if (isEditMode) ToggleEditMode();
+        if (isReplacingStoredError) CancelStoredErrorReplacement(null);
         ReleaseInteraction();
         CancelDash();
         ClearRunAfterimages();

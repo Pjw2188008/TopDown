@@ -12,45 +12,17 @@ public partial class PlayerMove
 
     private Vector2 GetMovementInput()
     {
-        if (IsSideView)
-        {
-            var keyboard = Keyboard.current;
-            if (keyboard == null) return Vector2.zero;
-            bool left = keyboard.aKey.isPressed || keyboard.leftArrowKey.isPressed;
-            bool right = keyboard.dKey.isPressed || keyboard.rightArrowKey.isPressed;
-            bool up = IsSideViewDepthMovement && (keyboard.wKey.isPressed || keyboard.upArrowKey.isPressed);
-            bool down = IsSideViewDepthMovement && (keyboard.sKey.isPressed || keyboard.downArrowKey.isPressed);
-            return Vector2.ClampMagnitude(new Vector2((right ? 1f : 0f) - (left ? 1f : 0f), (up ? 1f : 0f) - (down ? 1f : 0f)), 1f);
-        }
-        Vector2 input = Vector2.zero;
-
-        if (Keyboard.current.wKey.isPressed)
-        {
-            input.y += 1f;
-        }
-
-        if (Keyboard.current.sKey.isPressed)
-        {
-            input.y -= 1f;
-        }
-
-        if (Keyboard.current.dKey.isPressed)
-        {
-            input.x += 1f;
-        }
-
-        if (Keyboard.current.aKey.isPressed)
-        {
-            input.x -= 1f;
-        }
-
-        return input;
+        var keyboard = Keyboard.current;
+        if (keyboard == null) return Vector2.zero;
+        bool left = keyboard.aKey.isPressed || keyboard.leftArrowKey.isPressed;
+        bool right = keyboard.dKey.isPressed || keyboard.rightArrowKey.isPressed;
+        return Vector2.right * ((right ? 1f : 0f) - (left ? 1f : 0f));
     }
 
     private Vector2 GetMouseDirection()
     {
         // 일반 전투는 마지막 이동 방향, 편집 모드는 마우스 조준을 유지합니다.
-        if (IsSideView && !isEditMode) return Vector2.right * GetSideViewFacing(lastDirection);
+        if (!isEditMode) return Vector2.right * GetSideViewFacing(lastDirection);
         if (Mouse.current == null || Camera.main == null)
             return lastDirection.sqrMagnitude > 0f ? lastDirection.normalized : Vector2.right;
 
@@ -72,18 +44,17 @@ public partial class PlayerMove
         }
 
         // 클립/프레임은 Animator와 Animation 창에서 관리합니다.
-        if (IsSideView && UpdateSideViewJumpAnimation(direction, isMoving)) return;
+        if (UpdateSideViewJumpAnimation(direction, isMoving)) return;
         // 스크립트는 이동 상태만 전달하고, 실제 클립 전환은 Controller가 담당합니다.
         animator.SetBool(IsMovingHash, isMoving);
         if (!isMoving)
             return;
 
-        // 대각선은 수평 방향을 우선하여 좌우 이동 클립을 사용합니다.
-        int movementDirection = IsSideView ? 2 : direction.x != 0f ? 2 : (direction.y > 0f ? 0 : 1);
+        // 오른쪽 이동 클립을 좌우 반전하여 사용합니다.
+        const int movementDirection = 2;
         animator.SetInteger(DirectionHash, movementDirection);
 
-        // 왼쪽과 왼쪽 대각선만 오른쪽 클립을 뒤집습니다. 위/아래는 뒤집지 않습니다.
-        spriteRenderer.flipX = IsSideView ? GetSideViewFacing(direction) < 0f : movementDirection == 2 && direction.x < 0f;
+        spriteRenderer.flipX = GetSideViewFacing(direction) < 0f;
     }
 
     private void EnsureProjectileCollider()

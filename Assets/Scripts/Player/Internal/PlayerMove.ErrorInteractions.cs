@@ -78,7 +78,7 @@ public partial class PlayerMove
         switch (selected)
         {
             case StoredErrorType.Giant:
-                GetOrAddEffect<GiantErrorEffect>(target.gameObject).ApplyPaste(multiplier, IsSideView && !IsSideViewDepthMovement);
+                GetOrAddEffect<GiantErrorEffect>(target.gameObject).ApplyPaste(multiplier);
                 break;
             case StoredErrorType.Acceleration:
                 GetOrAddEffect<AccelerationErrorEffect>(target.gameObject).ApplyPaste(multiplier);

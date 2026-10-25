@@ -8,7 +8,6 @@ public sealed partial class TutorialBoss
     [SerializeField, Tooltip("사이드뷰 낙석이 착지할 바닥/발판 레이어입니다. 일반 Collider2D가 필요하며 Trigger와 몬스터/플레이어는 제외합니다.")]
     private LayerMask sideViewGroundLayers = Physics2D.DefaultRaycastLayers;
     private readonly List<RaycastHit2D> groundHits = new List<RaycastHit2D>();
-    private bool IsSideViewBattle => true;
 
     private Bounds RockfallWorldBounds
     {
@@ -40,7 +39,8 @@ public sealed partial class TutorialBoss
                 || shape.GetComponentInParent<PlayerMove>() != null || shape.GetComponentInParent<ICombatDamageable>() != null) continue;
             point = new Vector2(x,hit.point.y+radius+.02f);
             // 바닥에 원을 묻지 않고 올립니다. 높이가 다른 플랫폼은 실제 윗면을 따릅니다.
-            if (!IsRockPointValid(point,radius)) return false;
+            // 천장/상단 발판이 영역 밖이거나 막혀 있어도 그 아래의 유효한 바닥까지 계속 찾습니다.
+            if (!IsRockPointValid(point,radius)) continue;
             return true;
         }
         return false;
@@ -49,7 +49,7 @@ public sealed partial class TutorialBoss
     private void SetPatternBodyScale(Vector3 scale)
     {
         Physics2D.SyncTransforms();
-        bool anchorFeet = IsSideViewBattle && EnemySideView.TryBounds(transform,out _);
+        bool anchorFeet = EnemySideView.TryBounds(transform,out _);
         float feet = 0f;
         if (anchorFeet && EnemySideView.TryBounds(transform,out var before)) feet = before.min.y;
         transform.localScale = scale;
@@ -61,21 +61,13 @@ public sealed partial class TutorialBoss
     private void FitRockVisuals(FallingRock rock)
     {
         float radius = rock.radius;
-        if (rock.sideView)
+        rock.point.y = rock.surfaceY+radius+.02f;
+        if (rock.root != null) rock.root.transform.position = new Vector3(rock.point.x,rock.point.y,transform.position.z);
+        if (rock.warning != null)
         {
-            rock.point.y = rock.surfaceY+radius+.02f;
-            if (rock.root != null) rock.root.transform.position = new Vector3(rock.point.x,rock.point.y,transform.position.z);
-            if (rock.warning != null)
-            {
-                Fit(rock.warning,new Vector2(radius*2f,.1f));
-                rock.warning.transform.localPosition = Vector3.down*radius;
-            }
-            if (rock.picture != null) Fit(rock.picture,Vector2.one*radius*2f);
+            Fit(rock.warning,new Vector2(radius*2f,.1f));
+            rock.warning.transform.localPosition = Vector3.down*radius;
         }
-        else
-        {
-            if (rock.warning != null) Fit(rock.warning,Vector2.one*radius*2f);
-            if (rock.picture != null) Fit(rock.picture,Vector2.one*radius*1.5f);
-        }
+        if (rock.picture != null) Fit(rock.picture,Vector2.one*radius*2f);
     }
 }

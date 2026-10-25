@@ -5,9 +5,9 @@ using UnityEngine;
 public sealed partial class TutorialBoss
 {
     [Header("좌우 충격파")]
-    [SerializeField, Tooltip("거리와 무관하게 사용하며 근접 동작이 끝난 뒤 시작합니다. 낙석과 동시에 진행하고 좌우 두 방향으로만 발사합니다.")] private bool enableShockwave = true;
+    [SerializeField, Tooltip("근접 박스 밖의 플레이어에게 좌우 충격파를 사용합니다. 낙석과 동시 진행하며 2페이즈에서는 근접 동작 중에도 범위 밖이면 별도 준비합니다.")] private bool enableShockwave = true;
     [SerializeField, Min(0f), Tooltip("방 입장 후 첫 충격파 준비까지의 최소 시간입니다.")] private float shockwaveFirstDelay = 5f;
-    [SerializeField, Min(.1f), Tooltip("충격파 공격 시작 사이의 최소 간격입니다. 다른 공격 중이면 끝날 때까지 기다립니다.")] private float shockwaveInterval = 9f;
+    [SerializeField, Min(.1f), Tooltip("충격파 사이의 대기 시간입니다. 1페이즈는 다른 공격이 끝날 때까지 기다리고, 2페이즈는 근접 중에도 대상이 범위 밖이면 별도 준비할 수 있습니다.")] private float shockwaveInterval = 9f;
     [SerializeField, Min(.1f), Tooltip("충격파 애니메이션 시작부터 발사 프레임까지의 시간입니다. 애니메이션이 없어도 이 시간 뒤 발사합니다.")] private float shockwaveWindupTime = 1f;
     [SerializeField, Min(2), Tooltip("Boss_Shockwave 클립의 발사 프레임 번호(첫 프레임=1). 이후 후딜도 끝까지 재생합니다.")] private int shockwaveReleaseFrame = 9;
     [SerializeField, Tooltip("보스 중심 기준 발사 위치입니다. 월드 단위이며 보스의 좌우 반전과 무관합니다.")] private Vector2 shockwaveOriginOffset;
@@ -22,20 +22,19 @@ public sealed partial class TutorialBoss
     [SerializeField, Min(.01f), Tooltip("충격파 그림과 타격 반지름을 함께 확대/축소합니다. 예: Radius 0.35 × Scale 3 = 실제 반지름 1.05. 발사된 충격파는 생성 당시 크기를 유지합니다.")] private float shockwaveVisualScale = 1f;
 
     private float shockwaveRemaining;
+    private PatternError concurrentShockwaveError;
+    private float concurrentShockwaveWindup;
     private readonly List<GameObject> shockwaveShots = new List<GameObject>();
-    private Vector2 ShockwaveOrigin
+    private Vector2 ShockwaveOrigin => GetShockwaveOrigin(activePatternError);
+    private Vector2 GetShockwaveOrigin(PatternError pattern)
     {
-        get
-        {
             Vector2 origin = (Vector2)transform.position+shockwaveOriginOffset;
-            if (IsSideViewBattle && EnemySideView.TryBounds(transform,out var bounds))
+            if (EnemySideView.TryBounds(transform,out var bounds))
             {
-                float size = activePatternError != null && !activePatternError.removed && activePatternError.type == StoredErrorType.Giant
-                    ? activePatternError.multiplier : 1f;
+                float size = pattern != null ? pattern.Multiplier(StoredErrorType.Giant) : 1f;
                 origin.y = Mathf.Max(origin.y,bounds.min.y+ShockwaveHitRadius*size+.04f);
             }
             return origin;
-        }
     }
     private int ShockwaveCount => 2;
     // 공통 투사체의 최소 반지름(0.01)까지 맞춰 그림/판정/기즈모가 같은 크기 기준을 씁니다.
@@ -55,11 +54,34 @@ public sealed partial class TutorialBoss
     }
 
     private void ReleaseShockwaves()
+        => ReleaseShockwavesFor(activePatternError);
+
+    // 2페이즈의 근접 동작 중에는 그 애니메이션을 끊지 않고 충격파를 별도 준비합니다.
+    private void TickConcurrentShockwave(float dt)
+    {
+        if (!enableShockwave || IsStaggered || phase == Phase.Dead) return;
+        if (concurrentShockwaveError != null)
+        {
+            concurrentShockwaveWindup = Mathf.Max(0f,concurrentShockwaveWindup-dt);
+            if (concurrentShockwaveWindup > 0f) return;
+            var pattern = concurrentShockwaveError;
+            concurrentShockwaveError = null;
+            shockwaveRemaining = Mathf.Max(.1f,shockwaveInterval);
+            ReleaseShockwavesFor(pattern);
+            return;
+        }
+        bool meleeBusy = phase == Phase.SlamWarning || (attackAnimationActive && !attackAnimationIsShockwave);
+        if (!IsSecondPhase || !meleeBusy || shockwaveRemaining > 0f || CanStartMelee()) return;
+        shockwaveRemaining = Mathf.Max(.1f,shockwaveInterval);
+        concurrentShockwaveError = CreatePatternError(PatternKind.Shockwave);
+        concurrentShockwaveWindup = Mathf.Max(.1f,shockwaveWindupTime);
+    }
+
+    private void ReleaseShockwavesFor(PatternError pattern)
     {
         if (!IsPlayerInRoom() || phase == Phase.Dead || IsStaggered) return;
         float radius = ShockwaveHitRadius;
         float speed = Mathf.Max(.1f, shockwaveSpeed);
-        var pattern = activePatternError;
         var prefab = shockwaveEffectPrefab != null ? shockwaveEffectPrefab
             : Resources.Load<GameObject>("TutorialBossEffects/ShockwaveEffect");
         for (int i = 0; i < ShockwaveCount; i++)
@@ -68,7 +90,8 @@ public sealed partial class TutorialBoss
             shot.name = "Boss Shockwave " + (i + 1);
             shot.SetActive(true);
             Vector2 direction = ShockwaveDirection(i);
-            shot.transform.position = new Vector3(ShockwaveOrigin.x, ShockwaveOrigin.y, transform.position.z);
+            Vector2 origin = GetShockwaveOrigin(pattern);
+            shot.transform.position = new Vector3(origin.x, origin.y, transform.position.z);
             shot.transform.rotation = Quaternion.Euler(0f,0f,Mathf.Atan2(direction.y,direction.x)*Mathf.Rad2Deg);
             var visual = shot.GetComponent<SpriteRenderer>();
             if (visual == null) visual = shot.AddComponent<SpriteRenderer>();
@@ -132,6 +155,8 @@ public sealed partial class TutorialBoss
 
     private void ResetShockwaveAttack()
     {
+        DeactivatePatternError(concurrentShockwaveError);
+        concurrentShockwaveError = null;concurrentShockwaveWindup = 0f;
         ClearShockwaves();
         shockwaveRemaining = Mathf.Max(0f, shockwaveFirstDelay);
     }
@@ -141,8 +166,8 @@ public sealed partial class TutorialBoss
         if (!enableShockwave) return;
         Gizmos.color = new Color(.5f,.9f,1f,.65f);
         float radius = ShockwaveHitRadius;
-        if (activePatternError != null && activePatternError.kind == PatternKind.Shockwave && !activePatternError.removed
-            && activePatternError.type == StoredErrorType.Giant) radius *= activePatternError.multiplier;
+        if (activePatternError != null && activePatternError.kind == PatternKind.Shockwave)
+            radius *= activePatternError.Multiplier(StoredErrorType.Giant);
         Gizmos.DrawWireSphere(ShockwaveOrigin, radius);
         for (int i = 0; i < ShockwaveCount; i++)
         {

@@ -1,5 +1,7 @@
 # 오류 스크립트
 
+> 사이드뷰 전용 정리: 플레이어 모드 선택·상하 이동/공격/가드/패링·2.5D 높이 보정 및 몬스터 탑다운 격자 길찾기를 제거했습니다. 기존 시점 플래그 값과 무관하게 좌우 이동·중력을 사용합니다. 사이드뷰 Animator와 그림, 씬/프리팹 참조는 유지합니다.
+
 ## Attachable — 오류 대상 오브젝트에 부착
 - GiantErrorEffect.cs: 거대화 효과와 원본/붙여넣기 상태.
 - AccelerationErrorEffect.cs: 가속 효과와 속도 배율.
@@ -18,7 +20,7 @@
 
 ## 거대화의 바닥 기준 확대
 
-- `GiantErrorEffect → Growth Anchor` 기본값은 **AutoSideView**입니다. 2D 사이드뷰에서 원본 거대화/Paste 시 몸체 밑면의 월드 Y 위치를 유지하며 위로 커집니다. 탑다운과 2.5D 바닥 이동은 기존 피벗 기준 확대를 유지합니다.
+- `GiantErrorEffect → Growth Anchor` 기본값은 **AutoBottom**입니다. 원본 거대화/Paste 시 밑면을 유지하며 위로 커집니다. 중심 확대가 필요한 개별 사물만 Pivot을 직접 선택하세요.
 - **Bottom**: 시점과 무관하게 항상 밑면 기준. **Pivot**: 기존처럼 Transform 피벗 기준.
 - `Bottom Anchor Collider`를 비우면 자신과 자식의 활성 비트리거 Collider2D 중 최하단을 사용합니다. 감지 Trigger는 제외합니다. 복잡한 프리팹은 몸체 Collider를 직접 연결하세요. Collider가 전혀 없으면 SpriteRenderer 밑면을 기준으로 합니다.
 - 확대 매 단계마다 현재 밑면을 보정하므로 크기 변화 도중 물체를 옮겨도 최초 위치로 끌어당기지 않습니다. Cut/Reset으로 작아질 때도 현재 밑면을 유지합니다. Rigidbody2D 위치와 물리 판정도 함께 갱신합니다.
