@@ -70,6 +70,7 @@ public sealed partial class TutorialBoss
             ReleaseShockwavesFor(pattern);
             return;
         }
+        if (player == null || player.IsHiddenFromEnemies) return;
         bool meleeBusy = phase == Phase.SlamWarning || (attackAnimationActive && !attackAnimationIsShockwave);
         if (!IsSecondPhase || !meleeBusy || shockwaveRemaining > 0f || CanStartMelee()) return;
         shockwaveRemaining = Mathf.Max(.1f,shockwaveInterval);

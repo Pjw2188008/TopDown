@@ -44,7 +44,7 @@ public partial class PlayerMove
         {
             if (!(component is IErrorSource source) || !component.isActiveAndEnabled || !source.IsActive) continue;
             // 일반 모드의 기존 판정 유지: 반사 오류만 있는 적은 일반 피해/반사 처리를 받습니다.
-            if (!isEditMode && source.ErrorType == StoredErrorType.Reflection) continue;
+            if (!isEditMode && (source.ErrorType == StoredErrorType.Reflection || source.ErrorType == StoredErrorType.Stealth)) continue;
             hasActiveError = true;
             if (!source.CanCut || storedErrors.Contains(source.ErrorType)) continue;
             if (candidates.Exists(item => ((IErrorSource)item).ErrorType == source.ErrorType)) continue;
@@ -85,6 +85,9 @@ public partial class PlayerMove
                 break;
             case StoredErrorType.Reflection:
                 GetOrAddEffect<ReflectionErrorEffect>(target.gameObject).ApplyPaste();
+                break;
+            case StoredErrorType.Stealth:
+                GetOrAddEffect<StealthErrorEffect>(target.gameObject).ApplyPaste();
                 break;
             default: return false;
         }

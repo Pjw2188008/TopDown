@@ -122,7 +122,7 @@ public sealed class TutorialTrainingDummy : MonoBehaviour, ICombatDamageable
         shots.RemoveAll(shot => shot == null);
         if (shots.Count == 0) finishingReturnShots = false;
         if (!practicing || Time.deltaTime <= 0f) return;
-        if (practicePlayer == null || !practicePlayer.isActiveAndEnabled || practicePlayer.IsInstantlyDead
+        if (practicePlayer == null || !practicePlayer.isActiveAndEnabled || practicePlayer.IsHiddenFromEnemies || practicePlayer.IsInstantlyDead
             || Vector2.Distance(transform.position, practicePlayer.transform.position) > Mathf.Max(.1f, attackRange))
         { charging = false; SetWarning(false); return; }
         if (!charging && Time.time >= nextShotAt)

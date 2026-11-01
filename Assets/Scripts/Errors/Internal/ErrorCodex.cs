@@ -11,7 +11,7 @@ public sealed class ErrorCodex
 {
     public static readonly IReadOnlyList<StoredErrorType> Entries = Array.AsReadOnly(new[]
     {
-        StoredErrorType.Giant, StoredErrorType.Reflection, StoredErrorType.Acceleration
+        StoredErrorType.Giant, StoredErrorType.Reflection, StoredErrorType.Acceleration, StoredErrorType.Stealth
     });
 
     private readonly HashSet<StoredErrorType> discovered = new HashSet<StoredErrorType>();
@@ -46,6 +46,9 @@ public sealed class ErrorCodex
         StoredErrorType.Acceleration => "대상의 움직임을 비정상적으로 빠르게 만드는 오류입니다.\n\n"
             + "원본에서 Cut하면 움직임이 정상 속도로 돌아옵니다. 이동 기능을 갖춘 생명체·물체·투사체에 Paste하면 움직임이 빨라집니다.\n\n"
             + "전투 기술에 사용하면 일정 시간 공격 속도가 빨라집니다.",
+        StoredErrorType.Stealth => "대상이 희미해지고 노이즈가 생기는 은신 오류입니다.\n\n"
+            + "생명체·물체·투사체·표면과 전투 기술에 사용할 수 있습니다. 원본에서 Cut하면 은신이 사라집니다.\n\n"
+            + "전투 Paste는 일정 시간 플레이어의 탐지와 추적을 막습니다. 무적이 아니므로 이미 진행 중인 공격·투사체·기믹에 맞으면 피해를 받습니다.",
         _ => "아직 발견하지 않은 오류입니다."
     };
 

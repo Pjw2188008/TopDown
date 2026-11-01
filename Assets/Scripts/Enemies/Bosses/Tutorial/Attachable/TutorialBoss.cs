@@ -111,7 +111,7 @@ public sealed partial class TutorialBoss : MonoBehaviour, ICombatDamageable, ICo
             else
             {
                 rockfallRemaining = Mathf.Max(0f,rockfallRemaining-dt);
-                if (rockfallRemaining <= 0f) BeginRockfall();
+                if (rockfallRemaining <= 0f && !player.IsHiddenFromEnemies) BeginRockfall();
             }
         }
         // 착지 피해/패링 콜백으로 사망하거나 대상이 리스폰했을 수 있습니다.
@@ -126,12 +126,13 @@ public sealed partial class TutorialBoss : MonoBehaviour, ICombatDamageable, ICo
         TickConcurrentShockwave(dt);
         // 낙석/이미 발사된 충격파는 이동을 막지 않습니다. 직접 공격은 준비부터 클립 끝까지 제자리에서 진행합니다.
         // 타격 후 Recovery로 바뀌어도 후속 애니메이션 또는 별도 충격파 준비가 남아 있으면 아직 이동하지 않습니다.
-        bool canChase = !attackAnimationActive && concurrentShockwaveError == null
+        bool canChase = !player.IsHiddenFromEnemies && !attackAnimationActive && concurrentShockwaveError == null
             && (phase == Phase.Ready || phase == Phase.Recovery);
         if (canChase) ChasePlayer(dt);
         if (attackAnimationActive) return;
         if (phase == Phase.Ready)
         {
+            if (player.IsHiddenFromEnemies) return;
             if (!CanStartMelee())
             {
                 if (enableShockwave && concurrentShockwaveError == null && shockwaveRemaining <= 0f)
@@ -224,7 +225,7 @@ public sealed partial class TutorialBoss : MonoBehaviour, ICombatDamageable, ICo
     // 선택/추적 시에는 대상 쪽을 바라본 박스를 검사하되, 진행 중 공격의 그림 방향은 바꾸지 않습니다.
     private bool CanStartMelee()
     {
-        if (!IsPlayerInRoom() || !CanSee(player.transform.position)) return false;
+        if (!IsPlayerInRoom() || player.IsHiddenFromEnemies || !CanSee(player.transform.position)) return false;
         float deltaX = player.transform.position.x-transform.position.x;
         float facing = Mathf.Abs(deltaX) > .0001f ? Mathf.Sign(deltaX) : MeleeFacingSign;
         Vector2 center = (Vector2)transform.position + new Vector2(meleeHitBoxOffset.x*facing,meleeHitBoxOffset.y)*PatternSize;

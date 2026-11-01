@@ -158,6 +158,7 @@ public partial class PlayerMove
     private void OnDisable()
     {
         ClearBossErrorRewards();
+        EndCombatStealth();
         CloseErrorCodex(); // 먼저 도감 이전 시간 배율을 복원한 뒤 편집 모드를 종료합니다.
         ResetSideViewJumpHeight();
         isAttacking = false;

@@ -26,6 +26,7 @@ public partial class PlayerMove
         CaptureRespawnPosition();
         lastInstantDeathFrame = Time.frameCount;
         currentHealth = 0f;
+        EndCombatStealth();
         ClearBossErrorRewards();
         ResetSideViewJumpHeight();
         ReleaseInteraction();

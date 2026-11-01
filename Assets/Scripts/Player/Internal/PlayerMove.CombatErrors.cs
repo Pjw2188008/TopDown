@@ -41,6 +41,12 @@ public partial class PlayerMove
     {
         StoredErrorType selectedError = GetSelectedStoredErrorType();
 
+        if (selectedError == StoredErrorType.Stealth)
+        {
+            ActivateCombatStealth();
+            return;
+        }
+
         if (selectedError == StoredErrorType.Giant)
         {
             TryActivatePlayerErrorBuff();
@@ -104,7 +110,7 @@ public partial class PlayerMove
     {
         return playerErrorTimer > 0f
             || accelerationAttackTimer > 0f
-            || reflectionCombatTimer > 0f;
+            || reflectionCombatTimer > 0f || IsCombatStealthActive;
     }
 
     private string GetActiveCombatErrorDisplayName()
@@ -124,6 +130,7 @@ public partial class PlayerMove
             return "[반사]";
         }
 
+        if (IsCombatStealthActive) return "[은신]";
         return "[오류]";
     }
 }

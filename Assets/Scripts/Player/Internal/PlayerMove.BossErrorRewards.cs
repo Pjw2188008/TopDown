@@ -20,7 +20,7 @@ public partial class PlayerMove
     /// <summary>패링으로 이미 해제된 오류를 획득합니다. 가득 차면 전투 모드에서도 교체를 기다립니다.</summary>
     public void ReceiveBossPatternError(StoredErrorType type, float multiplier)
     {
-        if (!isActiveAndEnabled || IsInstantlyDead || type < StoredErrorType.Giant || type > StoredErrorType.Reflection) return;
+        if (!isActiveAndEnabled || IsInstantlyDead || type < StoredErrorType.Giant || type > StoredErrorType.Stealth) return;
         if (errorCodex.TryDiscover(type))
         {
             if (selectedCodexError == StoredErrorType.None) selectedCodexError = type;

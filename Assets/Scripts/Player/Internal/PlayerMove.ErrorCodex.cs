@@ -51,6 +51,7 @@ public partial class PlayerMove
         ScanErrorSources<GiantErrorEffect>(ref newlyDiscovered);
         ScanErrorSources<ReflectionErrorEffect>(ref newlyDiscovered);
         ScanErrorSources<AccelerationErrorEffect>(ref newlyDiscovered);
+        ScanErrorSources<StealthErrorEffect>(ref newlyDiscovered);
         if (newlyDiscovered.Length == 0) return;
         if (usePersistentErrorDiscoveries) PlayerPrefs.Save();
         discoveryNotice = "이상현상 발견: " + newlyDiscovered + "\n도감에 등록했습니다. [" + errorCodexKey + "] 도감 열기";

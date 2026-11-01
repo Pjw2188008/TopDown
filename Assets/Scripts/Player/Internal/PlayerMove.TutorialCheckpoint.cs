@@ -7,6 +7,8 @@ public partial class PlayerMove
     internal Action CaptureTutorialState()
     {
         var inventory = storedErrors.Copy();
+        var stealth = GetComponent<StealthErrorEffect>();
+        Action restoreStealth = stealth != null ? stealth.CaptureTutorialState() : null;
         float giantTime = playerErrorTimer, giantMultiplier = storedPlayerErrorMultiplier;
         float accelerationTime = accelerationAttackTimer, speedMultiplier = activeAttackSpeedMultiplier;
         float reflectionTime = reflectionCombatTimer;
@@ -17,6 +19,8 @@ public partial class PlayerMove
         {
             if (this == null) return;
             storedErrors.RestoreFrom(inventory);
+            if (restoreStealth != null) restoreStealth();
+            else GetComponent<StealthErrorEffect>()?.ResetStealth();
             playerErrorTimer = giantTime;
             storedPlayerErrorMultiplier = giantMultiplier;
             accelerationAttackTimer = accelerationTime;

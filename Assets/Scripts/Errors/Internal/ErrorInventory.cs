@@ -6,8 +6,8 @@ using System;
 /// </summary>
 public sealed class ErrorInventory
 {
-    private readonly bool[] occupied = new bool[4];
-    private readonly float[] multipliers = new float[4];
+    private readonly bool[] occupied = new bool[5];
+    private readonly float[] multipliers = new float[5];
     private readonly StoredErrorType[] slots;
     public int Capacity { get; }
     public int Count { get; private set; }
@@ -37,7 +37,7 @@ public sealed class ErrorInventory
         slots = new StoredErrorType[capacity];
     }
 
-    private static bool IsValid(StoredErrorType type) => type >= StoredErrorType.Giant && type <= StoredErrorType.Reflection;
+    private static bool IsValid(StoredErrorType type) => type >= StoredErrorType.Giant && type <= StoredErrorType.Stealth;
     public bool Contains(StoredErrorType type) => IsValid(type) && occupied[(int)type];
     public float GetMultiplier(StoredErrorType type) => Contains(type) ? multipliers[(int)type] : 0f;
 

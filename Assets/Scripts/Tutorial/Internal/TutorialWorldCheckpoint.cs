@@ -13,7 +13,7 @@ internal sealed class TutorialWorldCheckpoint
         public Quaternion Rotation;
         public bool Active;
         public int Depth;
-        public Action Giant, Acceleration, Reflection;
+        public Action Giant, Acceleration, Reflection, Stealth;
         public SpriteRenderer Renderer;
         public Color Color;
     }
@@ -41,6 +41,7 @@ internal sealed class TutorialWorldCheckpoint
             var giant = target.GetComponent<GiantErrorEffect>();
             var acceleration = target.GetComponent<AccelerationErrorEffect>();
             var reflection = target.GetComponent<ReflectionErrorEffect>();
+            var stealth = target.GetComponent<StealthErrorEffect>();
             var renderer = target.GetComponent<SpriteRenderer>();
             int depth = 0;
             for (var parent = transform.parent; parent != null; parent = parent.parent) depth++;
@@ -51,6 +52,7 @@ internal sealed class TutorialWorldCheckpoint
                 Giant = giant != null ? giant.CaptureTutorialState() : null,
                 Acceleration = acceleration != null ? acceleration.CaptureTutorialState() : null,
                 Reflection = reflection != null ? reflection.CaptureTutorialState() : null,
+                Stealth = stealth != null ? stealth.CaptureTutorialState() : null,
                 Renderer = renderer, Color = renderer != null ? SpriteTint.GetColor(renderer) : Color.white
             });
         }
@@ -74,6 +76,8 @@ internal sealed class TutorialWorldCheckpoint
             else target.GetComponent<AccelerationErrorEffect>()?.ResetAcceleration();
             if (saved.Reflection != null) saved.Reflection();
             else target.GetComponent<ReflectionErrorEffect>()?.ResetReflection();
+            if (saved.Stealth != null) saved.Stealth();
+            else target.GetComponent<StealthErrorEffect>()?.ResetStealth();
             target.transform.SetPositionAndRotation(saved.Position, saved.Rotation);
             target.transform.localScale = saved.Scale;
             if (target.TryGetComponent<Rigidbody2D>(out var body))

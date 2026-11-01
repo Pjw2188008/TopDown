@@ -42726,7 +42726,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 856138132916773424, guid: 27f13612cc6077b43a95295c8f3f12f2, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 71.1
+      value: -12.8
       objectReference: {fileID: 0}
     - target: {fileID: 856138132916773424, guid: 27f13612cc6077b43a95295c8f3f12f2, type: 3}
       propertyPath: m_LocalPosition.y
@@ -44095,6 +44095,7 @@ GameObject:
   - component: {fileID: 1671294896}
   - component: {fileID: 1671294895}
   - component: {fileID: 1671294898}
+  - component: {fileID: 1671294899}
   m_Layer: 8
   m_Name: 09_decorations_10 (2)
   m_TagString: Untagged
@@ -44259,6 +44260,24 @@ BoxCollider2D:
   m_AutoTiling: 0
   m_Size: {x: 0.46, y: 1.38}
   m_EdgeRadius: 0
+--- !u!114 &1671294899
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1671294894}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cf09cd78baef4ae89225defc80ef9aac, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  triggerOnStart: 1
+  visibleOpacity: 0.069
+  noiseStrength: 0.196
+  noisePixelSize: 3
+  noiseRate: 12
+  targetRenderers: []
 --- !u!1 &1672692739
 GameObject:
   m_ObjectHideFlags: 0

@@ -214,7 +214,7 @@ public abstract class TerritoryMonster : MonoBehaviour, ICombatDamageable, IAcce
         if (animator != null) animator.speed = animationSpeed * multiplier;
         if (useGravity) navigation.ApplyGravity(transform,target,dt,movementBlockingLayers);
         cooldown = Mathf.Max(0f,cooldown-dt);
-        bool valid = Target != null && Target.isActiveAndEnabled && IsInsideChaseArea(Target.transform.position);
+        bool valid = Target != null && Target.isActiveAndEnabled && !Target.IsHiddenFromEnemies && IsInsideChaseArea(Target.transform.position);
         if ((engaged || IsAttacking) && !valid) BeginReturn();
         if (stagger.IsStunned || Time.time < hurtUntil) { CancelAttack(); Play(hitState); return; }
         if (State == MonsterBehaviourState.Returning)
@@ -249,7 +249,7 @@ public abstract class TerritoryMonster : MonoBehaviour, ICombatDamageable, IAcce
         if (Visual != null) Visual.flipX = facingLeft != spriteFacesLeft;
         if (!IsAttacking || Time.deltaTime <= 0f) return;
         if (stagger.IsStunned || Time.time < hurtUntil) { CancelAttack(); return; }
-        if (Target == null || !Target.isActiveAndEnabled || !IsInsideChaseArea(Target.transform.position)) { BeginReturn(); return; }
+        if (Target == null || !Target.isActiveAndEnabled || Target.IsHiddenFromEnemies || !IsInsideChaseArea(Target.transform.position)) { BeginReturn(); return; }
         // Update 뒤에 대상이 이동했어도 늦은 타격/발사를 만들지 않습니다.
         if (CancelWindupWhenOutOfRange && !struck && !CanAttackTarget()) { CancelAttack(); return; }
         float progress = attackElapsed/Mathf.Max(.05f,fallbackAttackDuration);
@@ -284,7 +284,7 @@ public abstract class TerritoryMonster : MonoBehaviour, ICombatDamageable, IAcce
     }
     private bool CanAttackTarget()
     {
-        if (Target == null || !Target.isActiveAndEnabled || !IsInsideChaseArea(target.position)) return false;
+        if (Target == null || !Target.isActiveAndEnabled || Target.IsHiddenFromEnemies || !IsInsideChaseArea(target.position)) return false;
         Physics2D.SyncTransforms();
         return IsTargetInAttackRange() && navigation.HasSight(transform,target,target.position,movementBlockingLayers);
     }
@@ -354,7 +354,7 @@ public abstract class TerritoryMonster : MonoBehaviour, ICombatDamageable, IAcce
         var attacker = source != null ? source.GetComponentInParent<PlayerMove>() : null;
         if (source != null && attacker == null && source.GetComponentInParent<ICombatDamageable>() != null) return false;
         CancelAttack();
-        if (attacker != null && State != MonsterBehaviourState.Returning && IsInsideChaseArea(attacker.transform.position))
+        if (attacker != null && !attacker.IsHiddenFromEnemies && State != MonsterBehaviourState.Returning && IsInsideChaseArea(attacker.transform.position))
         { target = attacker.transform; Target = attacker; engaged = true; State = MonsterBehaviourState.Chasing; }
         if (canReflect && source != null && source != gameObject && TryGetComponent<ReflectionErrorEffect>(out var reflection) && reflection.IsActive)
         { CombatDamageUtility.TryApplyDamage(source,amount,gameObject,false); return true; }
