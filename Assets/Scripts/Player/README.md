@@ -52,6 +52,17 @@ PlayerMove.* 파일은 PlayerMove 하나를 나눈 partial 구현이며 같은 �
 
 오류 규칙 모델 자체는 ../Errors, 옮길 수 있는 물체 컴포넌트는 ../Interaction에 있습니다.
 
+## 플레이어 주변 빛 / 어두운 배경
+
+- Main Camera의 **CameraFollow → 플레이어 주변 빛**에서 조절합니다. 기존 CameraFollow의 Player를 그대로 사용하며 기본 활성화되어 있습니다. Play 중 Game 화면에 적용됩니다.
+- **Use Player Light**: 연출 켜기/끄기. **Background Darkness**: 먼 곳의 어두운 정도(기본 0.65). **Darkness Color**: 어둠 색.
+- **Light Inner Radius**: 원래 밝기가 유지되는 범위(기본 1.1). **Light Outer Radius**: 어둠이 완전히 적용되는 범위(기본 4.5). 단위는 월드 단위이며 둘 사이를 부드럽게 연결합니다. 경계가 너무 뚜렷하면 Outer Radius를 키우세요.
+- **Player Light Offset**: 빛 중심 위치(기본 X=0, Y=0.5). 카메라를 선택하면 Scene Gizmos에서 노란 안쪽 원과 파란 바깥 원을 확인할 수 있습니다.
+- 빛은 화면 중앙이 아니라 실제 플레이어 위치를 따라갑니다. 바운드 끝, 점프, 포탈, 카메라 줌 및 해상도 변경도 반영합니다.
+- 이 효과는 실제 그림자 광원이나 스프라이트 발광이 아닌 **게임 화면을 부드럽게 어둡게 하는 연출**입니다. 밝은 영역은 원래 밝기를 유지합니다. 기존 은신 투명도·피격 색상·스프라이트 머티리얼은 변경하지 않습니다.
+- 런타임 전용 Screen Space Overlay Canvas를 Sorting Order **-32700**으로 표시하므로 일반 화면 UI(기본 0)와 구역 전환 페이드(32760)는 위에 유지됩니다. 입력을 받지 않습니다. World Space/Screen Space Camera UI는 게임 화면과 함께 어두워질 수 있습니다.
+- Internal/CameraFollow.PlayerLight.cs는 CameraFollow의 일부이므로 따로 부착하지 않습니다. Resources/Rendering/PlayerFocusLight.shader는 빌드에도 포함됩니다.
+
 ## 구역별 카메라 설정
 
 1. Main Camera의 기존 CameraFollow에서 Player를 연결하고 Use Area Bounds를 켭니다(기본 켜짐). Orthographic 카메라로 사용합니다.

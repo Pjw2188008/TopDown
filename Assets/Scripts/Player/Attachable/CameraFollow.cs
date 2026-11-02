@@ -71,6 +71,12 @@ public partial class CameraFollow : MonoBehaviour
 
     private void LateUpdate()
     {
+        UpdateCameraPosition();
+        UpdatePlayerLight();
+    }
+
+    private void UpdateCameraPosition()
+    {
         if (player == null)
         {
             ResetRoomTransition();
@@ -200,11 +206,16 @@ public partial class CameraFollow : MonoBehaviour
 
     private void OnDisable()
     {
+        HidePlayerLight();
         ResetAreaFollow();
         ResetRoomTransition();
         RestoreZoom();
         activeArea = null;
     }
 
-    private void OnDestroy() => DestroyRoomFadeOverlay();
+    private void OnDestroy()
+    {
+        DestroyRoomFadeOverlay();
+        DestroyPlayerLight();
+    }
 }
