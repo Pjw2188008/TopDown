@@ -18,6 +18,8 @@ public sealed class ReflectProjectile : MonoBehaviour
     private bool wasParried;
     // 발사자가 죽거나 파괴되어도 진영은 유지합니다. 표면 반사는 진영을 바꾸지 않습니다.
     private bool playerOwned;
+    private bool restrictCollisionTargets;
+    private LayerMask obstacleLayers;
     public Vector2 TravelDirection => direction;
     /// <summary>오류 배율까지 반영된 실제 원형 판정 반지름. 충격파 그림 크기 동기화에 사용합니다.</summary>
     public float HitRadius => radius;
@@ -46,6 +48,13 @@ public sealed class ReflectProjectile : MonoBehaviour
     /// <summary>실제 패링으로 해당 플레이어에게 소유권이 넘어간 탄환인지 확인합니다. 표면 반사는 포함하지 않습니다.</summary>
     public bool WasParriedBy(PlayerMove player) => wasParried && player != null && owner == player.gameObject;
 
+    /// <summary>원거리 몬스터 탄환의 충돌을 플레이어와 벽/땅으로 제한합니다. 패링 후 적 타격은 유지합니다.</summary>
+    public void RestrictCollisionTargets(LayerMask layers)
+    {
+        restrictCollisionTargets = true;
+        obstacleLayers = layers;
+    }
+
     /// <summary>
     /// 투사체를 생성한 공격자와 이동·피해·반사 정보를 전달받아 초기화합니다.
     /// </summary>
@@ -60,6 +69,9 @@ public sealed class ReflectProjectile : MonoBehaviour
         bool reflectFromOrdinarySurfaces)
     {
         owner = projectileOwner;
+        // 공용 투사체의 다른 발사자(보스 등)는 기존 충돌 규칙을 사용합니다.
+        restrictCollisionTargets = false;
+        obstacleLayers = 0;
         playerOwned = owner != null && owner.GetComponentInParent<PlayerMove>() != null;
         patternSize = patternSpeed = 1f;
         patternWallReflection = false;
@@ -164,7 +176,8 @@ public sealed class ReflectProjectile : MonoBehaviour
                 || hit.collider.GetComponentInParent<ReflectProjectile>() != null
                 || IsOwnerCollider(hit.collider)
                 || IsFriendlyCombatant(hit.collider)
-                || IsDetectionTrigger(hit.collider))
+                || IsDetectionTrigger(hit.collider)
+                || !IsAllowedCollisionTarget(hit.collider))
             {
                 continue;
             }
@@ -176,6 +189,19 @@ public sealed class ReflectProjectile : MonoBehaviour
             }
         }
         return foundHit;
+    }
+
+    private bool IsAllowedCollisionTarget(Collider2D collider)
+    {
+        if (!restrictCollisionTargets) return true;
+        if (collider.GetComponentInParent<PlayerMove>() != null) return true;
+        if (wasParried && CombatDamageUtility.TryFindReceiver(collider.gameObject, out _)) return true;
+        if (collider.isTrigger) return false;
+        if ((obstacleLayers.value & (1 << collider.gameObject.layer)) != 0) return true;
+        // 이 프로젝트의 바닥은 Floor 레이어가 아닌 Floor 태그를 사용합니다.
+        for (Transform current = collider.transform; current != null; current = current.parent)
+            if (current.CompareTag("Floor")) return true;
+        return false;
     }
 
     // 현재 공통 피해 수신자는 플레이어와 적/보스/훈련용 적입니다.

@@ -4,6 +4,10 @@ using UnityEngine.InputSystem;
 /// <summary>PlayerMove의 오류 Cut·환경 Paste 구현 부분입니다. 별도 컴포넌트가 아니므로 직접 부착하지 않습니다.</summary>
 public partial class PlayerMove
 {
+    [Header("거대화 붙여넣기 대상")]
+    [Tooltip("거대화 오류를 붙여넣을 수 있는 대상의 레이어입니다. PasteTarget이 붙은 오브젝트의 Layer를 검사합니다. 기본값은 이 프로젝트의 Error 레이어(8)입니다.")]
+    [SerializeField] private LayerMask giantPasteLayers = 1 << 8;
+
     // 환경 Paste 성공만 기록합니다. 슬롯 선택/취소/실패/전투 기술 사용은 포함하지 않습니다.
     public int SuccessfulEnvironmentPasteVersion { get; private set; }
     private readonly System.Collections.Generic.Dictionary<int, System.Collections.Generic.Dictionary<StoredErrorType, int>>
@@ -69,6 +73,12 @@ public partial class PlayerMove
         { Debug.Log("붙여넣을 오류가 없습니다."); return false; }
 
         if (!TryFindPasteTarget(out PasteTarget target)) return false;
+        if (selected == StoredErrorType.Giant
+            && (giantPasteLayers.value & (1 << target.gameObject.layer)) == 0)
+        {
+            Debug.Log("거대화 오류는 Giant Paste Layers에 지정한 레이어의 물체에만 붙여넣을 수 있습니다.", target);
+            return false;
+        }
         if (!ErrorRules.CanPasteTo(selected, target.TargetType))
         { Debug.Log(ErrorRules.DisplayName(selected) + " 오류는 " + target.TargetType + " 대상에 Paste할 수 없습니다."); return false; }
         if (target.TargetType == PasteTargetType.CombatSkill)
