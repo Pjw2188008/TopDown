@@ -4,10 +4,6 @@ using UnityEngine.InputSystem;
 /// <summary>PlayerMove의 오류 Cut·환경 Paste 구현 부분입니다. 별도 컴포넌트가 아니므로 직접 부착하지 않습니다.</summary>
 public partial class PlayerMove
 {
-    [Header("거대화 붙여넣기 대상")]
-    [Tooltip("거대화 오류를 붙여넣을 수 있는 대상의 레이어입니다. PasteTarget이 붙은 오브젝트의 Layer를 검사합니다. 기본값은 이 프로젝트의 Error 레이어(8)입니다.")]
-    [SerializeField] private LayerMask giantPasteLayers = 1 << 8;
-
     // 환경 Paste 성공만 기록합니다. 슬롯 선택/취소/실패/전투 기술 사용은 포함하지 않습니다.
     public int SuccessfulEnvironmentPasteVersion { get; private set; }
     private readonly System.Collections.Generic.Dictionary<int, System.Collections.Generic.Dictionary<StoredErrorType, int>>
@@ -73,10 +69,9 @@ public partial class PlayerMove
         { Debug.Log("붙여넣을 오류가 없습니다."); return false; }
 
         if (!TryFindPasteTarget(out PasteTarget target)) return false;
-        if (selected == StoredErrorType.Giant
-            && (giantPasteLayers.value & (1 << target.gameObject.layer)) == 0)
+        if (!IsErrorCutLayer(target.gameObject))
         {
-            Debug.Log("거대화 오류는 Giant Paste Layers에 지정한 레이어의 물체에만 붙여넣을 수 있습니다.", target);
+            Debug.Log("오류는 Error 레이어 오브젝트에만 붙여넣을 수 있습니다.", target);
             return false;
         }
         if (!ErrorRules.CanPasteTo(selected, target.TargetType))
@@ -113,23 +108,27 @@ public partial class PlayerMove
         if (Mouse.current == null || Camera.main == null) return false;
         Vector3 worldPosition = Camera.main.ScreenToWorldPoint(Mouse.current.position.ReadValue());
         worldPosition.z = 0f;
-        Collider2D collider = Physics2D.OverlapPoint(worldPosition);
-        if (collider == null)
+
+        foreach (Collider2D collider in Physics2D.OverlapPointAll(worldPosition))
         {
-            GameObject clicked = GetSpriteObjectAtMousePosition(worldPosition);
-            if (clicked == null) { Debug.Log("커서 위치에 붙여넣기 대상이 없습니다."); return false; }
-            collider = clicked.GetComponent<Collider2D>();
-            if (collider == null)
-            {
-                BoxCollider2D box = clicked.AddComponent<BoxCollider2D>();
-                SpriteRenderer renderer = clicked.GetComponent<SpriteRenderer>();
-                if (renderer != null) box.size = renderer.bounds.size;
-                collider = box;
-            }
+            if (collider == null) continue;
+            PasteTarget candidate = collider.GetComponentInParent<PasteTarget>();
+            if (candidate == null || !IsErrorCutLayer(candidate.gameObject)) continue;
+            target = candidate;
+            return true;
         }
-        target = collider.GetComponentInParent<PasteTarget>();
-        if (target == null) Debug.Log("PasteTarget이 없는 대상에는 오류를 Paste할 수 없습니다.");
-        return target != null;
+
+        foreach (SpriteRenderer renderer in FindObjectsByType<SpriteRenderer>(FindObjectsSortMode.None))
+        {
+            if (renderer == null || IsRunAfterimage(renderer) || !renderer.bounds.Contains(worldPosition)) continue;
+            PasteTarget candidate = renderer.GetComponentInParent<PasteTarget>();
+            if (candidate == null || !IsErrorCutLayer(candidate.gameObject)) continue;
+            target = candidate;
+            return true;
+        }
+
+        Debug.Log("커서 위치에 붙여넣을 Error 레이어 PasteTarget이 없습니다.");
+        return false;
     }
 
     private static T GetOrAddEffect<T>(GameObject target) where T : Component
@@ -138,22 +137,4 @@ public partial class PlayerMove
         return effect != null ? effect : target.AddComponent<T>();
     }
 
-    private GameObject GetSpriteObjectAtMousePosition(Vector3 mouseWorldPos)
-    {
-        SpriteRenderer[] renderers = FindObjectsByType<SpriteRenderer>(FindObjectsSortMode.None);
-
-        foreach (SpriteRenderer renderer in renderers)
-        {
-            // 시각 효과인 잔상을 Collider 없는 환경 Paste 대상으로 취급하지 않습니다.
-            if (IsRunAfterimage(renderer)) continue;
-            if (renderer == null || renderer.bounds.Contains(mouseWorldPos) == false)
-            {
-                continue;
-            }
-
-            return renderer.gameObject;
-        }
-
-        return null;
-    }
 }

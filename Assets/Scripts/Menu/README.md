@@ -3,7 +3,7 @@
 `Assets/Scenes/MainMenu.unity`를 열고 Play하면 시작 화면이 나옵니다. 빌드 Scene List에서도 첫 번째 씬으로 등록되어 있습니다. REDACT 씬에서 바로 Play하면 기존처럼 튜토리얼 테스트를 할 수 있습니다.
 
 - 배경: 기존 `Assets/UI.png`를 그대로 참조합니다. 원본 이미지 및 Import 설정은 변경하지 않습니다.
-- 게임 시작: 기존 `Assets/Scenes/REDACT.unity` 튜토리얼 씬을 엽니다. 도감 저장 기록을 임의로 초기화하지 않습니다.
+- 게임 시작: `Assets/SideViewTest/Scenes/SideViewTest.unity` 씬을 엽니다. 도감 저장 기록을 임의로 초기화하지 않습니다.
 - 설정: 화면 해상도, 창/전체 화면, 현재 키 안내, 전체 음량/음소거.
 - 게임 종료: 빌드에서는 종료, 에디터에서는 Play만 종료합니다.
 

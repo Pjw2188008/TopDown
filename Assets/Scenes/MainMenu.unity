@@ -5937,7 +5937,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 884d5d4c60e44ba8b258a53f1a1dc904, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  tutorialScene: Assets/Scenes/REDACT.unity
+  tutorialScene: Assets/SideViewTest/Scenes/SideViewTest.unity
   prioritizeSceneLoading: 1
   koreanFont: {fileID: 12800000, guid: 55845c29e71bafe4b98d8c08bb79b2f0, type: 3}
   menuCanvas: {fileID: 1378205895}

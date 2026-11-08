@@ -10,8 +10,8 @@ using UnityEngine.UI;
 public sealed class MainMenuController : MonoBehaviour
 {
     [Header("게임 시작")]
-    [Tooltip("Build Settings에 등록한 튜토리얼 씬 경로. 기존 REDACT 씬을 그대로 엽니다.")]
-    public string tutorialScene = "Assets/Scenes/REDACT.unity";
+    [Tooltip("Build Settings에 등록한 게임 시작 씬 경로입니다.")]
+    public string tutorialScene = "Assets/SideViewTest/Scenes/SideViewTest.unity";
     [Tooltip("씬 전환 중에만 로딩 우선순위를 높여 로딩에 더 많은 처리 시간을 줍니다. 완료/실패/종료 시 이전 설정으로 복원됩니다.")]
     public bool prioritizeSceneLoading = true;
     [Tooltip("본문 폰트를 직접 연결할 수 있습니다. 비우면 Resources/GameUIFont의 PF스타더스트를 사용합니다.")]

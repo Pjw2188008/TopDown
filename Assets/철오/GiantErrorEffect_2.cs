@@ -9,6 +9,10 @@ using UnityEngine;
 [DefaultExecutionOrder(-100)]
 public class GiantErrorEffect_2 : MonoBehaviour, IErrorSource
 {
+    [Header("효과 대상")]
+    [SerializeField, Tooltip("거대화할 대상입니다. 비워 두면 이 컴포넌트가 붙은 오브젝트만 대상으로 합니다.")]
+    private Transform effectTarget;
+
     [Header("거대화 설정")]
     [SerializeField, Min(0.01f)] private float targetMultiplier = 3f;
     [SerializeField, Min(0f)] private float growthSpeed = 1.5f;
@@ -56,6 +60,8 @@ public class GiantErrorEffect_2 : MonoBehaviour, IErrorSource
     private ErrorEffectState state;
     private GiantErrorEffect existingGiant;
 
+    private Transform TargetTransform => effectTarget != null ? effectTarget : transform;
+
     public float CurrentMultiplier => targetMultiplier;
     // 기존 캐릭터의 Cut 처리에서 거대화 오류로 인식합니다.
     public StoredErrorType ErrorType => StoredErrorType.Giant;
@@ -68,9 +74,9 @@ public class GiantErrorEffect_2 : MonoBehaviour, IErrorSource
 
     private void Awake()
     {
-        baseScale = transform.localScale;
+        baseScale = TargetTransform.localScale;
         growthStartScale = baseScale;
-        body = GetComponent<Rigidbody2D>();
+        body = TargetTransform.GetComponent<Rigidbody2D>();
         if (body != null) baseMass = body.mass;
 
         if (triggerOnStart) Trigger(targetMultiplier);
@@ -81,7 +87,7 @@ public class GiantErrorEffect_2 : MonoBehaviour, IErrorSource
     {
         if (FollowExistingGiant()) return;
         targetMultiplier = Mathf.Max(0.01f, multiplier);
-        growthStartScale = transform.localScale;
+        growthStartScale = TargetTransform.localScale;
         state.ActivateOriginal();
         isReturning = false;
         isGrowing = true;
@@ -111,7 +117,7 @@ public class GiantErrorEffect_2 : MonoBehaviour, IErrorSource
             return;
         }
         if (isGrowing && isReturning) return;
-        growthStartScale = transform.localScale;
+        growthStartScale = TargetTransform.localScale;
         isReturning = true;
         isGrowing = true;
         growthProgress = 0f;
@@ -135,7 +141,7 @@ public class GiantErrorEffect_2 : MonoBehaviour, IErrorSource
 
     private void UpdateNoiseVisuals()
     {
-        Vector3 scale = transform.localScale;
+        Vector3 scale = TargetTransform.localScale;
         float sizeRatio = Mathf.Max(ScaleRatio(scale.x, baseScale.x), ScaleRatio(scale.y, baseScale.y));
         if (!showGrowthNoise || sizeRatio <= 1.001f)
         {
@@ -164,10 +170,12 @@ public class GiantErrorEffect_2 : MonoBehaviour, IErrorSource
 
         if (noiseVisuals.Count > 0) return;
         var renderers = noiseRenderers != null && noiseRenderers.Length > 0
-            ? noiseRenderers : GetComponentsInChildren<SpriteRenderer>(true);
+            ? noiseRenderers : TargetTransform.GetComponentsInChildren<SpriteRenderer>(true);
         foreach (SpriteRenderer renderer in renderers)
         {
-            if (renderer == null || noiseVisuals.Exists(v => v.renderer == renderer)) continue;
+            if (renderer == null
+                || (renderer.transform != TargetTransform && !renderer.transform.IsChildOf(TargetTransform))
+                || noiseVisuals.Exists(v => v.renderer == renderer)) continue;
             noiseVisuals.Add(new NoiseVisual { renderer = renderer, original = renderer.sharedMaterial });
             renderer.sharedMaterial = noiseMaterial;
         }
@@ -192,7 +200,7 @@ public class GiantErrorEffect_2 : MonoBehaviour, IErrorSource
     private bool ExistingGiantControlsScale()
     {
         // 붙여넣기 때 런타임에 추가되는 컴포넌트도 찾습니다.
-        if (existingGiant == null) existingGiant = GetComponent<GiantErrorEffect>();
+        if (existingGiant == null) existingGiant = TargetTransform.GetComponent<GiantErrorEffect>();
         return existingGiant != null && existingGiant.IsActive;
     }
 
@@ -211,7 +219,7 @@ public class GiantErrorEffect_2 : MonoBehaviour, IErrorSource
     private void UpdateMassFromScale()
     {
         if (body == null) return;
-        Vector3 scale = transform.localScale;
+        Vector3 scale = TargetTransform.localScale;
         float xRatio = ScaleRatio(scale.x, baseScale.x);
         float yRatio = ScaleRatio(scale.y, baseScale.y);
         body.mass = Mathf.Max(0.0001f, baseMass * xRatio * yRatio);
@@ -236,16 +244,16 @@ public class GiantErrorEffect_2 : MonoBehaviour, IErrorSource
     {
         float bottomBefore = 0f;
         bool anchored = preserveBottom && TryGetWorldBottom(out bottomBefore);
-        transform.localScale = scale;
+        TargetTransform.localScale = scale;
 
         UpdateMassFromScale();
 
         if (anchored && TryGetWorldBottom(out float bottomAfter))
         {
-            Vector3 position = transform.position;
+            Vector3 position = TargetTransform.position;
             position.y += bottomBefore - bottomAfter;
             if (body != null) body.position = position;
-            transform.position = position;
+            TargetTransform.position = position;
         }
 
         Physics2D.SyncTransforms();
@@ -268,7 +276,7 @@ public class GiantErrorEffect_2 : MonoBehaviour, IErrorSource
         var colliders = UnityEngine.Pool.ListPool<Collider2D>.Get();
         try
         {
-            GetComponentsInChildren(false, colliders);
+            TargetTransform.GetComponentsInChildren(false, colliders);
             foreach (Collider2D shape in colliders)
                 if (IsUsableCollider(shape)) bottom = Mathf.Min(bottom, shape.bounds.min.y);
         }
@@ -282,7 +290,7 @@ public class GiantErrorEffect_2 : MonoBehaviour, IErrorSource
         var renderers = UnityEngine.Pool.ListPool<SpriteRenderer>.Get();
         try
         {
-            GetComponentsInChildren(false, renderers);
+            TargetTransform.GetComponentsInChildren(false, renderers);
             foreach (SpriteRenderer renderer in renderers)
                 if (renderer.enabled && renderer.sprite != null && renderer.gameObject.activeInHierarchy)
                     bottom = Mathf.Min(bottom, renderer.bounds.min.y);
@@ -297,7 +305,7 @@ public class GiantErrorEffect_2 : MonoBehaviour, IErrorSource
 
     private bool IsUsableCollider(Collider2D shape)
         => shape != null && shape.enabled && !shape.isTrigger && shape.gameObject.activeInHierarchy
-            && (shape.transform == transform || shape.transform.IsChildOf(transform))
+            && (shape.transform == TargetTransform || shape.transform.IsChildOf(TargetTransform))
             && (shape.attachedRigidbody == null || shape.attachedRigidbody.simulated)
             && shape.bounds.size.y > 0.00001f;
 }
